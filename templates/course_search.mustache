@@ -1,0 +1,166 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template block_mastermind_assistant/course_search
+
+    Template for course search, copy, and AI-powered creation interface
+
+    Context variables required for this template:
+    * ai_status - Status of AI connection (success/warning/error)
+    * ai_message - AI connection status message
+}}
+<div class="mastermind-course-search-container">
+    <div class="mastermind-search-header">
+        <h3 class="mastermind-search-title">Mastermind Assistant</h3>
+    </div>
+
+    <div class="mastermind-search-box">
+        <input type="text"
+               id="mastermind-course-search-input"
+               class="form-control"
+               placeholder="{{#str}}search_course_placeholder, block_mastermind_assistant{{/str}}"
+               autocomplete="off">
+    </div>
+
+    <div class="mastermind-search-filters" id="mastermind-search-filters">
+        <select id="mastermind-filter-category" class="form-control form-control-sm mastermind-filter-select">
+            <option value="0">{{#str}}all_categories, block_mastermind_assistant{{/str}}</option>
+        </select>
+        <input type="text"
+               id="mastermind-filter-year"
+               class="form-control form-control-sm mastermind-filter-year"
+               placeholder="{{#str}}filter_by_year, block_mastermind_assistant{{/str}}"
+               maxlength="4"
+               pattern="\d{4}">
+    </div>
+
+    {{! Document upload section }}
+    <div class="mastermind-document-upload-section">
+        <div class="mastermind-upload-divider">
+            <span class="mastermind-divider-text">{{#str}}or_upload_document, block_mastermind_assistant{{/str}}</span>
+        </div>
+        <div class="mastermind-upload-area" id="mastermind-upload-area">
+            <div class="mastermind-upload-dropzone" id="mastermind-upload-dropzone">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21 15V19A2 2 0 0 1 19 21H5A2 2 0 0 1 3 19V15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <polyline points="17 8 12 3 7 8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <line x1="12" y1="3" x2="12" y2="15" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <p class="mastermind-upload-text">{{#str}}upload_document_prompt, block_mastermind_assistant{{/str}}</p>
+                <p class="mastermind-upload-formats">{{#str}}supported_formats, block_mastermind_assistant{{/str}}</p>
+                <input type="file" id="mastermind-document-input"
+                       accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
+                       style="display: none;">
+                <button class="btn btn-outline-primary btn-sm" id="mastermind-upload-btn">
+                    {{#str}}choose_file, block_mastermind_assistant{{/str}}
+                </button>
+            </div>
+            <div class="mastermind-upload-selected" id="mastermind-upload-selected" style="display: none;">
+                <div class="mastermind-selected-file">
+                    <span class="mastermind-file-icon">&#128196;</span>
+                    <span class="mastermind-file-name" id="mastermind-file-name"></span>
+                    <span class="mastermind-file-size" id="mastermind-file-size"></span>
+                    <button class="btn btn-link btn-sm mastermind-file-remove" id="mastermind-file-remove">&times;</button>
+                </div>
+                <button class="btn btn-primary btn-sm mastermind-create-from-doc-btn" id="mastermind-create-from-doc-btn">
+                    &#9889; {{#str}}create_from_document, block_mastermind_assistant{{/str}}
+                </button>
+            </div>
+        </div>
+    </div>
+
+    {{! Document creation progress bar }}
+    <div id="mastermind-doc-creation-progress" class="mastermind-creation-progress" style="display: none;">
+        <div class="mastermind-progress-header">
+            <strong>{{#str}}creating_from_document, block_mastermind_assistant{{/str}}</strong>
+        </div>
+        <div class="progress mastermind-progress-bar">
+            <div class="progress-bar progress-bar-striped progress-bar-animated bg-success" role="progressbar" style="width: 100%"></div>
+        </div>
+        <p class="mastermind-progress-text">{{#str}}doc_creation_in_progress, block_mastermind_assistant{{/str}}</p>
+    </div>
+
+    <div id="mastermind-search-results" class="mastermind-search-results" style="display: none;">
+        <!-- Results will be dynamically inserted here -->
+    </div>
+
+    <div id="mastermind-search-loading" class="mastermind-search-loading" style="display: none;">
+        <div class="spinner-border text-primary" role="status">
+            <span class="sr-only">{{#str}}loading{{/str}}</span>
+        </div>
+        <p>{{#str}}searching, block_mastermind_assistant{{/str}}</p>
+    </div>
+
+    <div id="mastermind-creation-progress" class="mastermind-creation-progress" style="display: none;">
+        <div class="mastermind-progress-header">
+            <strong>Creating course with AI...</strong>
+        </div>
+        <div class="progress mastermind-progress-bar">
+            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%"></div>
+        </div>
+        <p class="mastermind-progress-text">Please wait while AI generates your course structure</p>
+    </div>
+
+    <div id="mastermind-copy-progress" class="mastermind-copy-progress" style="display: none;">
+        <div class="mastermind-progress-header">
+            <strong id="mastermind-copy-progress-title">{{#str}}copying_course, block_mastermind_assistant{{/str}}</strong>
+        </div>
+        <div class="progress mastermind-progress-bar">
+            <div class="progress-bar progress-bar-striped progress-bar-animated bg-info" role="progressbar" style="width: 100%"></div>
+        </div>
+        <p class="mastermind-progress-text">{{#str}}copy_in_progress, block_mastermind_assistant{{/str}}</p>
+    </div>
+
+    <div id="mastermind-post-copy-guide" class="mastermind-post-copy-guide" style="display: none;">
+        <div class="mastermind-guide-header">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 11L12 14L22 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M21 12V19A2 2 0 0 1 19 21H5A2 2 0 0 1 3 19V5A2 2 0 0 1 5 3H16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <strong>{{#str}}copy_success, block_mastermind_assistant{{/str}}</strong>
+        </div>
+        <div class="mastermind-guide-checklist">
+            <div class="mastermind-guide-item mastermind-guide-done">
+                <span class="mastermind-guide-check">&#10003;</span>
+                <span>{{#str}}enrolled_as_teacher, block_mastermind_assistant{{/str}}</span>
+            </div>
+            <div class="mastermind-guide-item">
+                <span class="mastermind-guide-check">&#9744;</span>
+                <a href="#" id="mastermind-guide-dates-link">{{#str}}update_dates, block_mastermind_assistant{{/str}}</a>
+            </div>
+            <div class="mastermind-guide-item">
+                <span class="mastermind-guide-check">&#9744;</span>
+                <a href="#" id="mastermind-guide-analysis-link">{{#str}}run_analysis, block_mastermind_assistant{{/str}}</a>
+            </div>
+        </div>
+        <div id="mastermind-audit-findings" class="mastermind-audit-findings" style="display: none;">
+            <div class="mastermind-audit-header">
+                <strong>Items that may need updating:</strong>
+            </div>
+            <div id="mastermind-audit-list" class="mastermind-audit-list"></div>
+        </div>
+        <a href="#" id="mastermind-guide-view-btn" class="btn btn-primary btn-sm mastermind-guide-view-btn">
+            {{#str}}view_course, block_mastermind_assistant{{/str}}
+        </a>
+    </div>
+
+    <div class="mastermind-search-help">
+        <p class="text-muted small">
+            {{#str}}course_search_help, block_mastermind_assistant{{/str}}
+        </p>
+    </div>
+</div>

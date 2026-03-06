@@ -1,0 +1,770 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template block_mastermind_assistant/mod_draft
+
+    Template for the Mastermind Assistant mod draft feature.
+
+    Context variables required for this template:
+    * courseid - Course ID
+    * coursename - Course name
+    * modname - Module name (e.g., "Page")
+    * pagename - Page name (if editing existing)
+    * pagedescription - Page description (if editing existing)
+    * is_new - Boolean, true if creating new page
+    * ai_status - AI connection status
+    * ai_message - AI status message
+    * is_ai_success - Boolean, true if AI is connected
+}}
+
+<div class="mastermind-mod-draft-container">
+    <div class="mastermind-mod-draft-header">
+        <svg class="mastermind-mod-draft-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" fill="currentColor"/>
+        </svg>
+        <h3 class="mastermind-mod-draft-title">{{#str}} ai_content_assistant, block_mastermind_assistant {{/str}}</h3>
+    </div>
+
+    {{#is_ai_success}}
+    {{! Show intro text when on the correct working page }}
+    {{#is_on_edit_page}}
+    <div class="mastermind-mod-draft-intro">
+        <p class="mastermind-mod-draft-text">
+            {{#is_page}}{{^is_new}}{{#str}} draft_page_prompt_edit, block_mastermind_assistant, {{modname}} {{/str}}{{/is_new}}{{#is_new}}{{#str}} draft_page_prompt_new, block_mastermind_assistant, {{modname}} {{/str}}{{/is_new}}{{/is_page}}
+            {{#is_quiz}}{{^is_new}}{{#str}} draft_quiz_prompt_edit, block_mastermind_assistant, {{modname}} {{/str}}{{/is_new}}{{#is_new}}{{#str}} draft_quiz_prompt_new, block_mastermind_assistant, {{modname}} {{/str}}{{/is_new}}{{/is_quiz}}
+            {{#is_assign}}{{^is_new}}{{#str}} draft_assign_prompt_edit, block_mastermind_assistant, {{modname}} {{/str}}{{/is_new}}{{#is_new}}{{#str}} draft_assign_prompt_new, block_mastermind_assistant, {{modname}} {{/str}}{{/is_new}}{{/is_assign}}
+            {{#is_url}}{{^is_new}}{{#str}} draft_url_prompt_edit, block_mastermind_assistant, {{modname}} {{/str}}{{/is_new}}{{#is_new}}{{#str}} draft_url_prompt_new, block_mastermind_assistant, {{modname}} {{/str}}{{/is_new}}{{/is_url}}
+        </p>
+    </div>
+    {{/is_on_edit_page}}
+    {{! Direct-action modules (Forum/Glossary/Book/Lesson) show on their main pages }}
+    {{#is_direct_action}}
+    {{^is_on_edit_page}}
+    <div class="mastermind-mod-draft-intro">
+        <p class="mastermind-mod-draft-text">
+            {{#is_forum}}{{#str}} draft_forum_prompt_edit, block_mastermind_assistant, {{modname}} {{/str}}{{/is_forum}}
+            {{#is_lesson}}{{#str}} draft_lesson_prompt_new, block_mastermind_assistant, {{modname}} {{/str}}{{/is_lesson}}
+            {{#is_glossary}}{{#str}} draft_glossary_prompt_new, block_mastermind_assistant, {{modname}} {{/str}}{{/is_glossary}}
+            {{#is_book}}{{#str}} draft_book_prompt_new, block_mastermind_assistant, {{modname}} {{/str}}{{/is_book}}
+        </p>
+        {{#existing_count}}<p class="mastermind-mod-draft-count">{{#str}} existing_items_count, block_mastermind_assistant, {{existing_count}} {{/str}}</p>{{/existing_count}}
+    </div>
+    {{/is_on_edit_page}}
+    {{#is_on_edit_page}}
+    <div class="mastermind-mod-draft-info-box">
+        <svg class="mastermind-info-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+            <path d="M12 16V12M12 8H12.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <div class="mastermind-info-content">
+            <p class="mastermind-info-text">{{#str}} go_to_main_page_to_generate, block_mastermind_assistant {{/str}}</p>
+            <a href="{{main_page_url}}" class="mastermind-settings-link">{{#str}} open_activity_main_page, block_mastermind_assistant {{/str}}</a>
+        </div>
+    </div>
+    {{/is_on_edit_page}}
+    {{/is_direct_action}}
+    {{! Editor-based modules (Page/Assign/URL) on view page — redirect to settings }}
+    {{^is_direct_action}}
+    {{^is_on_edit_page}}
+    <div class="mastermind-mod-draft-info-box">
+        <svg class="mastermind-info-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+            <path d="M12 16V12M12 8H12.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <div class="mastermind-info-content">
+            <p class="mastermind-info-text">{{#str}} go_to_settings_to_generate, block_mastermind_assistant {{/str}}</p>
+            <a href="{{edit_url}}" class="mastermind-settings-link">{{#str}} open_activity_settings, block_mastermind_assistant {{/str}}</a>
+        </div>
+    </div>
+    {{/is_on_edit_page}}
+    {{/is_direct_action}}
+    
+
+    <div id="mod-draft-progress-container" class="mastermind-progress-container" style="display: none;">
+        <div class="mastermind-progress-header">
+            <svg class="mastermind-progress-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 2V6M12 18V22M4.93 4.93L7.76 7.76M16.24 16.24L19.07 19.07M2 12H6M18 12H22M4.93 19.07L7.76 16.24M16.24 7.76L19.07 4.93" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <span id="progress-message">{{#is_page}}{{#str}} generating_content, block_mastermind_assistant {{/str}}{{/is_page}}{{#is_quiz}}{{#str}} generating_questions, block_mastermind_assistant {{/str}}{{/is_quiz}}{{#is_assign}}{{#str}} generating_content, block_mastermind_assistant {{/str}}{{/is_assign}}{{#is_forum}}{{#str}} generating_forum, block_mastermind_assistant {{/str}}{{/is_forum}}{{#is_lesson}}{{#str}} generating_lesson, block_mastermind_assistant {{/str}}{{/is_lesson}}{{#is_glossary}}{{#str}} generating_glossary, block_mastermind_assistant {{/str}}{{/is_glossary}}{{#is_book}}{{#str}} generating_book, block_mastermind_assistant {{/str}}{{/is_book}}{{#is_url}}{{#str}} generating_url, block_mastermind_assistant {{/str}}{{/is_url}}</span>
+        </div>
+        <div id="mod-draft-progress-content" class="mastermind-progress-content">
+            <div class="mastermind-progress-step">
+                <span class="mastermind-step-icon">⏳</span>
+                <span class="mastermind-step-text">{{#is_page}}{{#str}} analyzing_context, block_mastermind_assistant {{/str}}{{/is_page}}{{#is_quiz}}{{#str}} analyzing_quiz_context, block_mastermind_assistant {{/str}}{{/is_quiz}}{{#is_assign}}{{#str}} analyzing_context, block_mastermind_assistant {{/str}}{{/is_assign}}{{#is_forum}}{{#str}} analyzing_context, block_mastermind_assistant {{/str}}{{/is_forum}}{{#is_lesson}}{{#str}} analyzing_context, block_mastermind_assistant {{/str}}{{/is_lesson}}{{#is_glossary}}{{#str}} analyzing_context, block_mastermind_assistant {{/str}}{{/is_glossary}}{{#is_book}}{{#str}} analyzing_context, block_mastermind_assistant {{/str}}{{/is_book}}{{#is_url}}{{#str}} analyzing_context, block_mastermind_assistant {{/str}}{{/is_url}}</span>
+            </div>
+        </div>
+    </div>
+
+    {{! Options panels and generate buttons }}
+    {{#is_page}}{{#is_on_edit_page}}
+    <div class="mastermind-assign-options" id="page-options-panel">
+        <div class="mastermind-assign-option-group">
+            <label class="mastermind-option-label" for="page-content-type-select">
+                {{#str}} content_type_label, block_mastermind_assistant {{/str}}
+            </label>
+            <select id="page-content-type-select" class="mastermind-option-select">
+                <option value="">{{#str}} select_content_type, block_mastermind_assistant {{/str}}</option>
+                <option value="lecture_notes">{{#str}} type_lecture_notes, block_mastermind_assistant {{/str}}</option>
+                <option value="tutorial">{{#str}} type_tutorial, block_mastermind_assistant {{/str}}</option>
+                <option value="reference">{{#str}} type_reference, block_mastermind_assistant {{/str}}</option>
+                <option value="case_study">{{#str}} type_case_study_page, block_mastermind_assistant {{/str}}</option>
+                <option value="overview">{{#str}} type_overview, block_mastermind_assistant {{/str}}</option>
+            </select>
+        </div>
+        <div class="mastermind-assign-option-group">
+            <label class="mastermind-option-label" for="page-level-select">
+                {{#str}} academic_level_label, block_mastermind_assistant {{/str}}
+            </label>
+            <select id="page-level-select" class="mastermind-option-select">
+                <option value="">{{#str}} select_academic_level, block_mastermind_assistant {{/str}}</option>
+                <option value="introductory">{{#str}} level_introductory, block_mastermind_assistant {{/str}}</option>
+                <option value="intermediate">{{#str}} level_intermediate, block_mastermind_assistant {{/str}}</option>
+                <option value="advanced">{{#str}} level_advanced, block_mastermind_assistant {{/str}}</option>
+                <option value="graduate">{{#str}} level_graduate, block_mastermind_assistant {{/str}}</option>
+            </select>
+        </div>
+        <div class="mastermind-assign-option-group">
+            <label class="mastermind-option-label" for="page-length-select">
+                {{#str}} target_length_label, block_mastermind_assistant {{/str}}
+            </label>
+            <select id="page-length-select" class="mastermind-option-select">
+                <option value="standard">{{#str}} length_standard, block_mastermind_assistant {{/str}}</option>
+                <option value="brief">{{#str}} length_brief, block_mastermind_assistant {{/str}}</option>
+                <option value="comprehensive">{{#str}} length_comprehensive, block_mastermind_assistant {{/str}}</option>
+            </select>
+        </div>
+    </div>
+    <button id="generate-draft-btn" class="mastermind-action-button" data-courseid="{{courseid}}" data-coursename="{{coursename}}" data-modname="{{modname}}" data-pagename="{{pagename}}" data-pagedescription="{{pagedescription}}">
+        <svg class="mastermind-button-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" fill="currentColor"/>
+        </svg>
+        <span>{{#str}} generate_draft, block_mastermind_assistant {{/str}}</span>
+    </button>
+    {{/is_on_edit_page}}{{/is_page}}
+    {{#is_assign}}{{#is_on_edit_page}}
+    <div class="mastermind-assign-options" id="assign-options-panel">
+        <div class="mastermind-assign-option-group">
+            <label class="mastermind-option-label" for="assign-type-select">
+                {{#str}} assignment_type_label, block_mastermind_assistant {{/str}}
+            </label>
+            <select id="assign-type-select" class="mastermind-option-select">
+                <option value="">{{#str}} select_assignment_type, block_mastermind_assistant {{/str}}</option>
+                <option value="essay">{{#str}} type_essay, block_mastermind_assistant {{/str}}</option>
+                <option value="group_project">{{#str}} type_group_project, block_mastermind_assistant {{/str}}</option>
+                <option value="presentation">{{#str}} type_presentation, block_mastermind_assistant {{/str}}</option>
+                <option value="lab_report">{{#str}} type_lab_report, block_mastermind_assistant {{/str}}</option>
+                <option value="case_study">{{#str}} type_case_study, block_mastermind_assistant {{/str}}</option>
+                <option value="research_paper">{{#str}} type_research_paper, block_mastermind_assistant {{/str}}</option>
+            </select>
+        </div>
+        <div class="mastermind-assign-option-group">
+            <label class="mastermind-option-label" for="assign-level-select">
+                {{#str}} academic_level_label, block_mastermind_assistant {{/str}}
+            </label>
+            <select id="assign-level-select" class="mastermind-option-select">
+                <option value="">{{#str}} select_academic_level, block_mastermind_assistant {{/str}}</option>
+                <option value="introductory">{{#str}} level_introductory, block_mastermind_assistant {{/str}}</option>
+                <option value="intermediate">{{#str}} level_intermediate, block_mastermind_assistant {{/str}}</option>
+                <option value="advanced">{{#str}} level_advanced, block_mastermind_assistant {{/str}}</option>
+                <option value="graduate">{{#str}} level_graduate, block_mastermind_assistant {{/str}}</option>
+            </select>
+        </div>
+        <div class="mastermind-assign-option-group">
+            <label class="mastermind-option-label" for="assign-scope-input">
+                {{#str}} scope_length_label, block_mastermind_assistant {{/str}}
+            </label>
+            <input type="text" id="assign-scope-input" class="mastermind-option-input"
+                   placeholder="{{#str}} scope_length_placeholder, block_mastermind_assistant {{/str}}" />
+        </div>
+    </div>
+    <button id="generate-draft-btn" class="mastermind-action-button" data-courseid="{{courseid}}" data-coursename="{{coursename}}" data-modname="{{modname}}" data-pagename="{{pagename}}" data-pagedescription="{{pagedescription}}">
+        <svg class="mastermind-button-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" fill="currentColor"/>
+        </svg>
+        <span>{{#str}} generate_instructions, block_mastermind_assistant {{/str}}</span>
+    </button>
+    {{/is_on_edit_page}}{{/is_assign}}
+    {{#is_quiz}}{{#is_on_edit_page}}
+    <div class="mastermind-assign-options" id="quiz-options-panel">
+        <div class="mastermind-assign-option-group">
+            <label class="mastermind-option-label" for="quiz-difficulty-select">
+                {{#str}} difficulty_level_label, block_mastermind_assistant {{/str}}
+            </label>
+            <select id="quiz-difficulty-select" class="mastermind-option-select">
+                <option value="mixed">{{#str}} difficulty_mixed, block_mastermind_assistant {{/str}}</option>
+                <option value="easy">{{#str}} difficulty_easy, block_mastermind_assistant {{/str}}</option>
+                <option value="medium">{{#str}} difficulty_medium, block_mastermind_assistant {{/str}}</option>
+                <option value="hard">{{#str}} difficulty_hard, block_mastermind_assistant {{/str}}</option>
+            </select>
+        </div>
+        <div class="mastermind-assign-option-group">
+            <label class="mastermind-option-label" for="quiz-count-select">
+                {{#str}} question_count_label, block_mastermind_assistant {{/str}}
+            </label>
+            <select id="quiz-count-select" class="mastermind-option-select">
+                <option value="6">6</option>
+                <option value="8" selected>8</option>
+                <option value="10">10</option>
+            </select>
+        </div>
+        <div class="mastermind-assign-option-group">
+            <label class="mastermind-option-label" for="quiz-level-select">
+                {{#str}} academic_level_label, block_mastermind_assistant {{/str}}
+            </label>
+            <select id="quiz-level-select" class="mastermind-option-select">
+                <option value="">{{#str}} select_academic_level, block_mastermind_assistant {{/str}}</option>
+                <option value="introductory">{{#str}} level_introductory, block_mastermind_assistant {{/str}}</option>
+                <option value="intermediate">{{#str}} level_intermediate, block_mastermind_assistant {{/str}}</option>
+                <option value="advanced">{{#str}} level_advanced, block_mastermind_assistant {{/str}}</option>
+                <option value="graduate">{{#str}} level_graduate, block_mastermind_assistant {{/str}}</option>
+            </select>
+        </div>
+    </div>
+    <button id="generate-questions-btn" class="mastermind-action-button" data-courseid="{{courseid}}" data-quizid="{{quizid}}" data-quizname="{{pagename}}" data-quizdescription="{{pagedescription}}">
+        <svg class="mastermind-button-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" fill="currentColor"/>
+        </svg>
+        <span>{{#str}} generate_questions, block_mastermind_assistant {{/str}}</span>
+    </button>
+    {{/is_on_edit_page}}{{/is_quiz}}
+    {{#is_forum}}{{^is_on_edit_page}}
+    <div class="mastermind-assign-options" id="forum-options-panel">
+        <div class="mastermind-assign-option-group">
+            <label class="mastermind-option-label" for="forum-type-select">
+                {{#str}} forum_type_label, block_mastermind_assistant {{/str}}
+            </label>
+            <select id="forum-type-select" class="mastermind-option-select">
+                <option value="general">{{#str}} forum_type_general, block_mastermind_assistant {{/str}}</option>
+                <option value="single">{{#str}} forum_type_single, block_mastermind_assistant {{/str}}</option>
+                <option value="qanda">{{#str}} forum_type_qanda, block_mastermind_assistant {{/str}}</option>
+                <option value="eachuser">{{#str}} forum_type_eachuser, block_mastermind_assistant {{/str}}</option>
+            </select>
+        </div>
+        <div class="mastermind-assign-option-group">
+            <label class="mastermind-option-label" for="forum-level-select">
+                {{#str}} academic_level_label, block_mastermind_assistant {{/str}}
+            </label>
+            <select id="forum-level-select" class="mastermind-option-select">
+                <option value="">{{#str}} select_academic_level, block_mastermind_assistant {{/str}}</option>
+                <option value="introductory">{{#str}} level_introductory, block_mastermind_assistant {{/str}}</option>
+                <option value="intermediate">{{#str}} level_intermediate, block_mastermind_assistant {{/str}}</option>
+                <option value="advanced">{{#str}} level_advanced, block_mastermind_assistant {{/str}}</option>
+                <option value="graduate">{{#str}} level_graduate, block_mastermind_assistant {{/str}}</option>
+            </select>
+        </div>
+        <div class="mastermind-assign-option-group">
+            <label class="mastermind-option-label" for="forum-count-select">
+                {{#str}} discussion_count_label, block_mastermind_assistant {{/str}}
+            </label>
+            <select id="forum-count-select" class="mastermind-option-select">
+                <option value="3">3</option>
+                <option value="5" selected>5</option>
+                <option value="8">8</option>
+                <option value="10">10</option>
+            </select>
+        </div>
+    </div>
+    <button id="generate-draft-btn" class="mastermind-action-button" data-courseid="{{courseid}}" data-coursename="{{coursename}}" data-modname="{{modname}}" data-pagename="{{pagename}}" data-pagedescription="{{pagedescription}}" data-cmid="{{cmid}}" data-instanceid="{{instanceid}}">
+        <svg class="mastermind-button-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" fill="currentColor"/>
+        </svg>
+        <span>{{#str}} generate_forum_content, block_mastermind_assistant {{/str}}</span>
+    </button>
+    {{/is_on_edit_page}}{{/is_forum}}
+    {{#is_lesson}}{{^is_on_edit_page}}
+    <div class="mastermind-assign-options" id="lesson-options-panel">
+        <div class="mastermind-assign-option-group">
+            <label class="mastermind-option-label" for="lesson-level-select">
+                {{#str}} academic_level_label, block_mastermind_assistant {{/str}}
+            </label>
+            <select id="lesson-level-select" class="mastermind-option-select">
+                <option value="">{{#str}} select_academic_level, block_mastermind_assistant {{/str}}</option>
+                <option value="introductory">{{#str}} level_introductory, block_mastermind_assistant {{/str}}</option>
+                <option value="intermediate">{{#str}} level_intermediate, block_mastermind_assistant {{/str}}</option>
+                <option value="advanced">{{#str}} level_advanced, block_mastermind_assistant {{/str}}</option>
+                <option value="graduate">{{#str}} level_graduate, block_mastermind_assistant {{/str}}</option>
+            </select>
+        </div>
+        <div class="mastermind-assign-option-group">
+            <label class="mastermind-option-label" for="lesson-count-select">
+                {{#str}} page_count_label, block_mastermind_assistant {{/str}}
+            </label>
+            <select id="lesson-count-select" class="mastermind-option-select">
+                <option value="4">4</option>
+                <option value="6" selected>6</option>
+                <option value="8">8</option>
+                <option value="10">10</option>
+            </select>
+        </div>
+    </div>
+    <button id="generate-draft-btn" class="mastermind-action-button" data-courseid="{{courseid}}" data-coursename="{{coursename}}" data-modname="{{modname}}" data-pagename="{{pagename}}" data-pagedescription="{{pagedescription}}" data-cmid="{{cmid}}" data-instanceid="{{instanceid}}">
+        <svg class="mastermind-button-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" fill="currentColor"/>
+        </svg>
+        <span>{{#str}} generate_lesson_content, block_mastermind_assistant {{/str}}</span>
+    </button>
+    {{/is_on_edit_page}}{{/is_lesson}}
+    {{#is_glossary}}{{^is_on_edit_page}}
+    <div class="mastermind-assign-options" id="glossary-options-panel">
+        <div class="mastermind-assign-option-group">
+            <label class="mastermind-option-label" for="glossary-level-select">
+                {{#str}} academic_level_label, block_mastermind_assistant {{/str}}
+            </label>
+            <select id="glossary-level-select" class="mastermind-option-select">
+                <option value="">{{#str}} select_academic_level, block_mastermind_assistant {{/str}}</option>
+                <option value="introductory">{{#str}} level_introductory, block_mastermind_assistant {{/str}}</option>
+                <option value="intermediate">{{#str}} level_intermediate, block_mastermind_assistant {{/str}}</option>
+                <option value="advanced">{{#str}} level_advanced, block_mastermind_assistant {{/str}}</option>
+                <option value="graduate">{{#str}} level_graduate, block_mastermind_assistant {{/str}}</option>
+            </select>
+        </div>
+        <div class="mastermind-assign-option-group">
+            <label class="mastermind-option-label" for="glossary-count-select">
+                {{#str}} entry_count_label, block_mastermind_assistant {{/str}}
+            </label>
+            <select id="glossary-count-select" class="mastermind-option-select">
+                <option value="5">5</option>
+                <option value="10" selected>10</option>
+                <option value="15">15</option>
+                <option value="20">20</option>
+            </select>
+        </div>
+    </div>
+    <button id="generate-draft-btn" class="mastermind-action-button" data-courseid="{{courseid}}" data-coursename="{{coursename}}" data-modname="{{modname}}" data-pagename="{{pagename}}" data-pagedescription="{{pagedescription}}" data-cmid="{{cmid}}" data-instanceid="{{instanceid}}">
+        <svg class="mastermind-button-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" fill="currentColor"/>
+        </svg>
+        <span>{{#str}} generate_glossary_entries, block_mastermind_assistant {{/str}}</span>
+    </button>
+    {{/is_on_edit_page}}{{/is_glossary}}
+    {{#is_book}}{{^is_on_edit_page}}
+    <div class="mastermind-assign-options" id="book-options-panel">
+        <div class="mastermind-assign-option-group">
+            <label class="mastermind-option-label" for="book-level-select">
+                {{#str}} academic_level_label, block_mastermind_assistant {{/str}}
+            </label>
+            <select id="book-level-select" class="mastermind-option-select">
+                <option value="">{{#str}} select_academic_level, block_mastermind_assistant {{/str}}</option>
+                <option value="introductory">{{#str}} level_introductory, block_mastermind_assistant {{/str}}</option>
+                <option value="intermediate">{{#str}} level_intermediate, block_mastermind_assistant {{/str}}</option>
+                <option value="advanced">{{#str}} level_advanced, block_mastermind_assistant {{/str}}</option>
+                <option value="graduate">{{#str}} level_graduate, block_mastermind_assistant {{/str}}</option>
+            </select>
+        </div>
+        <div class="mastermind-assign-option-group">
+            <label class="mastermind-option-label" for="book-count-select">
+                {{#str}} chapter_count_label, block_mastermind_assistant {{/str}}
+            </label>
+            <select id="book-count-select" class="mastermind-option-select">
+                <option value="3">3</option>
+                <option value="5" selected>5</option>
+                <option value="7">7</option>
+                <option value="10">10</option>
+            </select>
+        </div>
+        <div class="mastermind-assign-option-group">
+            <label class="mastermind-option-label" for="book-length-select">
+                {{#str}} target_length_label, block_mastermind_assistant {{/str}}
+            </label>
+            <select id="book-length-select" class="mastermind-option-select">
+                <option value="standard">{{#str}} length_standard, block_mastermind_assistant {{/str}}</option>
+                <option value="brief">{{#str}} length_brief, block_mastermind_assistant {{/str}}</option>
+                <option value="comprehensive">{{#str}} length_comprehensive, block_mastermind_assistant {{/str}}</option>
+            </select>
+        </div>
+    </div>
+    <button id="generate-draft-btn" class="mastermind-action-button" data-courseid="{{courseid}}" data-coursename="{{coursename}}" data-modname="{{modname}}" data-pagename="{{pagename}}" data-pagedescription="{{pagedescription}}" data-cmid="{{cmid}}" data-instanceid="{{instanceid}}">
+        <svg class="mastermind-button-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" fill="currentColor"/>
+        </svg>
+        <span>{{#str}} generate_book_content, block_mastermind_assistant {{/str}}</span>
+    </button>
+    {{/is_on_edit_page}}{{/is_book}}
+    {{#is_url}}{{#is_on_edit_page}}
+    <div class="mastermind-assign-options" id="url-options-panel">
+        <div class="mastermind-assign-option-group">
+            <label class="mastermind-option-label" for="url-level-select">
+                {{#str}} academic_level_label, block_mastermind_assistant {{/str}}
+            </label>
+            <select id="url-level-select" class="mastermind-option-select">
+                <option value="">{{#str}} select_academic_level, block_mastermind_assistant {{/str}}</option>
+                <option value="introductory">{{#str}} level_introductory, block_mastermind_assistant {{/str}}</option>
+                <option value="intermediate">{{#str}} level_intermediate, block_mastermind_assistant {{/str}}</option>
+                <option value="advanced">{{#str}} level_advanced, block_mastermind_assistant {{/str}}</option>
+                <option value="graduate">{{#str}} level_graduate, block_mastermind_assistant {{/str}}</option>
+            </select>
+        </div>
+        <div class="mastermind-assign-option-group">
+            <label class="mastermind-option-label" for="url-count-select">
+                {{#str}} resource_count_label, block_mastermind_assistant {{/str}}
+            </label>
+            <select id="url-count-select" class="mastermind-option-select">
+                <option value="3">3</option>
+                <option value="5" selected>5</option>
+                <option value="8">8</option>
+                <option value="10">10</option>
+            </select>
+        </div>
+    </div>
+    <button id="generate-draft-btn" class="mastermind-action-button" data-courseid="{{courseid}}" data-coursename="{{coursename}}" data-modname="{{modname}}" data-pagename="{{pagename}}" data-pagedescription="{{pagedescription}}">
+        <svg class="mastermind-button-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z" fill="currentColor"/>
+        </svg>
+        <span>{{#str}} generate_url_recommendations, block_mastermind_assistant {{/str}}</span>
+    </button>
+    {{/is_on_edit_page}}{{/is_url}}
+    {{/is_ai_success}}
+
+    {{^is_ai_success}}
+    <div class="mastermind-ai-status-error">
+        <svg class="mastermind-ai-status-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+            <path d="M12 8V12M12 16H12.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <p>{{ai_message}}</p>
+    </div>
+    {{/is_ai_success}}
+</div>
+
+{{! Assignment preview modal - rendered outside main container for proper overlay positioning }}
+{{#is_assign}}
+<div id="assign-preview-modal" class="mastermind-preview-overlay" style="display:none;">
+    <div class="mastermind-preview-modal">
+        <div class="mastermind-preview-header">
+            <h3 class="mastermind-preview-title">{{#str}} preview_title, block_mastermind_assistant {{/str}}</h3>
+            <button id="preview-close-btn" class="mastermind-close-modal-btn" aria-label="Close">&times;</button>
+        </div>
+        <div class="mastermind-preview-body">
+            <div class="mastermind-preview-main">
+                <div id="preview-suggested-title" class="mastermind-preview-section" style="display:none;">
+                    <h4>{{#str}} suggested_title, block_mastermind_assistant {{/str}}</h4>
+                    <p id="preview-title-text"></p>
+                </div>
+                <div class="mastermind-preview-section">
+                    <h4>{{#str}} instructions_preview, block_mastermind_assistant {{/str}}</h4>
+                    <div id="preview-instructions-content" class="mastermind-preview-content"></div>
+                </div>
+                <div id="preview-rubric-section" class="mastermind-preview-section" style="display:none;">
+                    <h4>{{#str}} rubric_criteria_label, block_mastermind_assistant {{/str}}</h4>
+                    <div id="preview-rubric-content"></div>
+                </div>
+            </div>
+            <div class="mastermind-preview-sidebar">
+                <div id="preview-time-section" class="mastermind-preview-meta" style="display:none;">
+                    <h4>{{#str}} estimated_time_label, block_mastermind_assistant {{/str}}</h4>
+                    <p id="preview-time-text"></p>
+                </div>
+                <div id="preview-requirements-section" class="mastermind-preview-meta" style="display:none;">
+                    <h4>{{#str}} key_requirements_label, block_mastermind_assistant {{/str}}</h4>
+                    <ul id="preview-requirements-list"></ul>
+                </div>
+                <div id="preview-outcomes-section" class="mastermind-preview-meta" style="display:none;">
+                    <h4>{{#str}} learning_outcomes_label, block_mastermind_assistant {{/str}}</h4>
+                    <ul id="preview-outcomes-list"></ul>
+                </div>
+            </div>
+        </div>
+        <div class="mastermind-preview-footer">
+            <button id="preview-cancel-btn" class="mastermind-secondary-button mastermind-preview-btn">
+                {{#str}} cancel, block_mastermind_assistant {{/str}}
+            </button>
+            <button id="preview-regenerate-btn" class="mastermind-secondary-button mastermind-preview-btn">
+                {{#str}} regenerate, block_mastermind_assistant {{/str}}
+            </button>
+            <button id="preview-apply-btn" class="mastermind-action-button mastermind-preview-btn">
+                {{#str}} apply_instructions, block_mastermind_assistant {{/str}}
+            </button>
+        </div>
+    </div>
+</div>
+{{/is_assign}}
+
+{{! Page preview modal }}
+{{#is_page}}
+<div id="page-preview-modal" class="mastermind-preview-overlay" style="display:none;">
+    <div class="mastermind-preview-modal">
+        <div class="mastermind-preview-header">
+            <h3 class="mastermind-preview-title">{{#str}} page_preview_title, block_mastermind_assistant {{/str}}</h3>
+            <button id="page-preview-close-btn" class="mastermind-close-modal-btn" aria-label="Close">&times;</button>
+        </div>
+        <div class="mastermind-preview-body">
+            <div class="mastermind-preview-main">
+                <div id="page-preview-title-section" class="mastermind-preview-section" style="display:none;">
+                    <h4>{{#str}} suggested_title, block_mastermind_assistant {{/str}}</h4>
+                    <p id="page-preview-title-text"></p>
+                </div>
+                <div class="mastermind-preview-section">
+                    <h4>{{#str}} content_preview, block_mastermind_assistant {{/str}}</h4>
+                    <div id="page-preview-content" class="mastermind-preview-content"></div>
+                </div>
+            </div>
+            <div class="mastermind-preview-sidebar">
+                <div id="page-preview-reading-time" class="mastermind-preview-meta" style="display:none;">
+                    <h4>{{#str}} estimated_reading_time_label, block_mastermind_assistant {{/str}}</h4>
+                    <p id="page-preview-reading-time-text"></p>
+                </div>
+                <div id="page-preview-summary-section" class="mastermind-preview-meta" style="display:none;">
+                    <h4>{{#str}} content_summary_label, block_mastermind_assistant {{/str}}</h4>
+                    <p id="page-preview-summary-text"></p>
+                </div>
+                <div id="page-preview-objectives-section" class="mastermind-preview-meta" style="display:none;">
+                    <h4>{{#str}} learning_objectives_label, block_mastermind_assistant {{/str}}</h4>
+                    <ul id="page-preview-objectives-list"></ul>
+                </div>
+                <div id="page-preview-concepts-section" class="mastermind-preview-meta" style="display:none;">
+                    <h4>{{#str}} key_concepts_label, block_mastermind_assistant {{/str}}</h4>
+                    <ul id="page-preview-concepts-list"></ul>
+                </div>
+            </div>
+        </div>
+        <div class="mastermind-preview-footer">
+            <button id="page-preview-cancel-btn" class="mastermind-secondary-button mastermind-preview-btn">
+                {{#str}} cancel, block_mastermind_assistant {{/str}}
+            </button>
+            <button id="page-preview-regenerate-btn" class="mastermind-secondary-button mastermind-preview-btn">
+                {{#str}} regenerate, block_mastermind_assistant {{/str}}
+            </button>
+            <button id="page-preview-apply-btn" class="mastermind-action-button mastermind-preview-btn">
+                {{#str}} apply_content, block_mastermind_assistant {{/str}}
+            </button>
+        </div>
+    </div>
+</div>
+{{/is_page}}
+
+{{! Quiz preview modal }}
+{{#is_quiz}}
+<div id="quiz-preview-modal" class="mastermind-preview-overlay" style="display:none;">
+    <div class="mastermind-preview-modal mastermind-preview-modal-wide">
+        <div class="mastermind-preview-header">
+            <h3 class="mastermind-preview-title">{{#str}} quiz_preview_title, block_mastermind_assistant {{/str}}</h3>
+            <div class="mastermind-quiz-select-controls">
+                <button id="quiz-select-all-btn" class="mastermind-link-button">{{#str}} select_all, block_mastermind_assistant {{/str}}</button>
+                <span class="mastermind-select-divider">|</span>
+                <button id="quiz-deselect-all-btn" class="mastermind-link-button">{{#str}} deselect_all, block_mastermind_assistant {{/str}}</button>
+            </div>
+            <button id="quiz-preview-close-btn" class="mastermind-close-modal-btn" aria-label="Close">&times;</button>
+        </div>
+        <div class="mastermind-preview-body mastermind-quiz-preview-body">
+            <div id="quiz-preview-questions-list" class="mastermind-quiz-questions-list">
+            </div>
+        </div>
+        <div class="mastermind-preview-footer">
+            <span id="quiz-selected-count" class="mastermind-selected-count">0 selected</span>
+            <button id="quiz-preview-cancel-btn" class="mastermind-secondary-button mastermind-preview-btn">
+                {{#str}} cancel, block_mastermind_assistant {{/str}}
+            </button>
+            <button id="quiz-preview-regenerate-btn" class="mastermind-secondary-button mastermind-preview-btn">
+                {{#str}} regenerate, block_mastermind_assistant {{/str}}
+            </button>
+            <button id="quiz-preview-add-btn" class="mastermind-action-button mastermind-preview-btn">
+                {{#str}} add_selected_questions, block_mastermind_assistant {{/str}}
+            </button>
+        </div>
+    </div>
+</div>
+{{/is_quiz}}
+
+{{! Forum preview modal }}
+{{#is_forum}}
+<div id="forum-preview-modal" class="mastermind-preview-overlay" style="display:none;">
+    <div class="mastermind-preview-modal mastermind-preview-modal-wide">
+        <div class="mastermind-preview-header">
+            <h3 class="mastermind-preview-title">{{#str}} forum_preview_title, block_mastermind_assistant {{/str}}</h3>
+            <button id="forum-preview-close-btn" class="mastermind-close-modal-btn" aria-label="Close">&times;</button>
+        </div>
+        <div class="mastermind-preview-body">
+            <div class="mastermind-preview-main">
+                <div class="mastermind-preview-section">
+                    <h4>{{#str}} forum_introduction_label, block_mastermind_assistant {{/str}}</h4>
+                    <div id="forum-preview-introduction" class="mastermind-preview-content"></div>
+                </div>
+                <div class="mastermind-preview-section">
+                    <h4>{{#str}} forum_discussions_label, block_mastermind_assistant {{/str}}</h4>
+                    <div id="forum-preview-discussions" class="mastermind-preview-content"></div>
+                </div>
+            </div>
+            <div class="mastermind-preview-sidebar">
+                <div id="forum-preview-guidelines-section" class="mastermind-preview-meta" style="display:none;">
+                    <h4>{{#str}} forum_guidelines_label, block_mastermind_assistant {{/str}}</h4>
+                    <ul id="forum-preview-guidelines-list"></ul>
+                </div>
+            </div>
+        </div>
+        <div class="mastermind-preview-footer">
+            <button id="forum-preview-cancel-btn" class="mastermind-secondary-button mastermind-preview-btn">
+                {{#str}} cancel, block_mastermind_assistant {{/str}}
+            </button>
+            <button id="forum-preview-regenerate-btn" class="mastermind-secondary-button mastermind-preview-btn">
+                {{#str}} regenerate, block_mastermind_assistant {{/str}}
+            </button>
+            <button id="forum-preview-apply-btn" class="mastermind-action-button mastermind-preview-btn">
+                {{#str}} add_discussions, block_mastermind_assistant {{/str}}
+            </button>
+        </div>
+    </div>
+</div>
+{{/is_forum}}
+
+{{! Lesson preview modal }}
+{{#is_lesson}}
+<div id="lesson-preview-modal" class="mastermind-preview-overlay" style="display:none;">
+    <div class="mastermind-preview-modal mastermind-preview-modal-wide">
+        <div class="mastermind-preview-header">
+            <h3 class="mastermind-preview-title">{{#str}} lesson_preview_title, block_mastermind_assistant {{/str}}</h3>
+            <button id="lesson-preview-close-btn" class="mastermind-close-modal-btn" aria-label="Close">&times;</button>
+        </div>
+        <div class="mastermind-preview-body">
+            <div class="mastermind-preview-main">
+                <div class="mastermind-preview-section">
+                    <h4>{{#str}} lesson_pages_label, block_mastermind_assistant {{/str}}</h4>
+                    <div id="lesson-preview-pages" class="mastermind-preview-content"></div>
+                </div>
+            </div>
+            <div class="mastermind-preview-sidebar">
+                <div id="lesson-preview-objectives-section" class="mastermind-preview-meta" style="display:none;">
+                    <h4>{{#str}} learning_objectives_label, block_mastermind_assistant {{/str}}</h4>
+                    <ul id="lesson-preview-objectives-list"></ul>
+                </div>
+            </div>
+        </div>
+        <div class="mastermind-preview-footer">
+            <button id="lesson-preview-cancel-btn" class="mastermind-secondary-button mastermind-preview-btn">
+                {{#str}} cancel, block_mastermind_assistant {{/str}}
+            </button>
+            <button id="lesson-preview-regenerate-btn" class="mastermind-secondary-button mastermind-preview-btn">
+                {{#str}} regenerate, block_mastermind_assistant {{/str}}
+            </button>
+            <button id="lesson-preview-apply-btn" class="mastermind-action-button mastermind-preview-btn">
+                {{#str}} add_lesson_pages, block_mastermind_assistant {{/str}}
+            </button>
+        </div>
+    </div>
+</div>
+{{/is_lesson}}
+
+{{! Glossary preview modal }}
+{{#is_glossary}}
+<div id="glossary-preview-modal" class="mastermind-preview-overlay" style="display:none;">
+    <div class="mastermind-preview-modal mastermind-preview-modal-wide">
+        <div class="mastermind-preview-header">
+            <h3 class="mastermind-preview-title">{{#str}} glossary_preview_title, block_mastermind_assistant {{/str}}</h3>
+            <button id="glossary-preview-close-btn" class="mastermind-close-modal-btn" aria-label="Close">&times;</button>
+        </div>
+        <div class="mastermind-preview-body">
+            <div class="mastermind-preview-main">
+                <div class="mastermind-preview-section">
+                    <h4>{{#str}} glossary_description_label, block_mastermind_assistant {{/str}}</h4>
+                    <div id="glossary-preview-description" class="mastermind-preview-content"></div>
+                </div>
+                <div class="mastermind-preview-section">
+                    <h4>{{#str}} glossary_entries_label, block_mastermind_assistant {{/str}}</h4>
+                    <div id="glossary-preview-entries" class="mastermind-preview-content"></div>
+                </div>
+            </div>
+        </div>
+        <div class="mastermind-preview-footer">
+            <button id="glossary-preview-cancel-btn" class="mastermind-secondary-button mastermind-preview-btn">
+                {{#str}} cancel, block_mastermind_assistant {{/str}}
+            </button>
+            <button id="glossary-preview-regenerate-btn" class="mastermind-secondary-button mastermind-preview-btn">
+                {{#str}} regenerate, block_mastermind_assistant {{/str}}
+            </button>
+            <button id="glossary-preview-apply-btn" class="mastermind-action-button mastermind-preview-btn">
+                {{#str}} add_glossary_entries, block_mastermind_assistant {{/str}}
+            </button>
+        </div>
+    </div>
+</div>
+{{/is_glossary}}
+
+{{! Book preview modal }}
+{{#is_book}}
+<div id="book-preview-modal" class="mastermind-preview-overlay" style="display:none;">
+    <div class="mastermind-preview-modal mastermind-preview-modal-wide">
+        <div class="mastermind-preview-header">
+            <h3 class="mastermind-preview-title">{{#str}} book_preview_title, block_mastermind_assistant {{/str}}</h3>
+            <button id="book-preview-close-btn" class="mastermind-close-modal-btn" aria-label="Close">&times;</button>
+        </div>
+        <div class="mastermind-preview-body">
+            <div class="mastermind-preview-main">
+                <div class="mastermind-preview-section">
+                    <h4>{{#str}} book_chapters_label, block_mastermind_assistant {{/str}}</h4>
+                    <div id="book-preview-chapters" class="mastermind-preview-content"></div>
+                </div>
+            </div>
+            <div class="mastermind-preview-sidebar">
+                <div id="book-preview-objectives-section" class="mastermind-preview-meta" style="display:none;">
+                    <h4>{{#str}} learning_objectives_label, block_mastermind_assistant {{/str}}</h4>
+                    <ul id="book-preview-objectives-list"></ul>
+                </div>
+                <div id="book-preview-summary-section" class="mastermind-preview-meta" style="display:none;">
+                    <h4>{{#str}} content_summary_label, block_mastermind_assistant {{/str}}</h4>
+                    <p id="book-preview-summary-text"></p>
+                </div>
+            </div>
+        </div>
+        <div class="mastermind-preview-footer">
+            <button id="book-preview-cancel-btn" class="mastermind-secondary-button mastermind-preview-btn">
+                {{#str}} cancel, block_mastermind_assistant {{/str}}
+            </button>
+            <button id="book-preview-regenerate-btn" class="mastermind-secondary-button mastermind-preview-btn">
+                {{#str}} regenerate, block_mastermind_assistant {{/str}}
+            </button>
+            <button id="book-preview-apply-btn" class="mastermind-action-button mastermind-preview-btn">
+                {{#str}} add_book_chapters, block_mastermind_assistant {{/str}}
+            </button>
+        </div>
+    </div>
+</div>
+{{/is_book}}
+
+{{! URL preview modal }}
+{{#is_url}}
+<div id="url-preview-modal" class="mastermind-preview-overlay" style="display:none;">
+    <div class="mastermind-preview-modal mastermind-preview-modal-wide">
+        <div class="mastermind-preview-header">
+            <h3 class="mastermind-preview-title">{{#str}} url_preview_title, block_mastermind_assistant {{/str}}</h3>
+            <button id="url-preview-close-btn" class="mastermind-close-modal-btn" aria-label="Close">&times;</button>
+        </div>
+        <div class="mastermind-preview-body">
+            <div class="mastermind-preview-main">
+                <div id="url-preview-summary-top" class="mastermind-preview-section" style="display:none;">
+                    <h4>{{#str}} url_topic_summary_label, block_mastermind_assistant {{/str}}</h4>
+                    <p id="url-preview-summary-text"></p>
+                </div>
+                <div class="mastermind-preview-section">
+                    <h4>{{#str}} url_recommendations_label, block_mastermind_assistant {{/str}}</h4>
+                    <div id="url-preview-links" class="mastermind-preview-content"></div>
+                </div>
+            </div>
+        </div>
+        <div class="mastermind-preview-footer">
+            <button id="url-preview-cancel-btn" class="mastermind-secondary-button mastermind-preview-btn">
+                {{#str}} cancel, block_mastermind_assistant {{/str}}
+            </button>
+            <button id="url-preview-regenerate-btn" class="mastermind-secondary-button mastermind-preview-btn">
+                {{#str}} regenerate, block_mastermind_assistant {{/str}}
+            </button>
+            <button id="url-preview-apply-btn" class="mastermind-action-button mastermind-preview-btn">
+                {{#str}} apply_url, block_mastermind_assistant {{/str}}
+            </button>
+        </div>
+    </div>
+</div>
+{{/is_url}}
+
