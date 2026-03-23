@@ -35,16 +35,16 @@ use external_value;
 use context_course;
 
 /**
- * Log user feedback on AI-generated content (apply, regenerate, discard).
- * Sends the feedback to the dashboard for training data collection.
+ * Log user feedback on AI-generated content (generate, apply, regenerate, discard).
+ * Sends the feedback to the dashboard for action consumption and training data collection.
  */
 class log_generation_feedback extends external_api {
 
     public static function execute_parameters() {
         return new external_function_parameters([
             'courseid' => new external_value(PARAM_INT, 'Course ID'),
-            'action' => new external_value(PARAM_ALPHA, 'User action: apply, regenerate, or discard'),
-            'moduletype' => new external_value(PARAM_ALPHA, 'Module type: page, quiz, assign, forum, lesson, glossary, book, url'),
+            'action' => new external_value(PARAM_ALPHA, 'User action: generate, apply, regenerate, or discard'),
+            'moduletype' => new external_value(PARAM_ALPHA, 'Module type: course, page, quiz, assign, forum, lesson, glossary, book, url'),
             'activityname' => new external_value(PARAM_TEXT, 'Activity name', VALUE_DEFAULT, ''),
             'coursename' => new external_value(PARAM_TEXT, 'Course name', VALUE_DEFAULT, ''),
         ]);

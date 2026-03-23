@@ -25,9 +25,34 @@
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Post-installation script for the block
+ * Post-installation script for the block.
+ * Creates a sticky block instance so the block appears site-wide automatically.
  */
 function xmldb_block_mastermind_assistant_install() {
+    global $DB;
+
+    // Create sticky block instance so the block appears on all pages automatically.
+    $existing = $DB->get_record('block_instances', [
+        'blockname' => 'mastermind_assistant',
+        'showinsubcontexts' => 1,
+    ]);
+
+    if (!$existing) {
+        $blockinstance = new stdClass();
+        $blockinstance->blockname = 'mastermind_assistant';
+        $blockinstance->parentcontextid = SYSCONTEXTID;
+        $blockinstance->showinsubcontexts = 1;
+        $blockinstance->pagetypepattern = '*';
+        $blockinstance->subpagepattern = null;
+        $blockinstance->defaultregion = 'side-pre';
+        $blockinstance->defaultweight = 0;
+        $blockinstance->configdata = '';
+        $blockinstance->timecreated = time();
+        $blockinstance->timemodified = time();
+
+        $DB->insert_record('block_instances', $blockinstance);
+    }
+
     return true;
 }
 

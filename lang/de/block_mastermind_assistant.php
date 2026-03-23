@@ -95,7 +95,7 @@ $string['questions_count'] = '{$a} Fragen bereit zum Hinzufuegen';
 
 // Einstellungen
 $string['settings_dashboard_url'] = 'Dashboard-URL';
-$string['settings_dashboard_url_desc'] = 'Die URL Ihrer Mastermind-Dashboard-Instanz (z.B. https://dashboard.mastermindassistant.ai)';
+$string['settings_dashboard_url_desc'] = 'Die URL Ihrer Mastermind-Dashboard-Instanz (z.B. https://mastermindassistant.ai)';
 $string['settings_api_key'] = 'API-Schluessel';
 $string['settings_api_key_desc'] = 'Ihr Mastermind-API-Schluessel (beginnt mit ma_live_)';
 $string['connection_status'] = 'Verbindungsstatus';

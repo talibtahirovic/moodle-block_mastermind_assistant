@@ -421,6 +421,7 @@ function(Ajax, Notification, AiPolicy) {
             courseactivities: '[]'
         };
 
+        logFeedback('generate', 'page');
         Ajax.call([{
             methodname: 'block_mastermind_assistant_generate_page_content',
             args: args
@@ -621,6 +622,7 @@ function(Ajax, Notification, AiPolicy) {
             courseactivities: '[]'
         };
 
+        logFeedback('generate', 'assign');
         Ajax.call([{
             methodname: 'block_mastermind_assistant_generate_assignment_instructions',
             args: args
@@ -884,6 +886,7 @@ function(Ajax, Notification, AiPolicy) {
             selectedquestions: ''
         };
 
+        logFeedback('generate', 'quiz');
         Ajax.call([{
             methodname: 'block_mastermind_assistant_generate_quiz_questions',
             args: args
@@ -1228,6 +1231,7 @@ function(Ajax, Notification, AiPolicy) {
         var countSelect = document.getElementById('forum-count-select');
         var sectionSelect = document.getElementById('id_section');
 
+        logFeedback('generate', 'forum');
         Ajax.call([{
             methodname: 'block_mastermind_assistant_generate_forum_content',
             args: {
@@ -1420,6 +1424,7 @@ function(Ajax, Notification, AiPolicy) {
         var countSelect = document.getElementById('lesson-count-select');
         var sectionSelect = document.getElementById('id_section');
 
+        logFeedback('generate', 'lesson');
         Ajax.call([{
             methodname: 'block_mastermind_assistant_generate_lesson_content',
             args: {
@@ -1641,6 +1646,7 @@ function(Ajax, Notification, AiPolicy) {
         var countSelect = document.getElementById('glossary-count-select');
         var sectionSelect = document.getElementById('id_section');
 
+        logFeedback('generate', 'glossary');
         Ajax.call([{
             methodname: 'block_mastermind_assistant_generate_glossary_entries',
             args: {
@@ -1816,6 +1822,7 @@ function(Ajax, Notification, AiPolicy) {
         var lengthSelect = document.getElementById('book-length-select');
         var sectionSelect = document.getElementById('id_section');
 
+        logFeedback('generate', 'book');
         Ajax.call([{
             methodname: 'block_mastermind_assistant_generate_book_content',
             args: {
@@ -2023,6 +2030,7 @@ function(Ajax, Notification, AiPolicy) {
         var countSelect = document.getElementById('url-count-select');
         var sectionSelect = document.getElementById('id_section');
 
+        logFeedback('generate', 'url');
         Ajax.call([{
             methodname: 'block_mastermind_assistant_generate_url_resource',
             args: {

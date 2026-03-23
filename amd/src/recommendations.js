@@ -82,6 +82,20 @@ function(Ajax, Notification, Str, AiPolicy) {
         btn.disabled = true;
         showProgress();
 
+        // Log action consumption at generation time (action is consumed even if result is not applied).
+        Ajax.call([{
+            methodname: 'block_mastermind_assistant_log_generation_feedback',
+            args: {
+                courseid: courseid,
+                action: 'generate',
+                moduletype: 'course',
+                activityname: '',
+                coursename: ''
+            }
+        }])[0].catch(function() {
+            // Silent — feedback logging is non-critical.
+        });
+
         Ajax.call([{
             methodname: 'block_mastermind_assistant_get_full_analysis',
             args: {

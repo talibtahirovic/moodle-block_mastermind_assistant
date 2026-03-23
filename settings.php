@@ -29,7 +29,7 @@ if ($ADMIN->fulltree) {
         'block_mastermind_assistant/dashboard_url',
         get_string('settings_dashboard_url', 'block_mastermind_assistant'),
         get_string('settings_dashboard_url_desc', 'block_mastermind_assistant'),
-        'https://dashboard.mastermindassistant.ai'
+        'https://mastermindassistant.ai'
     ));
 
     // API Key.
