@@ -66,12 +66,15 @@ class api_client {
     public function request(string $endpoint, array $data = [], string $method = 'POST', int $timeout = 300): array {
         $url = $this->baseUrl . $endpoint;
 
+        global $CFG;
+
         $ch = curl_init($url);
         curl_setopt_array($ch, [
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_HTTPHEADER => [
                 'Content-Type: application/json',
                 'Authorization: Bearer ' . $this->apiKey,
+                'X-LMS-Origin: ' . ($CFG->wwwroot ?? ''),
             ],
             CURLOPT_TIMEOUT => $timeout,
             CURLOPT_CONNECTTIMEOUT => 30,

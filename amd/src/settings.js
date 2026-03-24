@@ -70,6 +70,14 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
             }
 
             button.addEventListener('click', function() {
+                // Check if the API key field is empty.
+                var apiKeyInput = document.getElementById('id_s_block_mastermind_assistant_api_key');
+                if (apiKeyInput && !apiKeyInput.value.trim()) {
+                    resultDiv.innerHTML = '<div class="alert alert-warning">' +
+                        'Please enter your API key above and <strong>save changes</strong> first.' +
+                        '</div>';
+                    return;
+                }
                 testConnection(button, resultDiv);
             });
         }

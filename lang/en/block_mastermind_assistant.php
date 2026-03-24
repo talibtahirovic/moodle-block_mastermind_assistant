@@ -100,6 +100,7 @@ $string['settings_api_key'] = 'API Key';
 $string['settings_api_key_desc'] = 'Your Mastermind API key (starts with ma_live_)';
 $string['connection_status'] = 'Connection Status';
 $string['test_connection'] = 'Test Connection';
+$string['test_connection_desc'] = 'Save your settings first, then click Test Connection to verify your API key.';
 $string['testing_connection'] = 'Testing connection...';
 $string['connection_success'] = 'Connected successfully';
 $string['connection_failed'] = 'Connection failed: {$a}';

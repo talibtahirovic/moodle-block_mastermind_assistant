@@ -33,7 +33,7 @@ if ($ADMIN->fulltree) {
     ));
 
     // API Key.
-    $settings->add(new admin_setting_configpasswordunmask(
+    $settings->add(new admin_setting_configtext(
         'block_mastermind_assistant/api_key',
         get_string('settings_api_key', 'block_mastermind_assistant'),
         get_string('settings_api_key_desc', 'block_mastermind_assistant'),
@@ -55,26 +55,24 @@ if ($ADMIN->fulltree) {
         $infohtml
     ));
 
-    // Only show Test Connection button if settings are already saved.
-    $dashboardurl = get_config('block_mastermind_assistant', 'dashboard_url');
-    $apikey = get_config('block_mastermind_assistant', 'api_key');
+    // Test Connection button — always visible. JS validates that fields are filled.
+    $html = '<div id="mastermind-settings-info" style="margin-top: 1rem;">';
+    $html .= '<p style="margin-bottom: 0.5rem; color: #666; font-size: 0.85em;">';
+    $html .= get_string('test_connection_desc', 'block_mastermind_assistant');
+    $html .= '</p>';
+    $html .= '<button type="button" id="mastermind-test-connection" class="btn btn-secondary">';
+    $html .= get_string('test_connection', 'block_mastermind_assistant');
+    $html .= '</button>';
+    $html .= '<div id="mastermind-connection-result" style="margin-top: 0.75rem;"></div>';
+    $html .= '</div>';
 
-    if (!empty($dashboardurl) && !empty($apikey)) {
-        $html = '<div id="mastermind-settings-info" style="margin-top: 1rem;">';
-        $html .= '<button type="button" id="mastermind-test-connection" class="btn btn-secondary">';
-        $html .= get_string('test_connection', 'block_mastermind_assistant');
-        $html .= '</button>';
-        $html .= '<div id="mastermind-connection-result" style="margin-top: 0.75rem;"></div>';
-        $html .= '</div>';
+    $settings->add(new admin_setting_heading(
+        'block_mastermind_assistant/connection_heading',
+        get_string('connection_status', 'block_mastermind_assistant'),
+        $html
+    ));
 
-        $settings->add(new admin_setting_heading(
-            'block_mastermind_assistant/connection_heading',
-            get_string('connection_status', 'block_mastermind_assistant'),
-            $html
-        ));
-
-        // Load the settings JS module.
-        global $PAGE;
-        $PAGE->requires->js_call_amd('block_mastermind_assistant/settings', 'init');
-    }
+    // Load the settings JS module.
+    global $PAGE;
+    $PAGE->requires->js_call_amd('block_mastermind_assistant/settings', 'init');
 }
