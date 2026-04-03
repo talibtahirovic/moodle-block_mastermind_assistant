@@ -18,7 +18,7 @@
  * External function to get updated course structure
  *
  * @package    block_mastermind_assistant
- * @copyright  2025 The Namers <info@mastermindassistant.ai>
+ * @copyright  2026 The Namers <info@mastermindassistant.ai>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 namespace block_mastermind_assistant\external;
@@ -56,11 +56,11 @@ class get_updated_structure extends external_api {
 
         // Fix potential section ID vs course ID confusion.
         global $DB;
-        $courseExists = $DB->record_exists('course', ['id' => $params['courseid']]);
-        if (!$courseExists) {
-            $sectionRecord = $DB->get_record('course_sections', ['id' => $params['courseid']], 'id, course, section');
-            if ($sectionRecord) {
-                $params['courseid'] = $sectionRecord->course;
+        $courseexists = $DB->record_exists('course', ['id' => $params['courseid']]);
+        if (!$courseexists) {
+            $sectionrecord = $DB->get_record('course_sections', ['id' => $params['courseid']], 'id, course, section');
+            if ($sectionrecord) {
+                $params['courseid'] = $sectionrecord->course;
             }
         }
 
@@ -77,16 +77,16 @@ class get_updated_structure extends external_api {
 
             // Call dashboard API instead of OpenAI directly.
             $client = new \block_mastermind_assistant\api_client();
-            $aiResponse = $client->generateStructure($data, $params['recommendations']);
+            $airesponse = $client->generate_structure($data, $params['recommendations']);
 
             // Normalize response — different dashboard packages may return
             // different shapes (e.g. {sections: ...}, {structure: {sections: ...}},
             // {result: ...}, or a flat response).
-            $structure = $aiResponse;
-            if (isset($aiResponse['structure']) && is_array($aiResponse['structure'])) {
-                $structure = $aiResponse['structure'];
-            } elseif (isset($aiResponse['result']) && is_array($aiResponse['result'])) {
-                $structure = $aiResponse['result'];
+            $structure = $airesponse;
+            if (isset($airesponse['structure']) && is_array($airesponse['structure'])) {
+                $structure = $airesponse['structure'];
+            } elseif (isset($airesponse['result']) && is_array($airesponse['result'])) {
+                $structure = $airesponse['result'];
             }
 
             // Accept if we have a sections array at any level.
@@ -98,10 +98,10 @@ class get_updated_structure extends external_api {
             }
 
             // If the response is a string (e.g. markdown), return it as-is.
-            if (is_string($aiResponse)) {
+            if (is_string($airesponse)) {
                 return [
                     'success' => true,
-                    'structure' => $aiResponse
+                    'structure' => $airesponse
                 ];
             }
 

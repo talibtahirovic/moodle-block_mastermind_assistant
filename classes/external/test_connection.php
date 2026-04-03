@@ -18,7 +18,7 @@
  * External function to test dashboard connection
  *
  * @package    block_mastermind_assistant
- * @copyright  2025 The Namers <info@mastermindassistant.ai>
+ * @copyright  2026 The Namers <info@mastermindassistant.ai>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 namespace block_mastermind_assistant\external;
@@ -57,15 +57,15 @@ class test_connection extends external_api {
             $client = new \block_mastermind_assistant\api_client();
 
             // Test basic connectivity.
-            $client->testConnection();
+            $client->test_connection();
 
             // Fetch account info (tier and status only).
-            $accountResult = $client->getAccount();
+            $accountresult = $client->get_account();
 
             return [
                 'success' => true,
-                'tier' => $accountResult['tier'] ?? '',
-                'status' => $accountResult['status'] ?? '',
+                'tier' => $accountresult['tier'] ?? '',
+                'status' => $accountresult['status'] ?? '',
                 'message' => get_string('connection_success', 'block_mastermind_assistant')
             ];
         } catch (Exception $e) {

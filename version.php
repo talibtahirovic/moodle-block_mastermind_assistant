@@ -18,14 +18,14 @@
  * Version information for Mastermind Assistant
  *
  * @package    block_mastermind_assistant
- * @copyright  2025 The Namers <info@mastermindassistant.ai>
+ * @copyright  2026 The Namers <info@mastermindassistant.ai>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'block_mastermind_assistant';
-$plugin->version = 2026032400;
+$plugin->version = 2026040301;
 $plugin->requires = 2024100700; // Moodle 4.5 or later.
 $plugin->maturity = MATURITY_STABLE;
-$plugin->release = 'v3.1.0';
+$plugin->release = 'v3.2.0';

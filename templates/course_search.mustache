@@ -107,12 +107,12 @@
 
     <div id="mastermind-creation-progress" class="mastermind-creation-progress" style="display: none;">
         <div class="mastermind-progress-header">
-            <strong>Creating course with AI...</strong>
+            <strong>{{#str}}creating_course_ai, block_mastermind_assistant{{/str}}...</strong>
         </div>
         <div class="progress mastermind-progress-bar">
             <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%"></div>
         </div>
-        <p class="mastermind-progress-text">Please wait while AI generates your course structure</p>
+        <p class="mastermind-progress-text">{{#str}}ai_working, block_mastermind_assistant{{/str}}</p>
     </div>
 
     <div id="mastermind-copy-progress" class="mastermind-copy-progress" style="display: none;">
@@ -149,7 +149,7 @@
         </div>
         <div id="mastermind-audit-findings" class="mastermind-audit-findings" style="display: none;">
             <div class="mastermind-audit-header">
-                <strong>Items that may need updating:</strong>
+                <strong>{{#str}}audit_items_need_updating, block_mastermind_assistant{{/str}}</strong>
             </div>
             <div id="mastermind-audit-list" class="mastermind-audit-list"></div>
         </div>

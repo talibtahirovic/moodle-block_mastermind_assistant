@@ -18,7 +18,7 @@
  * External function to log generation feedback
  *
  * @package    block_mastermind_assistant
- * @copyright  2025 The Namers <info@mastermindassistant.ai>
+ * @copyright  2026 The Namers <info@mastermindassistant.ai>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 namespace block_mastermind_assistant\external;
@@ -65,7 +65,7 @@ class log_generation_feedback extends external_api {
 
         try {
             $client = new \block_mastermind_assistant\api_client();
-            $client->logGenerationFeedback(
+            $client->log_generation_feedback(
                 $params['action'],
                 $params['moduletype'],
                 $params['activityname'],

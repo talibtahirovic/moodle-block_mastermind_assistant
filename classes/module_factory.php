@@ -18,7 +18,7 @@
  * Factory for creating Moodle activity modules
  *
  * @package    block_mastermind_assistant
- * @copyright  2025 The Namers <info@mastermindassistant.ai>
+ * @copyright  2026 The Namers <info@mastermindassistant.ai>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 namespace block_mastermind_assistant;
@@ -41,18 +41,18 @@ class module_factory {
     /**
      * Create an activity from AI data.
      *
-     * @param array $activityData expects: name, moodle_type|type, intro(optional), etc.
+     * @param array $activitydata expects: name, moodle_type|type, intro(optional), etc.
      * @return bool success
      */
-    public function create_from_ai(array $activityData): bool {
+    public function create_from_ai(array $activitydata): bool {
         global $CFG, $DB;
 
         require_once($CFG->dirroot . '/course/modlib.php');
         require_once($CFG->dirroot . '/course/lib.php');
 
-        $modname = strtolower($activityData['moodle_type'] ?? ($activityData['type'] ?? ''));
-        $name = $activityData['name'] ?? 'Untitled activity';
-        $intro = $activityData['intro'] ?? '';
+        $modname = strtolower($activitydata['moodle_type'] ?? ($activitydata['type'] ?? ''));
+        $name = $activitydata['name'] ?? 'Untitled activity';
+        $intro = $activitydata['intro'] ?? '';
 
         // Check if module exists and is enabled
         $module = $DB->get_record('modules', ['name' => $modname, 'visible' => 1]);
@@ -61,7 +61,7 @@ class module_factory {
         }
 
         // Build moduleinfo object with all required fields
-        $moduleinfo = $this->build_moduleinfo($modname, $module->id, $name, $intro, $activityData);
+        $moduleinfo = $this->build_moduleinfo($modname, $module->id, $name, $intro, $activitydata);
         if (!$moduleinfo) {
             return false;
         }

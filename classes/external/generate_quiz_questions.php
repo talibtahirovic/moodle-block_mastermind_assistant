@@ -18,7 +18,7 @@
  * External function to generate quiz questions
  *
  * @package    block_mastermind_assistant
- * @copyright  2025 The Namers <info@mastermindassistant.ai>
+ * @copyright  2026 The Namers <info@mastermindassistant.ai>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 namespace block_mastermind_assistant\external;
@@ -113,19 +113,19 @@ class generate_quiz_questions extends external_api {
                     throw new Exception('Invalid selected questions data.');
                 }
 
-                $createdQuestions = self::create_moodle_questions($questions, $quiz, $cm, $context);
-                $newCount = count($createdQuestions);
+                $createdquestions = self::create_moodle_questions($questions, $quiz, $cm, $context);
+                $newcount = count($createdquestions);
 
                 return [
                     'success' => true,
-                    'questioncount' => $newCount,
-                    'questions' => json_encode($createdQuestions),
-                    'message' => $newCount . ' question' . ($newCount != 1 ? 's' : '') . ' added successfully',
+                    'questioncount' => $newcount,
+                    'questions' => json_encode($createdquestions),
+                    'message' => $newcount . ' question' . ($newcount != 1 ? 's' : '') . ' added successfully',
                 ];
             }
 
             // Phase 1: Generate questions via AI.
-            $existingQuestions = self::get_existing_quiz_questions($quiz);
+            $existingquestions = self::get_existing_quiz_questions($quiz);
 
             // Gather course activities for context if not provided.
             $activities = json_decode($params['courseactivities'], true) ?: [];
@@ -139,10 +139,10 @@ class generate_quiz_questions extends external_api {
             }
 
             $client = new \block_mastermind_assistant\api_client();
-            $response = $client->generateQuiz(
+            $response = $client->generate_quiz(
                 $params['quizname'],
                 $params['quizdescription'],
-                $existingQuestions,
+                $existingquestions,
                 $params['difficultylevel'],
                 $params['questioncount'],
                 $params['academiclevel'],
@@ -163,14 +163,14 @@ class generate_quiz_questions extends external_api {
             }
 
             // Direct insert (backward compat).
-            $createdQuestions = self::create_moodle_questions($questions, $quiz, $cm, $context);
-            $newCount = count($createdQuestions);
+            $createdquestions = self::create_moodle_questions($questions, $quiz, $cm, $context);
+            $newcount = count($createdquestions);
 
             return [
                 'success' => true,
-                'questioncount' => $newCount,
-                'questions' => json_encode($createdQuestions),
-                'message' => $newCount . ' question' . ($newCount != 1 ? 's' : '') . ' added successfully',
+                'questioncount' => $newcount,
+                'questions' => json_encode($createdquestions),
+                'message' => $newcount . ' question' . ($newcount != 1 ? 's' : '') . ' added successfully',
             ];
 
         } catch (Exception $e) {
@@ -190,7 +190,7 @@ class generate_quiz_questions extends external_api {
         require_once($CFG->libdir . '/questionlib.php');
         require_once($CFG->dirroot . '/mod/quiz/locallib.php');
 
-        $existingQuestions = [];
+        $existingquestions = [];
 
         try {
             $quizobj = \quiz::create($quiz->id, $USER->id);
@@ -209,7 +209,7 @@ class generate_quiz_questions extends external_api {
                     continue;
                 }
 
-                $existingQuestions[] = [
+                $existingquestions[] = [
                     'name' => $questiondata->name,
                     'text' => strip_tags($questiondata->questiontext),
                     'type' => $questiondata->qtype,
@@ -220,14 +220,14 @@ class generate_quiz_questions extends external_api {
             error_log("Error retrieving existing questions: " . $e->getMessage());
         }
 
-        return $existingQuestions;
+        return $existingquestions;
     }
 
     protected static function create_moodle_questions($questions, $quiz, $cm, $context) {
         global $DB, $CFG;
         require_once($CFG->dirroot . '/question/engine/bank.php');
 
-        $createdQuestions = [];
+        $createdquestions = [];
 
         $modulecontext = context_module::instance($cm->id);
         $categories = $DB->get_records('question_categories', [
@@ -257,7 +257,7 @@ class generate_quiz_questions extends external_api {
                     $maxmark = $qdata['defaultmark'] ?? 1.0;
                     quiz_add_quiz_question($questionid, $quiz, 0, $maxmark);
 
-                    $createdQuestions[] = [
+                    $createdquestions[] = [
                         'id' => $questionid,
                         'name' => $qdata['name'] ?? substr($qdata['questiontext'], 0, 50),
                         'type' => $qdata['type'],
@@ -279,7 +279,7 @@ class generate_quiz_questions extends external_api {
         quiz_grade_item_update($quiz);
         quiz_delete_previews($quiz);
 
-        return $createdQuestions;
+        return $createdquestions;
     }
 
     protected static function create_single_question($qdata, $categoryid, $modulecontext) {

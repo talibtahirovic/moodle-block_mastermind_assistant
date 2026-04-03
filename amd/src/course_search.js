@@ -17,7 +17,7 @@
  * Course search, copy, and AI-powered creation module
  *
  * @module     block_mastermind_assistant/course_search
- * @copyright  2025 Your Name
+ * @copyright  2026 The Namers <info@mastermindassistant.ai>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 

@@ -1,3 +1,18 @@
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * AMD module for generating page/assignment/quiz/forum/lesson/glossary/book/url content drafts.
  *
@@ -10,6 +25,10 @@
  * - Glossary: options -> generate -> preview modal -> apply to editor
  * - Book: options -> generate -> preview modal -> apply to editor
  * - URL: options -> generate -> preview modal -> select URL to apply
+ *
+ * @module     block_mastermind_assistant/mod_draft
+ * @copyright  2026 The Namers <info@mastermindassistant.ai>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 /* global tinyMCE */
 /* eslint-disable jsdoc/require-param-type */

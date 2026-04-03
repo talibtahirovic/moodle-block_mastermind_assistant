@@ -18,7 +18,7 @@
  * External function to create course from document
  *
  * @package    block_mastermind_assistant
- * @copyright  2025 The Namers <info@mastermindassistant.ai>
+ * @copyright  2026 The Namers <info@mastermindassistant.ai>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 namespace block_mastermind_assistant\external;
@@ -97,7 +97,7 @@ class create_course_from_document extends external_api {
 
             // Send to dashboard for text extraction + AI generation.
             $client = new \block_mastermind_assistant\api_client();
-            $aiStructure = $client->generateCourseFromDocument(
+            $aistructure = $client->generate_course_from_document(
                 $params['filedata'],
                 $params['filetype'],
                 $params['filename']
@@ -107,19 +107,19 @@ class create_course_from_document extends external_api {
             if ($params['previewonly']) {
                 return [
                     'success' => true,
-                    'preview' => json_encode($aiStructure),
+                    'preview' => json_encode($aistructure),
                 ];
             }
 
             // Create the course.
             $coursedata = new stdClass();
-            $coursedata->fullname = $aiStructure['course_name'] ?? pathinfo($params['filename'], PATHINFO_FILENAME);
+            $coursedata->fullname = $aistructure['course_name'] ?? pathinfo($params['filename'], PATHINFO_FILENAME);
             $coursedata->shortname = create_course_with_ai::generate_shortname($coursedata->fullname);
             $coursedata->category = $params['categoryid'];
-            $coursedata->summary = $aiStructure['course_description'] ?? '';
+            $coursedata->summary = $aistructure['course_description'] ?? '';
             $coursedata->summaryformat = FORMAT_HTML;
             $coursedata->format = 'topics';
-            $coursedata->numsections = count($aiStructure['sections'] ?? []);
+            $coursedata->numsections = count($aistructure['sections'] ?? []);
             $coursedata->startdate = time();
             $coursedata->visible = 1;
             $coursedata->enablecompletion = 1;
@@ -127,8 +127,8 @@ class create_course_from_document extends external_api {
             $course = create_course($coursedata);
 
             // Apply AI-generated structure to the course.
-            if (!empty($aiStructure['sections'])) {
-                create_course_with_ai::apply_course_structure($course->id, $aiStructure['sections']);
+            if (!empty($aistructure['sections'])) {
+                create_course_with_ai::apply_course_structure($course->id, $aistructure['sections']);
             }
 
             return [

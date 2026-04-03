@@ -18,7 +18,7 @@
  * External function to apply course structure
  *
  * @package    block_mastermind_assistant
- * @copyright  2025 The Namers <info@mastermindassistant.ai>
+ * @copyright  2026 The Namers <info@mastermindassistant.ai>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 namespace block_mastermind_assistant\external;
@@ -51,7 +51,7 @@ class apply_course_structure extends external_api {
     public static function execute($courseid, $structuretext) {
         global $DB, $CFG, $USER;
 
-        $startTime = microtime(true);
+        $starttime = microtime(true);
 
         $params = self::validate_parameters(self::execute_parameters(), [
             'courseid' => $courseid,
@@ -152,10 +152,10 @@ class apply_course_structure extends external_api {
      */
     protected static function parse_json_structure($structuretext) {
         // First try to clean markdown code blocks if present
-        $cleanJsonText = self::clean_markdown_response($structuretext);
+        $cleanjsontext = self::clean_markdown_response($structuretext);
 
         // Try to parse as JSON
-        $data = json_decode($cleanJsonText, true);
+        $data = json_decode($cleanjsontext, true);
 
         if ($data && isset($data['sections'])) {
             // Convert JSON format to internal format
@@ -201,9 +201,9 @@ class apply_course_structure extends external_api {
     protected static function parse_markdown_structure($structuretext) {
         $sections = [];
         $lines = explode("\n", $structuretext);
-        $currentSection = null;
-        $inActivities = false;
-        $inObjectives = false;
+        $currentsection = null;
+        $inactivities = false;
+        $inobjectives = false;
 
         foreach ($lines as $line) {
             $line = trim($line);
@@ -213,63 +213,63 @@ class apply_course_structure extends external_api {
 
             // Section headers
             if (preg_match('/^Section\s+(\d+):\s*(.+)$/i', $line, $matches)) {
-                if ($currentSection) {
-                    $sections[] = $currentSection;
+                if ($currentsection) {
+                    $sections[] = $currentsection;
                 }
-                $currentSection = [
+                $currentsection = [
                     'name' => trim($matches[2]),
                     'status' => 'NEW',
                     'description' => '',
                     'activities' => [],
                     'objectives' => []
                 ];
-                $inActivities = false;
-                $inObjectives = false;
+                $inactivities = false;
+                $inobjectives = false;
             }
             // Status line
             elseif (preg_match('/^Status:\s*(.+)$/i', $line, $matches)) {
-                if ($currentSection) {
-                    $currentSection['status'] = trim($matches[1]);
+                if ($currentsection) {
+                    $currentsection['status'] = trim($matches[1]);
                 }
             }
             // Description line
             elseif (preg_match('/^Description:\s*(.+)$/i', $line, $matches)) {
-                if ($currentSection) {
-                    $currentSection['description'] = trim($matches[1]);
+                if ($currentsection) {
+                    $currentsection['description'] = trim($matches[1]);
                 }
-                $inActivities = false;
-                $inObjectives = false;
+                $inactivities = false;
+                $inobjectives = false;
             }
             // Activities section
             elseif (preg_match('/^Activities:/i', $line)) {
-                $inActivities = true;
-                $inObjectives = false;
+                $inactivities = true;
+                $inobjectives = false;
             }
             // Learning objectives section
             elseif (preg_match('/^Learning\s+Objectives:/i', $line)) {
-                $inObjectives = true;
-                $inActivities = false;
+                $inobjectives = true;
+                $inactivities = false;
             }
             // Activity or objective items
             elseif (preg_match('/^[-*•]\s*(.+)$/', $line, $matches)) {
                 $item = trim($matches[1]);
-                if ($currentSection) {
-                    if ($inActivities) {
+                if ($currentsection) {
+                    if ($inactivities) {
                         // Parse activity: "Activity Name (STATUS - type)" or "Activity Name (STATUS)"
-                        if (preg_match('/^(.+?)\s+\((KEEP|NEW|MODIFIED)(?:\s*-\s*([^)]+))?\)$/', $item, $actMatches)) {
-                            $activityName = trim($actMatches[1]);
-                            if ($activityName === '') {
+                        if (preg_match('/^(.+?)\s+\((KEEP|NEW|MODIFIED)(?:\s*-\s*([^)]+))?\)$/', $item, $actmatches)) {
+                            $activityname = trim($actmatches[1]);
+                            if ($activityname === '') {
                                 continue; // skip empty names
                             }
-                            $currentSection['activities'][] = [
-                                'name' => $activityName,
-                                'status' => trim($actMatches[2]),
-                                'type' => isset($actMatches[3]) ? trim($actMatches[3]) : 'page'
+                            $currentsection['activities'][] = [
+                                'name' => $activityname,
+                                'status' => trim($actmatches[2]),
+                                'type' => isset($actmatches[3]) ? trim($actmatches[3]) : 'page'
                             ];
                         }
-                    } elseif ($inObjectives) {
+                    } elseif ($inobjectives) {
                         if ($item !== 'Objective' && $item !== '[Objective]') {
-                            $currentSection['objectives'][] = $item;
+                            $currentsection['objectives'][] = $item;
                         }
                     }
                 }
@@ -277,8 +277,8 @@ class apply_course_structure extends external_api {
         }
 
         // Add the last section
-        if ($currentSection) {
-            $sections[] = $currentSection;
+        if ($currentsection) {
+            $sections[] = $currentsection;
         }
 
         return $sections;
@@ -308,89 +308,89 @@ class apply_course_structure extends external_api {
         }
 
         // Check for any invalid course module references in sections before we start
-        $sectionsToFix = [];
-        $allSections = $DB->get_records('course_sections', ['course' => $courseid]);
-        foreach ($allSections as $section) {
+        $sectionstofix = [];
+        $allsections = $DB->get_records('course_sections', ['course' => $courseid]);
+        foreach ($allsections as $section) {
             if (!empty($section->sequence)) {
-                $moduleIds = explode(',', $section->sequence);
-                $validModuleIds = [];
-                $foundInvalid = false;
+                $moduleids = explode(',', $section->sequence);
+                $validmoduleids = [];
+                $foundinvalid = false;
 
-                foreach ($moduleIds as $moduleId) {
-                    if (is_numeric($moduleId) && !empty($moduleId)) {
-                        if ($DB->record_exists('course_modules', ['id' => $moduleId])) {
-                            $validModuleIds[] = $moduleId;
+                foreach ($moduleids as $moduleid) {
+                    if (is_numeric($moduleid) && !empty($moduleid)) {
+                        if ($DB->record_exists('course_modules', ['id' => $moduleid])) {
+                            $validmoduleids[] = $moduleid;
                         } else {
-                            $foundInvalid = true;
+                            $foundinvalid = true;
                         }
                     }
                 }
 
                 // If we found invalid references, clean them up
-                if ($foundInvalid) {
-                    $newSequence = implode(',', $validModuleIds);
+                if ($foundinvalid) {
+                    $newsequence = implode(',', $validmoduleids);
                     $DB->update_record('course_sections', (object)[
                         'id' => $section->id,
-                        'sequence' => $newSequence
+                        'sequence' => $newsequence
                     ]);
-                    $sectionsToFix[] = $section->section;
+                    $sectionstofix[] = $section->section;
                 }
             }
         }
 
-        if (!empty($sectionsToFix)) {
+        if (!empty($sectionstofix)) {
             // Clear course cache after fixing sequences
             \rebuild_course_cache($courseid, true);
         }
 
-        $existingSections = $DB->get_records('course_sections', ['course' => $courseid], 'section');
+        $existingsections = $DB->get_records('course_sections', ['course' => $courseid], 'section');
 
-        foreach ($sections as $sectionData) {
-            $sectionName = $sectionData['name'];
-            $sectionId = $sectionData['section_id'] ?? null;
+        foreach ($sections as $sectiondata) {
+            $sectionname = $sectiondata['name'];
+            $sectionid = $sectiondata['section_id'] ?? null;
 
             // Match by section ID first (most reliable)
-            $existingSection = null;
-            $matchType = 'none';
+            $existingsection = null;
+            $matchtype = 'none';
 
-            if ($sectionId && is_numeric($sectionId)) {
+            if ($sectionid && is_numeric($sectionid)) {
                 // Find section by ID
-                foreach ($existingSections as $section) {
-                    if ($section->id == $sectionId) {
-                        $existingSection = $section;
-                        $matchType = 'section_id';
+                foreach ($existingsections as $section) {
+                    if ($section->id == $sectionid) {
+                        $existingsection = $section;
+                        $matchtype = 'section_id';
                         break;
                     }
                 }
             }
 
             // Fallback to name matching if ID match fails
-            if (!$existingSection) {
-                foreach ($existingSections as $section) {
+            if (!$existingsection) {
+                foreach ($existingsections as $section) {
                     // Exact match (case-sensitive)
-                    if ($section->name === $sectionName) {
-                        $existingSection = $section;
-                        $matchType = 'exact_name';
+                    if ($section->name === $sectionname) {
+                        $existingsection = $section;
+                        $matchtype = 'exact_name';
                         break;
                     }
                     // Trimmed exact match
-                    if (trim($section->name) === trim($sectionName)) {
-                        $existingSection = $section;
-                        $matchType = 'trimmed_name';
+                    if (trim($section->name) === trim($sectionname)) {
+                        $existingsection = $section;
+                        $matchtype = 'trimmed_name';
                         break;
                     }
                 }
             }
 
-            if ($sectionData['status'] === 'UNCHANGED') {
+            if ($sectiondata['status'] === 'UNCHANGED') {
                 // For unchanged sections, still process activities but don't modify section itself
-                if ($existingSection) {
+                if ($existingsection) {
                     // Process activities in this unchanged section
-                    foreach ($sectionData['activities'] as $activityData) {
-                        $atype = $activityData['moodle_type'] ?? ($activityData['type'] ?? '');
+                    foreach ($sectiondata['activities'] as $activitydata) {
+                        $atype = $activitydata['moodle_type'] ?? ($activitydata['type'] ?? '');
 
-                        if ($activityData['status'] === 'NEW') {
-                            if (self::create_activity($course, $existingSection, array_merge($activityData, ['type' => $atype]))) {
+                        if ($activitydata['status'] === 'NEW') {
+                            if (self::create_activity($course, $existingsection, array_merge($activitydata, ['type' => $atype]))) {
                                 $changes['activities_added']++;
                             } else {
                                 $changes['activities_failed']++;
@@ -401,44 +401,44 @@ class apply_course_structure extends external_api {
                 continue; // Skip section modification but activities were processed
             }
 
-            if (!$existingSection) {
+            if (!$existingsection) {
                 // Create new section at the end
-                $maxSection = $DB->get_field_sql("SELECT MAX(section) FROM {course_sections} WHERE course = ?", [$courseid]);
-                $newSectionNumber = ($maxSection ?? 0) + 1;
-                $existingSection = self::create_course_section($courseid, $newSectionNumber, $sectionData['name'], $sectionData['description']);
-                if ($existingSection) {
+                $maxsection = $DB->get_field_sql("SELECT MAX(section) FROM {course_sections} WHERE course = ?", [$courseid]);
+                $newsectionnumber = ($maxsection ?? 0) + 1;
+                $existingsection = self::create_course_section($courseid, $newsectionnumber, $sectiondata['name'], $sectiondata['description']);
+                if ($existingsection) {
                     $changes['sections_added']++;
                 }
             } else {
                 // Update existing section if modified
-                if ($sectionData['status'] === 'MODIFIED' || $sectionData['status'] === 'NEW') {
-                    self::update_course_section($existingSection, $sectionData['name'], $sectionData['description']);
+                if ($sectiondata['status'] === 'MODIFIED' || $sectiondata['status'] === 'NEW') {
+                    self::update_course_section($existingsection, $sectiondata['name'], $sectiondata['description']);
                     $changes['sections_modified']++;
                 }
             }
 
             // Handle activities in this section
-            foreach ($sectionData['activities'] as $activityData) {
-                $atype = $activityData['moodle_type'] ?? ($activityData['type'] ?? '');
+            foreach ($sectiondata['activities'] as $activitydata) {
+                $atype = $activitydata['moodle_type'] ?? ($activitydata['type'] ?? '');
 
-                if ($activityData['status'] === 'KEEP') {
+                if ($activitydata['status'] === 'KEEP') {
                     // Skip activities that should remain unchanged
                     continue;
                 }
 
-                if ($activityData['status'] === 'NEW') {
+                if ($activitydata['status'] === 'NEW') {
                     // Create new activity
-                    $result = self::create_activity($course, $existingSection, array_merge($activityData, ['type' => $atype]));
+                    $result = self::create_activity($course, $existingsection, array_merge($activitydata, ['type' => $atype]));
 
                     if ($result) {
                         $changes['activities_added']++;
                     } else {
                         $changes['activities_failed']++;
                     }
-                } elseif ($activityData['status'] === 'MODIFIED') {
+                } elseif ($activitydata['status'] === 'MODIFIED') {
                     // Try to find and modify existing activity (basic implementation)
                     // For now, we'll create a new one - in a full implementation you'd find and update
-                    if (self::create_activity($course, $existingSection, array_merge($activityData, ['type' => $atype]))) {
+                    if (self::create_activity($course, $existingsection, array_merge($activitydata, ['type' => $atype]))) {
                         $changes['activities_modified']++;
                     } else {
                         $changes['activities_failed']++;
@@ -525,12 +525,12 @@ class apply_course_structure extends external_api {
      * Create a new activity in a section
      * @param stdClass $course
      * @param stdClass $section
-     * @param array $activityData
+     * @param array $activitydata
      * @return bool Success status
      */
-    protected static function create_activity($course, $section, $activityData) {
+    protected static function create_activity($course, $section, $activitydata) {
         $factory = new \block_mastermind_assistant\module_factory($course, $section);
-        return $factory->create_from_ai($activityData);
+        return $factory->create_from_ai($activitydata);
     }
 
     /**
@@ -872,18 +872,18 @@ class apply_course_structure extends external_api {
     protected static function cleanup_invalid_cm_references(int $courseid): void {
         global $DB;
 
-        $allSections = $DB->get_records('course_sections', ['course' => $courseid]);
+        $allsections = $DB->get_records('course_sections', ['course' => $courseid]);
         $cleaned = [];
-        foreach ($allSections as $section) {
+        foreach ($allsections as $section) {
             if (empty($section->sequence)) {
                 continue;
             }
-            $moduleIds = array_filter(explode(',', $section->sequence));
-            $validIds = [];
+            $moduleids = array_filter(explode(',', $section->sequence));
+            $validids = [];
             $changed = false;
-            foreach ($moduleIds as $mid) {
+            foreach ($moduleids as $mid) {
                 if ($DB->record_exists('course_modules', ['id' => $mid])) {
-                    $validIds[] = $mid;
+                    $validids[] = $mid;
                 } else {
                     $changed = true;
                 }
@@ -891,7 +891,7 @@ class apply_course_structure extends external_api {
             if ($changed) {
                 $DB->update_record('course_sections', (object)[
                     'id' => $section->id,
-                    'sequence' => implode(',', $validIds)
+                    'sequence' => implode(',', $validids)
                 ]);
                 $cleaned[] = $section->section;
             }
@@ -919,28 +919,28 @@ class apply_course_structure extends external_api {
                 continue;
             }
 
-            $originalSeq = array_filter(explode(',', $section->sequence));
-            $cleanSeq = [];
+            $originalseq = array_filter(explode(',', $section->sequence));
+            $cleanseq = [];
 
-            foreach ($originalSeq as $cmid) {
+            foreach ($originalseq as $cmid) {
                 if (!$cmid) {
                     continue;
                 }
 
                 $exists = $DB->record_exists('course_modules', ['id' => $cmid]);
-                $ctxExists = $DB->record_exists('context', ['instanceid' => $cmid, 'contextlevel' => CONTEXT_MODULE]);
+                $ctxexists = $DB->record_exists('context', ['instanceid' => $cmid, 'contextlevel' => CONTEXT_MODULE]);
 
-                if ($exists && $ctxExists) {
-                    $cleanSeq[] = $cmid;
+                if ($exists && $ctxexists) {
+                    $cleanseq[] = $cmid;
                 } else {
                     $touched[$section->section][] = $cmid;
                 }
             }
 
-            if (implode(',', $cleanSeq) !== $section->sequence) {
+            if (implode(',', $cleanseq) !== $section->sequence) {
                 $DB->update_record('course_sections', (object)[
                     'id' => $section->id,
-                    'sequence' => implode(',', $cleanSeq)
+                    'sequence' => implode(',', $cleanseq)
                 ]);
             }
         }

@@ -18,7 +18,7 @@
  * Mastermind Assistant block.
  *
  * @package    block_mastermind_assistant
- * @copyright  2025 The Namers <info@mastermindassistant.ai>
+ * @copyright  2026 The Namers <info@mastermindassistant.ai>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -30,7 +30,7 @@ class block_mastermind_assistant extends block_base {
      * Initialize the block.
      */
     public function init() {
-        $this->title = 'Mastermind Assistant';
+        $this->title = get_string('pluginname', 'block_mastermind_assistant');
     }
 
     /**
@@ -102,9 +102,16 @@ class block_mastermind_assistant extends block_base {
             return $this->get_course_management_content();
         }
 
-        // Check if we're on a mod page edit form
+        // Check if we're on a supported mod page — show AI assistant.
         if ($this->is_mod_edit_page()) {
             return $this->get_mod_draft_content();
+        }
+
+        // If we're on any other mod page (unsupported activity), hide the block.
+        if ($this->is_mod_page()) {
+            $this->content->text = '';
+            $this->content->footer = '';
+            return $this->content;
         }
 
         // Site-level page: show link to course management.
@@ -166,6 +173,22 @@ class block_mastermind_assistant extends block_base {
         $PAGE->requires->js_call_amd('block_mastermind_assistant/recommendations', 'init', [$COURSE->id]);
         
         return $this->content;
+    }
+
+    /**
+     * Check if we're on any module page (view, edit, or settings).
+     *
+     * Used to hide the block on unsupported activity pages.
+     *
+     * @return bool
+     */
+    protected function is_mod_page(): bool {
+        global $PAGE;
+
+        $pageurl = $PAGE->url->out_as_local_url(false);
+
+        // Any /mod/xxx/ page or the modedit.php settings page.
+        return (strpos($pageurl, '/mod/') !== false || strpos($pageurl, '/course/modedit.php') !== false);
     }
 
     /**
@@ -367,32 +390,47 @@ class block_mastermind_assistant extends block_base {
     }
 
     /**
-     * Check if we're on a mod edit page or mod view page for supported activities
+     * Check if we're on a mod edit page or mod view page for supported activities.
+     *
+     * Only returns true for activity types the plugin actually supports.
      *
      * @return bool
      */
     protected function is_mod_edit_page(): bool {
-        global $PAGE;
+        global $PAGE, $DB;
 
         $pageurl = $PAGE->url->out_as_local_url(false);
+        $supported = ['page', 'quiz', 'assign', 'forum', 'lesson', 'glossary', 'book', 'url'];
 
-        // Settings edit form (Page, Quiz, Assign, URL).
+        // Settings edit form — only for supported module types.
         if (strpos($pageurl, '/course/modedit.php') !== false) {
-            return true;
+            $cmid = optional_param('update', 0, PARAM_INT);
+            $add = optional_param('add', '', PARAM_ALPHA);
+            if ($add) {
+                return in_array($add, $supported);
+            }
+            if ($cmid) {
+                $cm = get_coursemodule_from_id('', $cmid, 0, false, IGNORE_MISSING);
+                if ($cm) {
+                    $modname = $DB->get_field('modules', 'name', ['id' => $cm->module]);
+                    return in_array($modname, $supported);
+                }
+            }
+            return false;
         }
 
         // Module-specific pages where AI assistance is shown.
         $patterns = [
-            '/mod/page/view.php',       // Page view
-            '/mod/quiz/view.php',       // Quiz view
-            '/mod/quiz/edit.php',       // Quiz edit
-            '/mod/assign/view.php',     // Assignment view
-            '/mod/forum/view.php',      // Forum main page (discussions list)
-            '/mod/lesson/edit.php',     // Lesson edit page (add pages)
-            '/mod/glossary/view.php',   // Glossary main page (entries list)
-            '/mod/book/view.php',       // Book view (with chapters)
-            '/mod/book/edit.php',       // Book edit (add/edit chapters, also shown when empty)
-            '/mod/url/view.php',        // URL view
+            '/mod/page/view.php',
+            '/mod/quiz/view.php',
+            '/mod/quiz/edit.php',
+            '/mod/assign/view.php',
+            '/mod/forum/view.php',
+            '/mod/lesson/edit.php',
+            '/mod/glossary/view.php',
+            '/mod/book/view.php',
+            '/mod/book/edit.php',
+            '/mod/url/view.php',
         ];
 
         foreach ($patterns as $pattern) {

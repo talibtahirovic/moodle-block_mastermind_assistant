@@ -18,7 +18,7 @@
  * API client for Mastermind Assistant dashboard
  *
  * @package    block_mastermind_assistant
- * @copyright  2025 The Namers <info@mastermindassistant.ai>
+ * @copyright  2026 The Namers <info@mastermindassistant.ai>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 namespace block_mastermind_assistant;
@@ -34,10 +34,10 @@ defined('MOODLE_INTERNAL') || die();
 class api_client {
 
     /** @var string Dashboard base URL */
-    private string $baseUrl;
+    private string $baseurl;
 
     /** @var string API key (ma_live_xxx) */
-    private string $apiKey;
+    private string $apikey;
 
     /**
      * Constructor - reads config from plugin settings.
@@ -45,10 +45,10 @@ class api_client {
      * @throws \moodle_exception if settings are not configured
      */
     public function __construct() {
-        $this->baseUrl = rtrim(get_config('block_mastermind_assistant', 'dashboard_url') ?: '', '/');
-        $this->apiKey = get_config('block_mastermind_assistant', 'api_key') ?: '';
+        $this->baseurl = rtrim(get_config('block_mastermind_assistant', 'dashboard_url') ?: '', '/');
+        $this->apikey = get_config('block_mastermind_assistant', 'api_key') ?: '';
 
-        if (empty($this->baseUrl) || empty($this->apiKey)) {
+        if (empty($this->baseurl) || empty($this->apikey)) {
             throw new \moodle_exception('settings_not_configured', 'block_mastermind_assistant');
         }
     }
@@ -64,41 +64,39 @@ class api_client {
      * @throws \Exception on failure
      */
     public function request(string $endpoint, array $data = [], string $method = 'POST', int $timeout = 300): array {
-        $url = $this->baseUrl . $endpoint;
-
         global $CFG;
+        require_once($CFG->libdir . '/filelib.php');
 
-        $ch = curl_init($url);
-        curl_setopt_array($ch, [
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_HTTPHEADER => [
-                'Content-Type: application/json',
-                'Authorization: Bearer ' . $this->apiKey,
-                'X-LMS-Origin: ' . ($CFG->wwwroot ?? ''),
-            ],
-            CURLOPT_TIMEOUT => $timeout,
-            CURLOPT_CONNECTTIMEOUT => 30,
-            CURLOPT_SSL_VERIFYPEER => true,
-            CURLOPT_SSL_VERIFYHOST => 2,
+        $url = $this->baseurl . $endpoint;
+
+        $curl = new \curl();
+        $curl->setHeader([
+            'Content-Type: application/json',
+            'Authorization: Bearer ' . $this->apikey,
+            'X-LMS-Origin: ' . ($CFG->wwwroot ?? ''),
         ]);
 
+        $options = [
+            'CURLOPT_TIMEOUT' => $timeout,
+            'CURLOPT_CONNECTTIMEOUT' => 30,
+        ];
+
         if ($method === 'POST') {
-            curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+            $response = $curl->post($url, json_encode($data), $options);
+        } else {
+            $response = $curl->get($url, [], $options);
         }
 
-        $response = curl_exec($ch);
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $error = curl_error($ch);
-        curl_close($ch);
+        $httpcode = $curl->get_info()['http_code'] ?? 0;
+        $error = $curl->get_errno() ? $curl->error : '';
 
         if ($error) {
             throw new \Exception('Dashboard API request failed: ' . $error);
         }
 
-        if ($httpCode !== 200) {
+        if ($httpcode !== 200) {
             $decoded = json_decode($response, true);
-            $msg = $decoded['error'] ?? "HTTP {$httpCode}";
+            $msg = $decoded['error'] ?? "HTTP {$httpcode}";
             throw new \Exception('Dashboard API error: ' . $msg);
         }
 
@@ -113,11 +111,11 @@ class api_client {
     /**
      * Analyze course structure and get AI recommendations.
      *
-     * @param array $courseData {course, sections, activities}
+     * @param array $coursedata {course, sections, activities}
      * @return array
      */
-    public function analyzeCourse(array $courseData): array {
-        return $this->request('/api/ma/analyze-course', $courseData);
+    public function analyze_course(array $coursedata): array {
+        return $this->request('/api/ma/analyze-course', $coursedata);
     }
 
     /**
@@ -125,51 +123,51 @@ class api_client {
      *
      * Requires the /api/ma/full-analysis endpoint on the dashboard.
      * If the endpoint doesn't exist yet, callers should fall back to
-     * analyzeCourse() + generateStructure() separately.
+     * analyze_course() + generate_structure() separately.
      *
-     * @param array $courseData {course, sections, activities}
+     * @param array $coursedata {course, sections, activities}
      * @return array {recommendations: string, structure: {sections: [...]}}
      */
-    public function fullAnalysis(array $courseData): array {
-        return $this->request('/api/ma/full-analysis', $courseData);
+    public function full_analysis(array $coursedata): array {
+        return $this->request('/api/ma/full-analysis', $coursedata);
     }
 
     /**
      * Generate a complete course structure from scratch.
      *
-     * @param string $courseName
+     * @param string $coursename
      * @return array
      */
-    public function generateCourse(string $courseName): array {
-        return $this->request('/api/ma/generate-course', ['coursename' => $courseName]);
+    public function generate_course(string $coursename): array {
+        return $this->request('/api/ma/generate-course', ['coursename' => $coursename]);
     }
 
     /**
      * Generate a course structure from an uploaded document (PDF, DOCX, TXT).
      *
-     * @param string $fileData Base64-encoded file content
-     * @param string $fileType MIME type (application/pdf, etc.)
-     * @param string $fileName Original file name
+     * @param string $filedata Base64-encoded file content
+     * @param string $filetype MIME type (application/pdf, etc.)
+     * @param string $filename Original file name
      * @return array
      */
-    public function generateCourseFromDocument(string $fileData, string $fileType, string $fileName): array {
+    public function generate_course_from_document(string $filedata, string $filetype, string $filename): array {
         return $this->request('/api/ma/generate-course-from-document', [
-            'file_data' => $fileData,
-            'file_type' => $fileType,
-            'file_name' => $fileName,
+            'file_data' => $filedata,
+            'file_type' => $filetype,
+            'file_name' => $filename,
         ], 'POST', 600);
     }
 
     /**
      * Generate updated course structure based on recommendations.
      *
-     * @param array $courseData
+     * @param array $coursedata
      * @param string $recommendations
      * @return array
      */
-    public function generateStructure(array $courseData, string $recommendations): array {
+    public function generate_structure(array $coursedata, string $recommendations): array {
         return $this->request('/api/ma/generate-structure', [
-            'coursedata' => $courseData,
+            'coursedata' => $coursedata,
             'recommendations' => $recommendations,
         ]);
     }
@@ -177,226 +175,294 @@ class api_client {
     /**
      * Generate quiz questions.
      *
-     * @param string $quizName
-     * @param string $quizDescription
-     * @param array $existingQuestions
+     * @param string $quizname
+     * @param string $quizdescription
+     * @param array $existingquestions
+     * @param string $difficultylevel
+     * @param int $questioncount
+     * @param string $academiclevel
+     * @param string $sectionname
+     * @param array $courseactivities
      * @return array
      */
-    public function generateQuiz(
-        string $quizName,
-        string $quizDescription,
-        array $existingQuestions = [],
-        string $difficultyLevel = '',
-        int $questionCount = 8,
-        string $academicLevel = '',
-        string $sectionName = '',
-        array $courseActivities = []
+    public function generate_quiz(
+        string $quizname,
+        string $quizdescription,
+        array $existingquestions = [],
+        string $difficultylevel = '',
+        int $questioncount = 8,
+        string $academiclevel = '',
+        string $sectionname = '',
+        array $courseactivities = []
     ): array {
         return $this->request('/api/ma/generate-quiz', [
-            'quizname' => $quizName,
-            'quizdescription' => $quizDescription,
-            'existing_questions' => $existingQuestions,
-            'difficulty_level' => $difficultyLevel,
-            'question_count' => $questionCount,
-            'academic_level' => $academicLevel,
-            'section_name' => $sectionName,
-            'course_activities' => $courseActivities,
+            'quizname' => $quizname,
+            'quizdescription' => $quizdescription,
+            'existing_questions' => $existingquestions,
+            'difficulty_level' => $difficultylevel,
+            'question_count' => $questioncount,
+            'academic_level' => $academiclevel,
+            'section_name' => $sectionname,
+            'course_activities' => $courseactivities,
         ]);
     }
 
     /**
      * Generate page content.
      *
-     * @param string $courseName
-     * @param string $pageName
-     * @param string $pageDescription
+     * @param string $coursename
+     * @param string $pagename
+     * @param string $pagedescription
+     * @param string $contenttype
+     * @param string $academiclevel
+     * @param string $targetlength
+     * @param string $sectionname
+     * @param array $courseactivities
      * @return array
      */
-    public function generatePageContent(
-        string $courseName,
-        string $pageName,
-        string $pageDescription,
-        string $contentType = '',
-        string $academicLevel = '',
-        string $targetLength = '',
-        string $sectionName = '',
-        array $courseActivities = []
+    public function generate_page_content(
+        string $coursename,
+        string $pagename,
+        string $pagedescription,
+        string $contenttype = '',
+        string $academiclevel = '',
+        string $targetlength = '',
+        string $sectionname = '',
+        array $courseactivities = []
     ): array {
         return $this->request('/api/ma/generate-page', [
-            'coursename' => $courseName,
-            'pagename' => $pageName,
-            'pagedescription' => $pageDescription,
-            'content_type' => $contentType,
-            'academic_level' => $academicLevel,
-            'target_length' => $targetLength,
-            'section_name' => $sectionName,
-            'course_activities' => $courseActivities,
+            'coursename' => $coursename,
+            'pagename' => $pagename,
+            'pagedescription' => $pagedescription,
+            'content_type' => $contenttype,
+            'academic_level' => $academiclevel,
+            'target_length' => $targetlength,
+            'section_name' => $sectionname,
+            'course_activities' => $courseactivities,
         ]);
     }
 
     /**
      * Generate assignment instructions.
      *
-     * @param string $courseName
-     * @param string $assignmentName
-     * @param string $assignmentDescription
+     * @param string $coursename
+     * @param string $assignmentname
+     * @param string $assignmentdescription
+     * @param string $assignmenttype
+     * @param string $academiclevel
+     * @param string $scopelength
+     * @param string $sectionname
+     * @param array $courseactivities
      * @return array
      */
-    public function generateAssignment(
-        string $courseName,
-        string $assignmentName,
-        string $assignmentDescription,
-        string $assignmentType = '',
-        string $academicLevel = '',
-        string $scopeLength = '',
-        string $sectionName = '',
-        array $courseActivities = []
+    public function generate_assignment(
+        string $coursename,
+        string $assignmentname,
+        string $assignmentdescription,
+        string $assignmenttype = '',
+        string $academiclevel = '',
+        string $scopelength = '',
+        string $sectionname = '',
+        array $courseactivities = []
     ): array {
         return $this->request('/api/ma/generate-assignment', [
-            'coursename' => $courseName,
-            'assignmentname' => $assignmentName,
-            'assignmentdescription' => $assignmentDescription,
-            'assignment_type' => $assignmentType,
-            'academic_level' => $academicLevel,
-            'scope_length' => $scopeLength,
-            'section_name' => $sectionName,
-            'course_activities' => $courseActivities,
+            'coursename' => $coursename,
+            'assignmentname' => $assignmentname,
+            'assignmentdescription' => $assignmentdescription,
+            'assignment_type' => $assignmenttype,
+            'academic_level' => $academiclevel,
+            'scope_length' => $scopelength,
+            'section_name' => $sectionname,
+            'course_activities' => $courseactivities,
         ]);
     }
 
     /**
      * Generate forum content (introduction + discussion topics).
+     *
+     * @param string $coursename
+     * @param string $forumname
+     * @param string $forumdescription
+     * @param string $forumtype
+     * @param string $academiclevel
+     * @param int $discussioncount
+     * @param string $sectionname
+     * @param array $courseactivities
+     * @return array
      */
-    public function generateForum(
-        string $courseName,
-        string $forumName,
-        string $forumDescription,
-        string $forumType = '',
-        string $academicLevel = '',
-        int $discussionCount = 5,
-        string $sectionName = '',
-        array $courseActivities = []
+    public function generate_forum(
+        string $coursename,
+        string $forumname,
+        string $forumdescription,
+        string $forumtype = '',
+        string $academiclevel = '',
+        int $discussioncount = 5,
+        string $sectionname = '',
+        array $courseactivities = []
     ): array {
         return $this->request('/api/ma/generate-forum', [
-            'coursename' => $courseName,
-            'forumname' => $forumName,
-            'forumdescription' => $forumDescription,
-            'forum_type' => $forumType,
-            'academic_level' => $academicLevel,
-            'discussion_count' => $discussionCount,
-            'section_name' => $sectionName,
-            'course_activities' => $courseActivities,
+            'coursename' => $coursename,
+            'forumname' => $forumname,
+            'forumdescription' => $forumdescription,
+            'forum_type' => $forumtype,
+            'academic_level' => $academiclevel,
+            'discussion_count' => $discussioncount,
+            'section_name' => $sectionname,
+            'course_activities' => $courseactivities,
         ]);
     }
 
     /**
      * Generate lesson content (branching pages).
+     *
+     * @param string $coursename
+     * @param string $lessonname
+     * @param string $lessondescription
+     * @param string $academiclevel
+     * @param int $pagecount
+     * @param string $sectionname
+     * @param array $courseactivities
+     * @return array
      */
-    public function generateLesson(
-        string $courseName,
-        string $lessonName,
-        string $lessonDescription,
-        string $academicLevel = '',
-        int $pageCount = 6,
-        string $sectionName = '',
-        array $courseActivities = []
+    public function generate_lesson(
+        string $coursename,
+        string $lessonname,
+        string $lessondescription,
+        string $academiclevel = '',
+        int $pagecount = 6,
+        string $sectionname = '',
+        array $courseactivities = []
     ): array {
         return $this->request('/api/ma/generate-lesson', [
-            'coursename' => $courseName,
-            'lessonname' => $lessonName,
-            'lessondescription' => $lessonDescription,
-            'academic_level' => $academicLevel,
-            'page_count' => $pageCount,
-            'section_name' => $sectionName,
-            'course_activities' => $courseActivities,
+            'coursename' => $coursename,
+            'lessonname' => $lessonname,
+            'lessondescription' => $lessondescription,
+            'academic_level' => $academiclevel,
+            'page_count' => $pagecount,
+            'section_name' => $sectionname,
+            'course_activities' => $courseactivities,
         ]);
     }
 
     /**
      * Generate glossary entries.
+     *
+     * @param string $coursename
+     * @param string $glossaryname
+     * @param string $glossarydescription
+     * @param string $academiclevel
+     * @param int $entrycount
+     * @param string $sectionname
+     * @param array $courseactivities
+     * @return array
      */
-    public function generateGlossary(
-        string $courseName,
-        string $glossaryName,
-        string $glossaryDescription,
-        string $academicLevel = '',
-        int $entryCount = 10,
-        string $sectionName = '',
-        array $courseActivities = []
+    public function generate_glossary(
+        string $coursename,
+        string $glossaryname,
+        string $glossarydescription,
+        string $academiclevel = '',
+        int $entrycount = 10,
+        string $sectionname = '',
+        array $courseactivities = []
     ): array {
         return $this->request('/api/ma/generate-glossary', [
-            'coursename' => $courseName,
-            'glossaryname' => $glossaryName,
-            'glossarydescription' => $glossaryDescription,
-            'academic_level' => $academicLevel,
-            'entry_count' => $entryCount,
-            'section_name' => $sectionName,
-            'course_activities' => $courseActivities,
+            'coursename' => $coursename,
+            'glossaryname' => $glossaryname,
+            'glossarydescription' => $glossarydescription,
+            'academic_level' => $academiclevel,
+            'entry_count' => $entrycount,
+            'section_name' => $sectionname,
+            'course_activities' => $courseactivities,
         ]);
     }
 
     /**
      * Generate book content (multi-chapter).
+     *
+     * @param string $coursename
+     * @param string $bookname
+     * @param string $bookdescription
+     * @param string $academiclevel
+     * @param int $chaptercount
+     * @param string $targetlength
+     * @param string $sectionname
+     * @param array $courseactivities
+     * @return array
      */
-    public function generateBook(
-        string $courseName,
-        string $bookName,
-        string $bookDescription,
-        string $academicLevel = '',
-        int $chapterCount = 5,
-        string $targetLength = '',
-        string $sectionName = '',
-        array $courseActivities = []
+    public function generate_book(
+        string $coursename,
+        string $bookname,
+        string $bookdescription,
+        string $academiclevel = '',
+        int $chaptercount = 5,
+        string $targetlength = '',
+        string $sectionname = '',
+        array $courseactivities = []
     ): array {
         return $this->request('/api/ma/generate-book', [
-            'coursename' => $courseName,
-            'bookname' => $bookName,
-            'bookdescription' => $bookDescription,
-            'academic_level' => $academicLevel,
-            'chapter_count' => $chapterCount,
-            'target_length' => $targetLength,
-            'section_name' => $sectionName,
-            'course_activities' => $courseActivities,
+            'coursename' => $coursename,
+            'bookname' => $bookname,
+            'bookdescription' => $bookdescription,
+            'academic_level' => $academiclevel,
+            'chapter_count' => $chaptercount,
+            'target_length' => $targetlength,
+            'section_name' => $sectionname,
+            'course_activities' => $courseactivities,
         ]);
     }
 
     /**
      * Generate URL resource recommendations.
+     *
+     * @param string $coursename
+     * @param string $urlname
+     * @param string $urldescription
+     * @param string $academiclevel
+     * @param int $resourcecount
+     * @param string $sectionname
+     * @param array $courseactivities
+     * @return array
      */
-    public function generateUrl(
-        string $courseName,
-        string $urlName,
-        string $urlDescription,
-        string $academicLevel = '',
-        int $resourceCount = 5,
-        string $sectionName = '',
-        array $courseActivities = []
+    public function generate_url(
+        string $coursename,
+        string $urlname,
+        string $urldescription,
+        string $academiclevel = '',
+        int $resourcecount = 5,
+        string $sectionname = '',
+        array $courseactivities = []
     ): array {
         return $this->request('/api/ma/generate-url', [
-            'coursename' => $courseName,
-            'urlname' => $urlName,
-            'urldescription' => $urlDescription,
-            'academic_level' => $academicLevel,
-            'resource_count' => $resourceCount,
-            'section_name' => $sectionName,
-            'course_activities' => $courseActivities,
+            'coursename' => $coursename,
+            'urlname' => $urlname,
+            'urldescription' => $urldescription,
+            'academic_level' => $academiclevel,
+            'resource_count' => $resourcecount,
+            'section_name' => $sectionname,
+            'course_activities' => $courseactivities,
         ]);
     }
 
     /**
      * Log user feedback on AI-generated content.
+     *
+     * @param string $action
+     * @param string $moduletype
+     * @param string $activityname
+     * @param string $coursename
+     * @return array
      */
-    public function logGenerationFeedback(
+    public function log_generation_feedback(
         string $action,
-        string $moduleType,
-        string $activityName = '',
-        string $courseName = ''
+        string $moduletype,
+        string $activityname = '',
+        string $coursename = ''
     ): array {
         return $this->request('/api/ma/generation-feedback', [
             'action' => $action,
-            'module_type' => $moduleType,
-            'activity_name' => $activityName,
-            'course_name' => $courseName,
+            'module_type' => $moduletype,
+            'activity_name' => $activityname,
+            'course_name' => $coursename,
         ], 'POST', 15);
     }
 
@@ -405,7 +471,7 @@ class api_client {
      *
      * @return array
      */
-    public function testConnection(): array {
+    public function test_connection(): array {
         return $this->request('/api/ma/test-connection', [], 'GET', 15);
     }
 
@@ -414,7 +480,7 @@ class api_client {
      *
      * @return array
      */
-    public function getAccount(): array {
+    public function get_account(): array {
         return $this->request('/api/ma/account', [], 'GET', 15);
     }
 }

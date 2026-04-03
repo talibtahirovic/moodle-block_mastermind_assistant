@@ -18,7 +18,7 @@
  * English language strings for Mastermind Assistant
  *
  * @package    block_mastermind_assistant
- * @copyright  2025 The Namers <info@mastermindassistant.ai>
+ * @copyright  2026 The Namers <info@mastermindassistant.ai>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 // Language strings for Mastermind Assistant block.
@@ -276,3 +276,18 @@ $string['add_discussions'] = 'Add Discussions';
 $string['add_glossary_entries'] = 'Add Entries to Glossary';
 $string['add_book_chapters'] = 'Add Chapters to Book';
 $string['add_lesson_pages'] = 'Add Pages to Lesson';
+
+// Audit strings.
+$string['audit_items_need_updating'] = 'Items that may need updating:';
+
+// Capability strings.
+$string['mastermind_assistant:applychanges'] = 'Apply AI-generated changes to courses';
+
+// Privacy strings.
+$string['privacy:metadata:preference:ai_policy_accepted'] = 'Whether the user has accepted the AI usage policy.';
+$string['privacy:metadata:mastermind_dashboard'] = 'Course and activity data is sent to the Mastermind Dashboard API for AI-powered content generation and analysis.';
+$string['privacy:metadata:mastermind_dashboard:coursename'] = 'The name of the course.';
+$string['privacy:metadata:mastermind_dashboard:coursedata'] = 'Course structure data including section names and activity names.';
+$string['privacy:metadata:mastermind_dashboard:activityname'] = 'The name of the activity being generated.';
+$string['privacy:ai_policy_accepted_yes'] = 'The user has accepted the AI usage policy.';
+$string['privacy:ai_policy_accepted_no'] = 'The user has not accepted the AI usage policy.';

@@ -18,7 +18,7 @@
  * External function to get course data
  *
  * @package    block_mastermind_assistant
- * @copyright  2025 The Namers <info@mastermindassistant.ai>
+ * @copyright  2026 The Namers <info@mastermindassistant.ai>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 namespace block_mastermind_assistant\external;
@@ -65,12 +65,12 @@ class get_course_data extends external_api {
             ]);
             
             // Debug and fix potential section ID vs course ID confusion
-            $courseExists = $DB->record_exists('course', ['id' => $params['courseid']]);
-            if (!$courseExists) {
+            $courseexists = $DB->record_exists('course', ['id' => $params['courseid']]);
+            if (!$courseexists) {
                 // Check if the provided ID is actually a section ID
-                $sectionRecord = $DB->get_record('course_sections', ['id' => $params['courseid']], 'id, course, section');
-                if ($sectionRecord) {
-                    $params['courseid'] = $sectionRecord->course;
+                $sectionrecord = $DB->get_record('course_sections', ['id' => $params['courseid']], 'id, course, section');
+                if ($sectionrecord) {
+                    $params['courseid'] = $sectionrecord->course;
                 }
             }
 
@@ -146,7 +146,7 @@ class get_course_data extends external_api {
         ];
         
         // Build a map of activities grouped by section number.
-        $activitiesBySection = [];
+        $activitiesbysection = [];
         foreach ($modinfo->get_cms() as $cm) {
             $module_data = [];
 
@@ -187,7 +187,7 @@ class get_course_data extends external_api {
                 }
             }
 
-            $activityEntry = [
+            $activityentry = [
                 'id' => $cm->id,
                 'module' => $cm->modname,
                 'name' => $cm->name,
@@ -201,9 +201,9 @@ class get_course_data extends external_api {
                 'module_data' => $module_data,
             ];
 
-            $activitiesBySection[$cm->sectionnum][] = $activityEntry;
+            $activitiesbysection[$cm->sectionnum][] = $activityentry;
             // Also keep in the flat list for backward compatibility.
-            $data['activities'][] = $activityEntry;
+            $data['activities'][] = $activityentry;
         }
 
         // Get course sections — nest activities inside each section.
@@ -217,7 +217,7 @@ class get_course_data extends external_api {
                 'sequence' => $section->sequence ?: '',
                 'visible' => $section->visible,
                 'timemodified' => $section->timemodified,
-                'activities' => $activitiesBySection[$section->section] ?? [],
+                'activities' => $activitiesbysection[$section->section] ?? [],
             ];
         }
         

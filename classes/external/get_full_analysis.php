@@ -18,7 +18,7 @@
  * External function to get full course analysis
  *
  * @package    block_mastermind_assistant
- * @copyright  2025 The Namers <info@mastermindassistant.ai>
+ * @copyright  2026 The Namers <info@mastermindassistant.ai>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 namespace block_mastermind_assistant\external;
@@ -81,33 +81,33 @@ class get_full_analysis extends external_api {
             $client = new \block_mastermind_assistant\api_client();
 
             // Try single endpoint first (1 dashboard call).
-            $singleEndpointWorked = false;
+            $singleendpointworked = false;
             try {
-                $aiResponse = $client->fullAnalysis($data);
-                $singleEndpointWorked = true;
+                $airesponse = $client->full_analysis($data);
+                $singleendpointworked = true;
             } catch (Exception $e) {
                 // If the endpoint doesn't exist (404) or isn't supported,
                 // fall back to the two-step approach.
                 debugging('full-analysis endpoint not available, falling back to 2-step: ' . $e->getMessage(), DEBUG_DEVELOPER);
             }
 
-            if ($singleEndpointWorked) {
+            if ($singleendpointworked) {
                 // Extract from single-endpoint response.
-                $recommendationsStr = self::extract_recommendations($aiResponse);
-                $structureStr = self::extract_structure($aiResponse);
+                $recommendationsstr = self::extract_recommendations($airesponse);
+                $structurestr = self::extract_structure($airesponse);
             } else {
                 // Fallback: 2 separate dashboard calls.
-                $analysisResponse = $client->analyzeCourse($data);
-                $recommendationsStr = self::extract_recommendations($analysisResponse);
+                $analysisresponse = $client->analyze_course($data);
+                $recommendationsstr = self::extract_recommendations($analysisresponse);
 
-                $structureResponse = $client->generateStructure($data, $recommendationsStr);
-                $structureStr = self::extract_structure($structureResponse);
+                $structureresponse = $client->generate_structure($data, $recommendationsstr);
+                $structurestr = self::extract_structure($structureresponse);
             }
 
             return [
                 'success' => true,
-                'recommendations' => $recommendationsStr,
-                'structure' => $structureStr,
+                'recommendations' => $recommendationsstr,
+                'structure' => $structurestr,
             ];
 
         } catch (Exception $e) {

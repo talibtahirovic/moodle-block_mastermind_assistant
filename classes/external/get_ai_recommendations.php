@@ -18,7 +18,7 @@
  * External function to get AI recommendations
  *
  * @package    block_mastermind_assistant
- * @copyright  2025 The Namers <info@mastermindassistant.ai>
+ * @copyright  2026 The Namers <info@mastermindassistant.ai>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 namespace block_mastermind_assistant\external;
@@ -66,11 +66,11 @@ class get_ai_recommendations extends external_api {
 
             // Fix potential section ID vs course ID confusion.
             global $DB;
-            $courseExists = $DB->record_exists('course', ['id' => $params['courseid']]);
-            if (!$courseExists) {
-                $sectionRecord = $DB->get_record('course_sections', ['id' => $params['courseid']], 'id, course, section');
-                if ($sectionRecord) {
-                    $params['courseid'] = $sectionRecord->course;
+            $courseexists = $DB->record_exists('course', ['id' => $params['courseid']]);
+            if (!$courseexists) {
+                $sectionrecord = $DB->get_record('course_sections', ['id' => $params['courseid']], 'id, course, section');
+                if ($sectionrecord) {
+                    $params['courseid'] = $sectionrecord->course;
                 }
             }
 
@@ -86,18 +86,18 @@ class get_ai_recommendations extends external_api {
 
             // Call dashboard API instead of OpenAI directly.
             $client = new \block_mastermind_assistant\api_client();
-            $aiResponse = $client->analyzeCourse($data);
+            $airesponse = $client->analyze_course($data);
 
             // Normalize response — different dashboard packages may return
             // different shapes (e.g. {recommendations: ...}, {analysis: ...},
             // or a flat response).
-            $recommendations = $aiResponse;
-            if (isset($aiResponse['recommendations'])) {
-                $recommendations = $aiResponse['recommendations'];
-            } elseif (isset($aiResponse['analysis'])) {
-                $recommendations = $aiResponse['analysis'];
-            } elseif (isset($aiResponse['result'])) {
-                $recommendations = $aiResponse['result'];
+            $recommendations = $airesponse;
+            if (isset($airesponse['recommendations'])) {
+                $recommendations = $airesponse['recommendations'];
+            } elseif (isset($airesponse['analysis'])) {
+                $recommendations = $airesponse['analysis'];
+            } elseif (isset($airesponse['result'])) {
+                $recommendations = $airesponse['result'];
             }
 
             // Ensure we always return a JSON string.

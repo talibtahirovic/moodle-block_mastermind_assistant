@@ -18,7 +18,7 @@
  * German language strings for Mastermind Assistant
  *
  * @package    block_mastermind_assistant
- * @copyright  2025 The Namers <info@mastermindassistant.ai>
+ * @copyright  2026 The Namers <info@mastermindassistant.ai>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 // Sprachstrings fuer den Mastermind-Assistenten-Block (Deutsch).
@@ -100,6 +100,7 @@ $string['settings_api_key'] = 'API-Schluessel';
 $string['settings_api_key_desc'] = 'Ihr Mastermind-API-Schluessel (beginnt mit ma_live_)';
 $string['connection_status'] = 'Verbindungsstatus';
 $string['test_connection'] = 'Verbindung testen';
+$string['test_connection_desc'] = 'Speichern Sie zuerst Ihre Einstellungen und klicken Sie dann auf Verbindung testen, um Ihren API-Schluessel zu ueberpruefen.';
 $string['testing_connection'] = 'Verbindung wird getestet...';
 $string['connection_success'] = 'Verbindung erfolgreich hergestellt';
 $string['connection_failed'] = 'Verbindung fehlgeschlagen: {$a}';
@@ -275,3 +276,18 @@ $string['add_discussions'] = 'Diskussionen hinzufuegen';
 $string['add_glossary_entries'] = 'Eintraege zum Glossar hinzufuegen';
 $string['add_book_chapters'] = 'Kapitel zum Buch hinzufuegen';
 $string['add_lesson_pages'] = 'Seiten zur Lektion hinzufuegen';
+
+// Pruefungsstrings.
+$string['audit_items_need_updating'] = 'Elemente, die moeglicherweise aktualisiert werden muessen:';
+
+// Berechtigungen.
+$string['mastermind_assistant:applychanges'] = 'KI-generierte Aenderungen auf Kurse anwenden';
+
+// Datenschutz.
+$string['privacy:metadata:preference:ai_policy_accepted'] = 'Ob der Benutzer die KI-Nutzungsrichtlinie akzeptiert hat.';
+$string['privacy:metadata:mastermind_dashboard'] = 'Kurs- und Aktivitaetsdaten werden zur KI-gestuetzten Inhaltserstellung und Analyse an die Mastermind-Dashboard-API gesendet.';
+$string['privacy:metadata:mastermind_dashboard:coursename'] = 'Der Name des Kurses.';
+$string['privacy:metadata:mastermind_dashboard:coursedata'] = 'Kursstrukturdaten einschliesslich Abschnittsnamen und Aktivitaetsnamen.';
+$string['privacy:metadata:mastermind_dashboard:activityname'] = 'Der Name der zu erstellenden Aktivitaet.';
+$string['privacy:ai_policy_accepted_yes'] = 'Der Benutzer hat die KI-Nutzungsrichtlinie akzeptiert.';
+$string['privacy:ai_policy_accepted_no'] = 'Der Benutzer hat die KI-Nutzungsrichtlinie nicht akzeptiert.';

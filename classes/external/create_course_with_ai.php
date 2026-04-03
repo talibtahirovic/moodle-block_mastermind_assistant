@@ -18,7 +18,7 @@
  * External function to create course with AI
  *
  * @package    block_mastermind_assistant
- * @copyright  2025 The Namers <info@mastermindassistant.ai>
+ * @copyright  2026 The Namers <info@mastermindassistant.ai>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 namespace block_mastermind_assistant\external;
@@ -77,25 +77,25 @@ class create_course_with_ai extends external_api {
 
             // Get AI-generated course structure from dashboard.
             $client = new \block_mastermind_assistant\api_client();
-            $aiStructure = $client->generateCourse($params['coursename']);
+            $aistructure = $client->generate_course($params['coursename']);
 
             // Preview mode: return the structure without creating the course.
             if ($params['previewonly']) {
                 return [
                     'success' => true,
-                    'preview' => json_encode($aiStructure),
+                    'preview' => json_encode($aistructure),
                 ];
             }
 
             // Create the course.
             $coursedata = new stdClass();
-            $coursedata->fullname = $aiStructure['course_name'] ?? $params['coursename'];
+            $coursedata->fullname = $aistructure['course_name'] ?? $params['coursename'];
             $coursedata->shortname = self::generate_shortname($coursedata->fullname);
             $coursedata->category = $params['categoryid'];
-            $coursedata->summary = $aiStructure['course_description'] ?? '';
+            $coursedata->summary = $aistructure['course_description'] ?? '';
             $coursedata->summaryformat = FORMAT_HTML;
             $coursedata->format = 'topics';
-            $coursedata->numsections = count($aiStructure['sections'] ?? []);
+            $coursedata->numsections = count($aistructure['sections'] ?? []);
             $coursedata->startdate = time();
             $coursedata->visible = 1;
             $coursedata->enablecompletion = 1;
@@ -103,8 +103,8 @@ class create_course_with_ai extends external_api {
             $course = create_course($coursedata);
 
             // Apply AI-generated structure to the course.
-            if (!empty($aiStructure['sections'])) {
-                self::apply_course_structure($course->id, $aiStructure['sections']);
+            if (!empty($aistructure['sections'])) {
+                self::apply_course_structure($course->id, $aistructure['sections']);
             }
 
             return [
@@ -134,21 +134,21 @@ class create_course_with_ai extends external_api {
         $course = \get_course($courseid);
 
         $sectionnum = 1;
-        foreach ($sections as $sectionData) {
+        foreach ($sections as $sectiondata) {
             $section = $DB->get_record('course_sections', [
                 'course' => $courseid,
                 'section' => $sectionnum
             ]);
 
             if ($section) {
-                $section->name = $sectionData['section_name'] ?? "Section $sectionnum";
-                $section->summary = $sectionData['description'] ?? '';
+                $section->name = $sectiondata['section_name'] ?? "Section $sectionnum";
+                $section->summary = $sectiondata['description'] ?? '';
                 $section->summaryformat = FORMAT_HTML;
                 $DB->update_record('course_sections', $section);
             }
 
-            if (!empty($sectionData['activities'])) {
-                foreach ($sectionData['activities'] as $activity) {
+            if (!empty($sectiondata['activities'])) {
+                foreach ($sectiondata['activities'] as $activity) {
                     self::create_activity($course, $section, $activity);
                 }
             }
@@ -170,7 +170,7 @@ class create_course_with_ai extends external_api {
         $modulename = self::map_activity_type($activitydata['moodle_type'] ?? 'page');
         $activityname = $activitydata['activity_name'] ?? 'Untitled Activity';
 
-        $preparedData = [
+        $prepareddata = [
             'name' => $activityname,
             'moodle_type' => $modulename,
             'type' => $modulename,
@@ -179,15 +179,15 @@ class create_course_with_ai extends external_api {
         ];
 
         $factory = new \block_mastermind_assistant\module_factory($course, $section);
-        return $factory->create_from_ai($preparedData);
+        return $factory->create_from_ai($prepareddata);
     }
 
     /**
      * Map AI activity type to Moodle module.
-     * @param string $aiType
+     * @param string $aitype
      * @return string
      */
-    public static function map_activity_type(string $aiType): string {
+    public static function map_activity_type(string $aitype): string {
         $mapping = [
             'page' => 'page',
             'assignment' => 'assign',
@@ -202,7 +202,7 @@ class create_course_with_ai extends external_api {
             'feedback' => 'feedback',
         ];
 
-        $normalized = strtolower(trim($aiType));
+        $normalized = strtolower(trim($aitype));
         return $mapping[$normalized] ?? 'page';
     }
 
