@@ -28,6 +28,7 @@ function($, Ajax, Notification, AiPolicy) {
     var $searchInput = null;
     var $searchResults = null;
     var $searchLoading = null;
+    var allCategories = [];
     var $creationProgress = null;
     var $copyProgress = null;
     var $postCopyGuide = null;
@@ -83,6 +84,7 @@ function($, Ajax, Notification, AiPolicy) {
         $filterCategory = $('#mastermind-filter-category');
         $filterYear = $('#mastermind-filter-year');
 
+        allCategories = categories || [];
         loadCategories(categories);
 
         // Handle search input
@@ -732,7 +734,22 @@ function($, Ajax, Notification, AiPolicy) {
      */
     function getCategoryIdFromPage() {
         var urlParams = new URLSearchParams(window.location.search);
-        return parseInt(urlParams.get('categoryid')) || 1;
+        var urlCategoryId = parseInt(urlParams.get('categoryid'));
+        if (urlCategoryId > 0) {
+            return urlCategoryId;
+        }
+        // Fall back to the selected filter category.
+        if ($filterCategory && $filterCategory.val()) {
+            var filterVal = parseInt($filterCategory.val());
+            if (filterVal > 0) {
+                return filterVal;
+            }
+        }
+        // Fall back to the first available category from the server.
+        if (allCategories.length > 0) {
+            return allCategories[0].id;
+        }
+        return 1;
     }
 
     function showResults() {

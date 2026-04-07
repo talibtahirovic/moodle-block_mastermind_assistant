@@ -111,6 +111,11 @@ class create_course_from_document extends external_api {
                 ];
             }
 
+            // Validate category exists, fall back to default if not.
+            if (!$DB->record_exists('course_categories', ['id' => $params['categoryid']])) {
+                $params['categoryid'] = \core_course_category::get_default()->id;
+            }
+
             // Create the course.
             $coursedata = new stdClass();
             $coursedata->fullname = $aistructure['course_name'] ?? pathinfo($params['filename'], PATHINFO_FILENAME);

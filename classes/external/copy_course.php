@@ -80,6 +80,11 @@ class copy_course extends external_api {
             // Check source course exists
             $sourcecourse = $DB->get_record('course', ['id' => $params['courseid']], '*', MUST_EXIST);
 
+            // Validate category exists, fall back to default if not.
+            if (!$DB->record_exists('course_categories', ['id' => $params['categoryid']])) {
+                $params['categoryid'] = \core_course_category::get_default()->id;
+            }
+
             // Check capabilities
             $categorycontext = context_coursecat::instance($params['categoryid']);
             self::validate_context($categorycontext);

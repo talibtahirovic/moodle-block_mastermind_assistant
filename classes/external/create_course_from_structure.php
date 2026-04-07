@@ -71,6 +71,12 @@ class create_course_from_structure extends external_api {
                 throw new Exception('Invalid structure data.');
             }
 
+            // Validate category exists, fall back to default if not.
+            global $DB;
+            if (!$DB->record_exists('course_categories', ['id' => $params['categoryid']])) {
+                $params['categoryid'] = \core_course_category::get_default()->id;
+            }
+
             // Create the course.
             $coursedata = new stdClass();
             $coursedata->fullname = $aistructure['course_name'] ?? 'Untitled Course';
