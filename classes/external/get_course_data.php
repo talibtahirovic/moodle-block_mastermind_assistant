@@ -236,11 +236,22 @@ class get_course_data extends external_api {
             ];
         }
         
-        // Get grade data and encode as JSON for simplicity
+        // Get grade data and encode as JSON for simplicity.
         $grades = [];
         $gradeitems = $DB->get_records('grade_items', ['courseid' => $courseid]);
+
+        // Bulk-load all grade_grades for these items in a single query.
+        $allitemgrades = [];
+        if ($gradeitems) {
+            $itemids = array_keys($gradeitems);
+            list($insql, $inparams) = $DB->get_in_or_equal($itemids, SQL_PARAMS_NAMED);
+            $graderecords = $DB->get_records_select('grade_grades', "itemid $insql", $inparams);
+            foreach ($graderecords as $grade) {
+                $allitemgrades[$grade->itemid][] = $grade;
+            }
+        }
+
         foreach ($gradeitems as $gradeitem) {
-            $itemgrades = $DB->get_records('grade_grades', ['itemid' => $gradeitem->id]);
             $gradedata = [
                 'item' => [
                     'id' => $gradeitem->id,
@@ -253,7 +264,8 @@ class get_course_data extends external_api {
                 ],
                 'grades' => []
             ];
-            
+
+            $itemgrades = $allitemgrades[$gradeitem->id] ?? [];
             foreach ($itemgrades as $grade) {
                 $gradedata['grades'][] = [
                     'userid' => $grade->userid,
@@ -263,7 +275,7 @@ class get_course_data extends external_api {
                     'timemodified' => $grade->timemodified,
                 ];
             }
-            
+
             $grades[] = $gradedata;
         }
         $data['grades'] = $grades;

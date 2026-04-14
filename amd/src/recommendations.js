@@ -62,7 +62,7 @@ function(Ajax, Notification, Str, AiPolicy) {
                     
                     // Show error notification
                     Notification.addNotification({
-                        message: 'Error: ' + (errorData.error || 'Unknown error occurred'),
+                        message: errorData.error || errorData.message || 'error',
                         type: 'error'
                     });
 
@@ -97,7 +97,11 @@ function(Ajax, Notification, Str, AiPolicy) {
      */
     function getAIRecommendations(courseid, coursedata, btn, originalText) {
         // Update button and show progress
-        btn.innerHTML = 'Processing...';
+        Str.get_string('processing', 'block_mastermind_assistant').then(function(s) {
+            btn.innerHTML = s;
+        }).catch(function() {
+            // Fallback handled below.
+        });
         btn.disabled = true;
         showProgress();
 

@@ -283,6 +283,54 @@ $string['audit_items_need_updating'] = 'Elemente, die moeglicherweise aktualisie
 // Berechtigungen.
 $string['mastermind_assistant:applychanges'] = 'KI-generierte Aenderungen auf Kurse anwenden';
 
+// Metrik-Beschriftungen.
+$string['metric_completion_rate'] = 'Abschlussrate';
+$string['metric_avg_final_grade'] = 'Durchschnittliche Endnote';
+$string['metric_dropoff_section'] = 'Abbruch-Abschnitt';
+$string['metric_forum_activity'] = 'Forumsaktivitaet';
+$string['metric_posts_per_learner'] = 'Beitraege/Lernende';
+
+// Fortschrittsanzeige.
+$string['ai_analysis_progress'] = 'KI-Analyse Fortschritt';
+$string['progress_analyzing'] = 'Kursstruktur wird analysiert und Empfehlungen werden generiert...';
+$string['progress_generating_structure'] = 'Aktualisierte Kursstruktur wird erstellt...';
+$string['progress_analysis_complete'] = 'Analyse abgeschlossen!';
+$string['processing'] = 'Verarbeitung...';
+$string['show_detailed_metrics'] = 'Detaillierte Metriken anzeigen';
+
+// KI-Richtlinien-Modal.
+$string['ai_policy_title'] = 'KI-Nutzungsrichtlinie';
+$string['ai_policy_body'] = '<h4>Willkommen bei den KI-gestuetzten Funktionen!</h4>
+<p>Diese Kuenstliche-Intelligenz-Funktion (KI) basiert auf externen grossen Sprachmodellen (LLM), um Ihre Lern- und Lehrerfahrung zu verbessern. Bevor Sie diese KI-Dienste nutzen, lesen Sie bitte diese Nutzungsrichtlinie.</p>
+<h5>Genauigkeit von KI-generierten Inhalten</h5>
+<p>KI kann nuetzliche Vorschlaege und Informationen liefern, aber ihre Genauigkeit kann variieren. Sie sollten die bereitgestellten Informationen immer ueberpruefen, um sicherzustellen, dass sie korrekt, vollstaendig und fuer Ihre spezifische Situation geeignet sind.</p>
+<h5>Wie Ihre Daten verarbeitet werden</h5>
+<p>Diese KI-Funktion verwendet externe grosse Sprachmodelle (LLM). Wenn Sie diese Funktion nutzen, werden alle Informationen oder persoenlichen Daten, die Sie teilen, gemaess der Datenschutzrichtlinie dieser LLMs behandelt. Wir empfehlen Ihnen, deren Datenschutzrichtlinie zu lesen, um zu verstehen, wie sie mit Ihren Daten umgehen. Zusaetzlich kann eine Aufzeichnung Ihrer Interaktionen mit den KI-Funktionen auf dieser Website gespeichert werden.</p>
+<p>Wenn Sie Fragen zur Verarbeitung Ihrer Daten haben, wenden Sie sich bitte an Ihre Lehrenden oder Bildungseinrichtung.</p>
+<p><strong>Durch Fortfahren bestaetigen Sie, dass Sie diese Richtlinie verstehen und ihr zustimmen.</strong></p>';
+$string['ai_policy_accept_button'] = 'Akzeptieren und fortfahren';
+$string['ai_policy_accepted_msg'] = 'KI-Richtlinie akzeptiert. Ihre Anfrage wird verarbeitet...';
+$string['ai_policy_declined_msg'] = 'Sie muessen die KI-Nutzungsrichtlinie akzeptieren, um KI-Funktionen zu nutzen.';
+
+// Audit-Strings.
+$string['audit_past_due_date'] = 'Ueberfaelliges Faelligkeitsdatum';
+$string['audit_old_year_reference'] = 'Alte Jahresreferenz in';
+$string['audit_empty_section'] = 'Leerer Abschnitt';
+$string['audit_no_students'] = 'Noch keine Studierenden eingeschrieben';
+
+// Einstellungs-JS-Strings.
+$string['settings_save_api_key_first'] = 'Bitte geben Sie oben Ihren API-Schluessel ein und speichern Sie die Aenderungen zuerst.';
+
+// Erfolgsmeldungen (mod_draft).
+$string['success_content_applied'] = 'Inhalt erfolgreich angewendet!';
+$string['success_questions_added'] = 'Fragen erfolgreich hinzugefuegt!';
+$string['success_instructions_applied'] = 'Anweisungen erfolgreich angewendet!';
+$string['success_forum_applied'] = 'Forumsinhalte erfolgreich angewendet!';
+$string['success_lesson_applied'] = 'Lektionsinhalte erfolgreich angewendet!';
+$string['success_glossary_applied'] = 'Glossareintraege erfolgreich angewendet!';
+$string['success_book_applied'] = 'Buchinhalte erfolgreich angewendet!';
+$string['success_url_applied'] = 'URL erfolgreich angewendet!';
+
 // Datenschutz.
 $string['privacy:metadata:preference:ai_policy_accepted'] = 'Ob der Benutzer die KI-Nutzungsrichtlinie akzeptiert hat.';
 $string['privacy:metadata:mastermind_dashboard'] = 'Kurs- und Aktivitaetsdaten werden zur KI-gestuetzten Inhaltserstellung und Analyse an die Mastermind-Dashboard-API gesendet.';

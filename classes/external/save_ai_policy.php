@@ -58,10 +58,11 @@ class save_ai_policy extends external_api {
             'accepted' => $accepted
         ]);
 
-        // Validate context
+        // Validate context and capability.
         $context = \context_system::instance();
         self::validate_context($context);
         require_login();
+        require_capability('block/mastermind_assistant:view', $context);
 
         // Save user preference
         $value = $params['accepted'] ? 1 : 0;

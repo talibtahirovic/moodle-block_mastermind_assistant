@@ -21,7 +21,7 @@
  * @copyright  2026 The Namers <info@mastermindassistant.ai>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
+define(['core/ajax', 'core/notification', 'core/str', 'core/templates'], function(Ajax, Notification, Str, Templates) {
 
     /**
      * Call the test_connection web service and display results.
@@ -30,38 +30,51 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
      */
     function testConnection(button, resultDiv) {
         button.disabled = true;
-        button.textContent = 'Testing...';
-        resultDiv.innerHTML = '<div class="alert alert-info">Testing connection to Mastermind Dashboard...</div>';
+        Str.get_string('testing_connection', 'block_mastermind_assistant').then(function(s) {
+            button.textContent = s;
+            resultDiv.innerHTML = '<div class="alert alert-info">' + escapeHtml(s) + '</div>';
+        }).catch(function() {
+            button.textContent = '...';
+        });
 
         Ajax.call([{
             methodname: 'block_mastermind_assistant_test_connection',
             args: {}
         }])[0].then(function(response) {
             button.disabled = false;
-            button.textContent = 'Test Connection';
+            Str.get_strings([
+                {key: 'test_connection', component: 'block_mastermind_assistant'},
+                {key: 'connection_success', component: 'block_mastermind_assistant'},
+                {key: 'account_tier', component: 'block_mastermind_assistant'},
+                {key: 'account_status', component: 'block_mastermind_assistant'},
+            ]).then(function(strings) {
+                button.textContent = strings[0];
+            }).catch(function() {
+                // Fallback.
+            });
 
-            if (response.success) {
-                var html = '<div class="alert alert-success">';
-                html += '<strong>&#10003; Connected successfully</strong>';
-                html += '</div>';
-                html += '<table class="table table-sm table-bordered" style="max-width: 400px;">';
-                html += '<tbody>';
-                html += '<tr><td><strong>Tier</strong></td><td>' + escapeHtml(response.tier) + '</td></tr>';
-                html += '<tr><td><strong>Status</strong></td><td>' + escapeHtml(response.status) + '</td></tr>';
-                html += '</tbody>';
-                html += '</table>';
-                resultDiv.innerHTML = html;
-            } else {
-                resultDiv.innerHTML = '<div class="alert alert-danger">' +
-                    '<strong>&#10007; Connection failed:</strong> ' + escapeHtml(response.message) +
-                    '</div>';
-            }
+            var context = {
+                success: response.success,
+                tier: response.tier || '',
+                status: response.status || '',
+                message: response.message || ''
+            };
+            Templates.renderForPromise('block_mastermind_assistant/connection_result', context)
+                .then(function(result) {
+                    resultDiv.innerHTML = result.html;
+                }).catch(function() {
+                    resultDiv.innerHTML = '<div class="alert alert-danger">' +
+                        escapeHtml(response.message || '') + '</div>';
+                });
         }).catch(function(error) {
             button.disabled = false;
-            button.textContent = 'Test Connection';
+            Str.get_string('test_connection', 'block_mastermind_assistant').then(function(s) {
+                button.textContent = s;
+            }).catch(function() {
+                // Fallback.
+            });
             resultDiv.innerHTML = '<div class="alert alert-danger">' +
-                '<strong>&#10007; Error:</strong> ' + escapeHtml(error.message || 'Unknown error') +
-                '</div>';
+                escapeHtml(error.message || '') + '</div>';
             Notification.exception(error);
         });
     }
@@ -90,9 +103,11 @@ define(['core/ajax', 'core/notification'], function(Ajax, Notification) {
                 // Check if the API key field is empty.
                 var apiKeyInput = document.getElementById('id_s_block_mastermind_assistant_api_key');
                 if (apiKeyInput && !apiKeyInput.value.trim()) {
-                    resultDiv.innerHTML = '<div class="alert alert-warning">' +
-                        'Please enter your API key above and <strong>save changes</strong> first.' +
-                        '</div>';
+                    Str.get_string('settings_save_api_key_first', 'block_mastermind_assistant').then(function(s) {
+                        resultDiv.innerHTML = '<div class="alert alert-warning">' + escapeHtml(s) + '</div>';
+                    }).catch(function() {
+                        // Fallback.
+                    });
                     return;
                 }
                 testConnection(button, resultDiv);

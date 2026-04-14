@@ -50,10 +50,11 @@ class check_ai_policy extends external_api {
     public static function execute() {
         global $USER;
 
-        // Validate context
+        // Validate context and capability.
         $context = \context_system::instance();
         self::validate_context($context);
         require_login();
+        require_capability('block/mastermind_assistant:view', $context);
 
         // Check user preference
         $accepted = \get_user_preferences('mastermind_ai_policy_accepted', 0, $USER);

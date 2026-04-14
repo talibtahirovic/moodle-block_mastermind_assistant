@@ -138,12 +138,16 @@ class create_course_with_ai extends external_api {
 
         $course = \get_course($courseid);
 
+        // Preload all course sections in a single query, keyed by section number.
+        $allsections = $DB->get_records('course_sections', ['course' => $courseid], 'section', '*');
+        $sectionsbynumber = [];
+        foreach ($allsections as $sec) {
+            $sectionsbynumber[(int) $sec->section] = $sec;
+        }
+
         $sectionnum = 1;
         foreach ($sections as $sectiondata) {
-            $section = $DB->get_record('course_sections', [
-                'course' => $courseid,
-                'section' => $sectionnum
-            ]);
+            $section = $sectionsbynumber[$sectionnum] ?? null;
 
             if ($section) {
                 $section->name = $sectiondata['section_name'] ?? "Section $sectionnum";

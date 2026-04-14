@@ -20,8 +20,8 @@
  * @copyright  2026 The Namers <info@mastermindassistant.ai>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define(['jquery', 'core/ajax', 'core/notification', 'core/modal_factory', 'core/modal_events'],
-function($, Ajax, Notification, ModalFactory, ModalEvents) {
+define(['jquery', 'core/ajax', 'core/notification', 'core/modal_factory', 'core/modal_events', 'core/str'],
+function($, Ajax, Notification, ModalFactory, ModalEvents, Str) {
 
     /**
      * Check if user has accepted the AI policy
@@ -62,80 +62,64 @@ function($, Ajax, Notification, ModalFactory, ModalEvents) {
      * @param {function} onDecline Callback when user declines
      */
     function showPolicyModal(onAccept, onDecline) {
-        var modalBody = '<div style="padding: 20px;">' +
-            '<h4>Welcome to the AI-powered features!</h4>' +
-            '<p>This Artificial Intelligence (AI) feature is based on external Large Language Models (LLM) ' +
-            'to improve your learning and teaching experience. Before you start using these AI services, ' +
-            'please read this usage policy.</p>' +
+        // Load all required strings first.
+        var stringRequests = [
+            {key: 'ai_policy_title', component: 'block_mastermind_assistant'},
+            {key: 'ai_policy_body', component: 'block_mastermind_assistant'},
+            {key: 'ai_policy_accept_button', component: 'block_mastermind_assistant'},
+            {key: 'ai_policy_accepted_msg', component: 'block_mastermind_assistant'},
+            {key: 'ai_policy_declined_msg', component: 'block_mastermind_assistant'},
+        ];
 
-            '<h5 style="margin-top: 20px;">Accuracy of AI-generated content</h5>' +
-            '<p>AI can give useful suggestions and information, but its accuracy may vary. ' +
-            'You should always double-check the information provided to make sure it\'s accurate, ' +
-            'complete, and suitable for your specific situation.</p>' +
+        Str.get_strings(stringRequests).then(function(strings) {
+            var title = strings[0];
+            var body = strings[1];
+            var acceptBtn = strings[2];
+            var acceptedMsg = strings[3];
+            var declinedMsg = strings[4];
 
-            '<h5 style="margin-top: 20px;">How your data is processed</h5>' +
-            '<p>This AI feature uses external Large Language Models (LLM). If you use this feature, ' +
-            'any information or personal data you share will be handled according to the privacy policy ' +
-            'of those LLMs. We recommend that you read their privacy policy to understand how they will ' +
-            'handle your data. Additionally, a record of your interactions with the AI features may be ' +
-            'saved in this site.</p>' +
+            return ModalFactory.create({
+                type: ModalFactory.types.SAVE_CANCEL,
+                title: title,
+                body: '<div style="padding: 20px;">' + body + '</div>',
+                large: true
+            }).then(function(modal) {
+                modal.setSaveButtonText(acceptBtn);
 
-            '<p style="margin-top: 15px;">If you have questions about how your data is processed, ' +
-            'please check with your teachers or learning organisation.</p>' +
+                // Handle save (accept)
+                modal.getRoot().on(ModalEvents.save, function() {
+                    savePolicyAcceptance(true).then(function() {
+                        Notification.addNotification({
+                            message: acceptedMsg,
+                            type: 'success'
+                        });
 
-            '<p style="margin-top: 15px;"><strong>By continuing, you acknowledge that you understand ' +
-            'and agree to this policy.</strong></p>' +
-        '</div>';
-
-        ModalFactory.create({
-            type: ModalFactory.types.SAVE_CANCEL,
-            title: 'AI usage policy',
-            body: modalBody,
-            large: true
-        }).then(function(modal) {
-            modal.setSaveButtonText('Accept and continue');
-
-            // Handle save (accept)
-            modal.getRoot().on(ModalEvents.save, function() {
-                // Save acceptance to server
-                savePolicyAcceptance(true).then(function() {
-                    // Show success message
-                    Notification.addNotification({
-                        message: 'AI policy accepted. Proceeding with your request...',
-                        type: 'success'
+                        if (onAccept) {
+                            onAccept();
+                        }
+                    }).catch(function(error) {
+                        Notification.exception(error);
                     });
 
-                    // Proceed with the action
-                    if (onAccept) {
-                        onAccept();
+                    modal.hide();
+                });
+
+                // Handle cancel (decline)
+                modal.getRoot().on(ModalEvents.cancel, function() {
+                    Notification.addNotification({
+                        message: declinedMsg,
+                        type: 'warning'
+                    });
+
+                    if (onDecline) {
+                        onDecline();
                     }
-                }).catch(function(error) {
-                    Notification.exception(error);
+
+                    modal.hide();
                 });
 
-                // Let modal close naturally
-                modal.hide();
+                modal.show();
             });
-
-            // Handle cancel (decline)
-            modal.getRoot().on(ModalEvents.cancel, function() {
-                // Show warning but DON'T save the decline
-                // This allows the modal to appear again next time
-                Notification.addNotification({
-                    message: 'You must accept the AI usage policy to use AI features.',
-                    type: 'warning'
-                });
-
-                // Call decline callback if provided
-                if (onDecline) {
-                    onDecline();
-                }
-
-                // Let modal close naturally
-                modal.hide();
-            });
-
-            modal.show();
         }).catch(function(error) {
             Notification.exception(error);
         });

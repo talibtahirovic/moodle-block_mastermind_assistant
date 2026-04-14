@@ -32,7 +32,7 @@
 }}
 <div class="mastermind-insights-container">
     <div class="mastermind-insights-header">
-        <h3 class="mastermind-insights-title">Insights</h3>
+        <h3 class="mastermind-insights-title">{{#str}} insights_title, block_mastermind_assistant {{/str}}</h3>
     </div>
 
     <div class="mastermind-metrics-grid">
@@ -44,7 +44,7 @@
                 </svg>
             </div>
             <div class="mastermind-metric-content">
-                <div class="mastermind-metric-label">Completion Rate</div>
+                <div class="mastermind-metric-label">{{#str}} metric_completion_rate, block_mastermind_assistant {{/str}}</div>
                 <div class="mastermind-metric-value">{{completionrate}}%</div>
             </div>
         </div>
@@ -56,7 +56,7 @@
                 </svg>
             </div>
             <div class="mastermind-metric-content">
-                <div class="mastermind-metric-label">Avg Final Grade</div>
+                <div class="mastermind-metric-label">{{#str}} metric_avg_final_grade, block_mastermind_assistant {{/str}}</div>
                 <div class="mastermind-metric-value">{{avggrade}}%</div>
             </div>
         </div>
@@ -68,7 +68,7 @@
                 </svg>
             </div>
             <div class="mastermind-metric-content">
-                <div class="mastermind-metric-label">Drop-off Section</div>
+                <div class="mastermind-metric-label">{{#str}} metric_dropoff_section, block_mastermind_assistant {{/str}}</div>
                 <div class="mastermind-metric-value mastermind-metric-text">{{dropoffsection}}</div>
             </div>
         </div>
@@ -80,8 +80,8 @@
                 </svg>
             </div>
             <div class="mastermind-metric-content">
-                <div class="mastermind-metric-label">Forum Activity</div>
-                <div class="mastermind-metric-value">{{forumactivity}} <span class="mastermind-metric-unit">posts/learner</span></div>
+                <div class="mastermind-metric-label">{{#str}} metric_forum_activity, block_mastermind_assistant {{/str}}</div>
+                <div class="mastermind-metric-value">{{forumactivity}} <span class="mastermind-metric-unit">{{#str}} metric_posts_per_learner, block_mastermind_assistant {{/str}}</span></div>
             </div>
         </div>
 
@@ -94,7 +94,7 @@
                 </svg>
             </div>
             <div class="mastermind-metric-content">
-                <div class="mastermind-metric-label">Last Activity</div>
+                <div class="mastermind-metric-label">{{#str}} last_activity, block_mastermind_assistant {{/str}}</div>
                 <div class="mastermind-metric-value mastermind-metric-text">{{lastactivity}}</div>
             </div>
         </div>
@@ -109,7 +109,7 @@
                 </svg>
             </div>
             <div class="mastermind-metric-content">
-                <div class="mastermind-metric-label">Resources</div>
+                <div class="mastermind-metric-label">{{#str}} resources, block_mastermind_assistant {{/str}}</div>
                 <div class="mastermind-metric-value">{{resources}}</div>
             </div>
         </div>
@@ -124,20 +124,20 @@
             <svg class="mastermind-progress-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M12 2V6M12 18V22M4.93 4.93L7.76 7.76M16.24 16.24L19.07 19.07M2 12H6M18 12H22M4.93 19.07L7.76 16.24M16.24 7.76L19.07 4.93" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
             </svg>
-            <span>AI Analysis Progress</span>
+            <span>{{#str}} ai_analysis_progress, block_mastermind_assistant {{/str}}</span>
         </div>
         <div id="ai-progress-content" class="mastermind-progress-content">
             <div id="step1-progress" class="mastermind-progress-step">
                 <span class="mastermind-step-icon">⏳</span>
-                <span class="mastermind-step-text">Analyzing course structure and generating recommendations...</span>
+                <span class="mastermind-step-text">{{#str}} progress_analyzing, block_mastermind_assistant {{/str}}</span>
             </div>
             <div id="step2-progress" class="mastermind-progress-step" style="display: none;">
                 <span class="mastermind-step-icon">⏳</span>
-                <span class="mastermind-step-text">Generating updated course structure...</span>
+                <span class="mastermind-step-text">{{#str}} progress_generating_structure, block_mastermind_assistant {{/str}}</span>
             </div>
             <div id="step3-progress" class="mastermind-progress-step" style="display: none;">
                 <span class="mastermind-step-icon">✅</span>
-                <span class="mastermind-step-text">Analysis complete!</span>
+                <span class="mastermind-step-text">{{#str}} progress_analysis_complete, block_mastermind_assistant {{/str}}</span>
             </div>
         </div>
     </div>
@@ -146,7 +146,7 @@
         <svg class="mastermind-button-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z" fill="currentColor"/>
         </svg>
-        <span>Show Detailed Metrics</span>
+        <span>{{#str}} show_detailed_metrics, block_mastermind_assistant {{/str}}</span>
     </button>
 
     <button id="get-recommendations-btn" class="mastermind-action-button">

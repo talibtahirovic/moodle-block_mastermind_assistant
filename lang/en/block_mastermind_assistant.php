@@ -283,6 +283,54 @@ $string['audit_items_need_updating'] = 'Items that may need updating:';
 // Capability strings.
 $string['mastermind_assistant:applychanges'] = 'Apply AI-generated changes to courses';
 
+// Metric labels (used in templates and JS).
+$string['metric_completion_rate'] = 'Completion Rate';
+$string['metric_avg_final_grade'] = 'Avg Final Grade';
+$string['metric_dropoff_section'] = 'Drop-off Section';
+$string['metric_forum_activity'] = 'Forum Activity';
+$string['metric_posts_per_learner'] = 'posts/learner';
+
+// Progress step strings.
+$string['ai_analysis_progress'] = 'AI Analysis Progress';
+$string['progress_analyzing'] = 'Analyzing course structure and generating recommendations...';
+$string['progress_generating_structure'] = 'Generating updated course structure...';
+$string['progress_analysis_complete'] = 'Analysis complete!';
+$string['processing'] = 'Processing...';
+$string['show_detailed_metrics'] = 'Show Detailed Metrics';
+
+// AI policy modal strings.
+$string['ai_policy_title'] = 'AI usage policy';
+$string['ai_policy_body'] = '<h4>Welcome to the AI-powered features!</h4>
+<p>This Artificial Intelligence (AI) feature is based on external Large Language Models (LLM) to improve your learning and teaching experience. Before you start using these AI services, please read this usage policy.</p>
+<h5>Accuracy of AI-generated content</h5>
+<p>AI can give useful suggestions and information, but its accuracy may vary. You should always double-check the information provided to make sure it\'s accurate, complete, and suitable for your specific situation.</p>
+<h5>How your data is processed</h5>
+<p>This AI feature uses external Large Language Models (LLM). If you use this feature, any information or personal data you share will be handled according to the privacy policy of those LLMs. We recommend that you read their privacy policy to understand how they will handle your data. Additionally, a record of your interactions with the AI features may be saved in this site.</p>
+<p>If you have questions about how your data is processed, please check with your teachers or learning organisation.</p>
+<p><strong>By continuing, you acknowledge that you understand and agree to this policy.</strong></p>';
+$string['ai_policy_accept_button'] = 'Accept and continue';
+$string['ai_policy_accepted_msg'] = 'AI policy accepted. Proceeding with your request...';
+$string['ai_policy_declined_msg'] = 'You must accept the AI usage policy to use AI features.';
+
+// Audit finding strings.
+$string['audit_past_due_date'] = 'Past due date';
+$string['audit_old_year_reference'] = 'Old year reference in';
+$string['audit_empty_section'] = 'Empty section';
+$string['audit_no_students'] = 'No students enrolled yet';
+
+// Settings JS strings.
+$string['settings_save_api_key_first'] = 'Please enter your API key above and save changes first.';
+
+// Success state strings (mod_draft).
+$string['success_content_applied'] = 'Content applied successfully!';
+$string['success_questions_added'] = 'Questions added successfully!';
+$string['success_instructions_applied'] = 'Instructions applied successfully!';
+$string['success_forum_applied'] = 'Forum content applied successfully!';
+$string['success_lesson_applied'] = 'Lesson content applied successfully!';
+$string['success_glossary_applied'] = 'Glossary entries applied successfully!';
+$string['success_book_applied'] = 'Book content applied successfully!';
+$string['success_url_applied'] = 'URL applied successfully!';
+
 // Privacy strings.
 $string['privacy:metadata:preference:ai_policy_accepted'] = 'Whether the user has accepted the AI usage policy.';
 $string['privacy:metadata:mastermind_dashboard'] = 'Course and activity data is sent to the Mastermind Dashboard API for AI-powered content generation and analysis.';

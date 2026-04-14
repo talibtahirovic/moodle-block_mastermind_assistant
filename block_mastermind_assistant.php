@@ -125,7 +125,6 @@ class block_mastermind_assistant extends block_base {
                     'icon' => 'folder',
                 ]];
 
-                $PAGE->requires->css('/blocks/mastermind_assistant/styles.css');
 
                 $data = (object) ['nav_links' => $links];
                 $this->content->text = $PAGE->get_renderer('block_mastermind_assistant')
@@ -163,9 +162,6 @@ class block_mastermind_assistant extends block_base {
             'ai_message' => $aistatus['message'],
         ];
 
-        // Include custom CSS for professional styling
-        $PAGE->requires->css('/blocks/mastermind_assistant/styles.css');
-        
         $this->content->text = $PAGE->get_renderer('block_mastermind_assistant')->render_from_template('block_mastermind_assistant/content', $data);
         $this->content->footer = '';
         
@@ -233,8 +229,6 @@ class block_mastermind_assistant extends block_base {
         ];
 
         // Include custom CSS for professional styling
-        $PAGE->requires->css('/blocks/mastermind_assistant/styles.css');
-        
         $this->content->text = $PAGE->get_renderer('block_mastermind_assistant')->render_from_template('block_mastermind_assistant/course_search', $data);
         $this->content->footer = '';
         
@@ -349,9 +343,12 @@ class block_mastermind_assistant extends block_base {
         }
 
         // 5. Last Activity — how recently the most recent student was active.
+        // Restrict to last 90 days to avoid full table scan on large log tables.
+        $ninetydaysago = time() - (90 * DAYSECS);
         $lastactivitytime = $DB->get_field_sql(
-            "SELECT MAX(timecreated) FROM {logstore_standard_log} WHERE courseid = ? AND userid != 0",
-            [$courseid]
+            "SELECT MAX(timecreated) FROM {logstore_standard_log}
+              WHERE courseid = ? AND userid != 0 AND timecreated > ?",
+            [$courseid, $ninetydaysago]
         );
         if ($lastactivitytime) {
             $diff = time() - $lastactivitytime;
@@ -503,14 +500,10 @@ class block_mastermind_assistant extends block_base {
         } else if ($add) {
             $modname = $add;
         } else if ($id) {
-            // View page — try each supported module type.
-            $supported = ['page', 'quiz', 'assign', 'forum', 'lesson', 'glossary', 'book', 'url'];
-            foreach ($supported as $trymod) {
-                $cm = get_coursemodule_from_id($trymod, $id, 0, false, IGNORE_MISSING);
-                if ($cm) {
-                    list($modname, $pagename, $pagedescription, $instanceid) = $this->load_module_data($cm);
-                    break;
-                }
+            // View page — look up the course module once, then check if it's a supported type.
+            $cm = get_coursemodule_from_id('', $id, 0, false, IGNORE_MISSING);
+            if ($cm) {
+                list($modname, $pagename, $pagedescription, $instanceid) = $this->load_module_data($cm);
             }
         }
 
@@ -589,8 +582,6 @@ class block_mastermind_assistant extends block_base {
             'main_page_url' => $main_page_url,
             'existing_count' => $existing_count,
         ];
-
-        $PAGE->requires->css('/blocks/mastermind_assistant/styles.css');
 
         $this->content->text = $PAGE->get_renderer('block_mastermind_assistant')
             ->render_from_template('block_mastermind_assistant/mod_draft', $data);

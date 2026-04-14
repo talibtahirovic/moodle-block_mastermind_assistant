@@ -130,36 +130,39 @@ class get_detailed_metrics extends external_api {
         $metrics['enrollment_count'] = (int) $DB->count_records_sql($sql, [$courseid]);
 
         // Active users (last 30 days).
-        $thirtydaysago = time() - (30 * 24 * 60 * 60);
+        $thirtydaysago = time() - (30 * DAYSECS);
         $sql = "SELECT COUNT(DISTINCT userid)
                 FROM {logstore_standard_log}
                 WHERE courseid = ? AND timecreated > ?";
         $metrics['active_users'] = (int) $DB->count_records_sql($sql, [$courseid, $thirtydaysago]);
 
-        // Average login frequency (course views per enrolled user).
+        // Average login frequency (course views per enrolled user, last 365 days).
         if ($metrics['enrollment_count'] > 0) {
+            $oneyearago = time() - (365 * DAYSECS);
             $sql = "SELECT COUNT(*) FROM {logstore_standard_log}
-                    WHERE courseid = ? AND action = 'viewed' AND target = 'course'";
-            $totalviews = (int) $DB->count_records_sql($sql, [$courseid]);
+                    WHERE courseid = ? AND action = 'viewed' AND target = 'course'
+                      AND timecreated > ?";
+            $totalviews = (int) $DB->count_records_sql($sql, [$courseid, $oneyearago]);
             $metrics['avg_login_frequency'] = round($totalviews / $metrics['enrollment_count'], 1);
         }
 
-        // Dropout point — most common module type where users last interacted.
+        // Dropout point — most common module type where users last interacted (last 90 days).
+        $ninetydaysago = time() - (90 * DAYSECS);
         $sql = "SELECT m.name AS modname, COUNT(*) AS cnt
                 FROM {logstore_standard_log} l
                 JOIN (
                     SELECT userid, MAX(timecreated) AS lasttime
                     FROM {logstore_standard_log}
-                    WHERE courseid = ? AND contextlevel = 70
+                    WHERE courseid = ? AND contextlevel = 70 AND timecreated > ?
                     GROUP BY userid
                 ) latest ON latest.userid = l.userid AND latest.lasttime = l.timecreated
                 JOIN {course_modules} cm ON cm.id = l.contextinstanceid
                 JOIN {modules} m ON m.id = cm.module
-                WHERE l.courseid = ? AND l.contextlevel = 70
+                WHERE l.courseid = ? AND l.contextlevel = 70 AND l.timecreated > ?
                 GROUP BY m.name
                 ORDER BY cnt DESC
                 LIMIT 1";
-        $dropoutpoint = $DB->get_record_sql($sql, [$courseid, $courseid]);
+        $dropoutpoint = $DB->get_record_sql($sql, [$courseid, $ninetydaysago, $courseid, $ninetydaysago]);
         if ($dropoutpoint) {
             $metrics['dropout_point'] = $dropoutpoint->modname;
         }
@@ -311,17 +314,18 @@ class get_detailed_metrics extends external_api {
             );
         }
 
-        // Dropout timing — approximate week when inactive users last accessed.
+        // Dropout timing — approximate week when inactive users last accessed (last 365 days).
         $course = $DB->get_record('course', ['id' => $courseid], 'startdate');
         if ($course && $course->startdate > 0) {
+            $oneyearagodt = time() - (365 * DAYSECS);
             $sql = "SELECT AVG(lastaccess) AS avglast
                     FROM (
                         SELECT MAX(timecreated) AS lastaccess
                         FROM {logstore_standard_log}
-                        WHERE courseid = ?
+                        WHERE courseid = ? AND timecreated > ?
                         GROUP BY userid
                     ) t";
-            $result = $DB->get_record_sql($sql, [$courseid]);
+            $result = $DB->get_record_sql($sql, [$courseid, $oneyearagodt]);
             if ($result && $result->avglast > 0) {
                 $weeknum = max(1, ceil(($result->avglast - $course->startdate) / 604800));
                 $metrics['dropout_timing'] = 'Week ' . $weeknum;

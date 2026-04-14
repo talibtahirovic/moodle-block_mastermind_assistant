@@ -32,8 +32,8 @@
  */
 /* global tinyMCE */
 /* eslint-disable jsdoc/require-param-type */
-define(['core/ajax', 'core/notification', 'block_mastermind_assistant/ai_policy'],
-function(Ajax, Notification, AiPolicy) {
+define(['core/ajax', 'core/notification', 'block_mastermind_assistant/ai_policy', 'core/str', 'core/templates'],
+function(Ajax, Notification, AiPolicy, Str, Templates) {
 
     var courseid = 0;
     var lastAssignmentResponse = null;
@@ -104,34 +104,25 @@ function(Ajax, Notification, AiPolicy) {
         if (!introDiv) {
             return;
         }
-        var message = 'Content applied successfully!';
         var mn = modname ? modname.toLowerCase() : '';
-        if (mn === 'quiz') {
-            message = 'Questions added successfully!';
-        } else if (mn === 'assign') {
-            message = 'Instructions applied successfully!';
-        } else if (mn === 'forum') {
-            message = 'Forum content applied successfully!';
-        } else if (mn === 'lesson') {
-            message = 'Lesson content applied successfully!';
-        } else if (mn === 'glossary') {
-            message = 'Glossary entries applied successfully!';
-        } else if (mn === 'book') {
-            message = 'Book content applied successfully!';
-        } else if (mn === 'url') {
-            message = 'URL applied successfully!';
-        }
-        introDiv.innerHTML = '<div class="mastermind-success-state">' +
-            '<svg class="mastermind-success-icon" width="48" height="48" ' +
-            'viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">' +
-            '<circle cx="12" cy="12" r="10" stroke="currentColor" ' +
-            'stroke-width="2"/>' +
-            '<path d="M9 12L11 14L15 10" stroke="currentColor" ' +
-            'stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>' +
-            '</svg>' +
-            '<p class="mastermind-success-message">' + message + '</p>' +
-            '</div>';
-        introDiv.style.display = 'block';
+        var stringMap = {
+            'quiz': 'success_questions_added',
+            'assign': 'success_instructions_applied',
+            'forum': 'success_forum_applied',
+            'lesson': 'success_lesson_applied',
+            'glossary': 'success_glossary_applied',
+            'book': 'success_book_applied',
+            'url': 'success_url_applied'
+        };
+        var stringKey = stringMap[mn] || 'success_content_applied';
+        Str.get_string(stringKey, 'block_mastermind_assistant').then(function(message) {
+            return Templates.renderForPromise('block_mastermind_assistant/success_state', {message: message});
+        }).then(function(result) {
+            introDiv.innerHTML = result.html;
+            introDiv.style.display = 'block';
+        }).catch(function() {
+            // Fallback.
+        });
     }
 
     /**

@@ -21,8 +21,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-define(['jquery', 'core/ajax', 'core/notification', 'block_mastermind_assistant/ai_policy'],
-function($, Ajax, Notification, AiPolicy) {
+define(['jquery', 'core/ajax', 'core/notification', 'block_mastermind_assistant/ai_policy', 'core/str'],
+function($, Ajax, Notification, AiPolicy, Str) {
 
     var searchTimeout = null;
     var $searchInput = null;
@@ -393,38 +393,52 @@ function($, Ajax, Notification, AiPolicy) {
             var flags = data.audit_flags || {};
             var items = [];
 
-            if (flags.past_due_dates && flags.past_due_dates.length) {
-                flags.past_due_dates.forEach(function(d) {
-                    items.push({icon: '&#x1F4C5;', text: 'Past due date: ' + escapeHtml(d.name) + ' (due ' + escapeHtml(d.duedate) + ')'});
-                });
-            }
-            if (flags.old_year_references && flags.old_year_references.length) {
-                flags.old_year_references.forEach(function(name) {
-                    items.push({icon: '&#x1F4C4;', text: 'Old year reference in: ' + escapeHtml(name)});
-                });
-            }
-            if (flags.empty_sections && flags.empty_sections.length) {
-                flags.empty_sections.forEach(function(name) {
-                    items.push({icon: '&#x1F4AD;', text: 'Empty section: ' + escapeHtml(name)});
-                });
-            }
-            if (flags.missing_enrollments) {
-                items.push({icon: '&#x1F465;', text: 'No students enrolled yet'});
-            }
+            // Preload audit strings.
+            var stringRequests = [
+                {key: 'audit_past_due_date', component: 'block_mastermind_assistant'},
+                {key: 'audit_old_year_reference', component: 'block_mastermind_assistant'},
+                {key: 'audit_empty_section', component: 'block_mastermind_assistant'},
+                {key: 'audit_no_students', component: 'block_mastermind_assistant'},
+            ];
+            Str.get_strings(stringRequests).then(function(strings) {
+                if (flags.past_due_dates && flags.past_due_dates.length) {
+                    flags.past_due_dates.forEach(function(d) {
+                        items.push({
+                            icon: '&#x1F4C5;',
+                            text: strings[0] + ': ' + escapeHtml(d.name) + ' (' + escapeHtml(d.duedate) + ')'
+                        });
+                    });
+                }
+                if (flags.old_year_references && flags.old_year_references.length) {
+                    flags.old_year_references.forEach(function(name) {
+                        items.push({icon: '&#x1F4C4;', text: strings[1] + ': ' + escapeHtml(name)});
+                    });
+                }
+                if (flags.empty_sections && flags.empty_sections.length) {
+                    flags.empty_sections.forEach(function(name) {
+                        items.push({icon: '&#x1F4AD;', text: strings[2] + ': ' + escapeHtml(name)});
+                    });
+                }
+                if (flags.missing_enrollments) {
+                    items.push({icon: '&#x1F465;', text: strings[3]});
+                }
 
-            if (items.length > 0) {
-                var $list = $('#mastermind-audit-list');
-                $list.empty();
-                items.forEach(function(item) {
-                    $list.append(
-                        '<div class="mastermind-audit-item">' +
-                            '<span class="mastermind-audit-icon">' + item.icon + '</span>' +
-                            '<span>' + item.text + '</span>' +
-                        '</div>'
-                    );
-                });
-                $('#mastermind-audit-findings').show();
-            }
+                if (items.length > 0) {
+                    var $list = $('#mastermind-audit-list');
+                    $list.empty();
+                    items.forEach(function(item) {
+                        $list.append(
+                            '<div class="mastermind-audit-item">' +
+                                '<span class="mastermind-audit-icon">' + item.icon + '</span>' +
+                                '<span>' + item.text + '</span>' +
+                            '</div>'
+                        );
+                    });
+                    $('#mastermind-audit-findings').show();
+                }
+            }).catch(function() {
+                // Silently fail — string loading is non-critical.
+            });
 
             return response;
         }).catch(function() {
