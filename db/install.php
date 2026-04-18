@@ -29,7 +29,7 @@ defined('MOODLE_INTERNAL') || die();
  * Creates a sticky block instance so the block appears site-wide automatically.
  */
 function xmldb_block_mastermind_assistant_install() {
-    global $DB;
+    global $DB, $CFG;
 
     // Create sticky block instance so the block appears on all pages automatically.
     $existing = $DB->get_record('block_instances', [
@@ -53,6 +53,46 @@ function xmldb_block_mastermind_assistant_install() {
         $DB->insert_record('block_instances', $blockinstance);
     }
 
+    // Best-effort install ping. Used to track total plugin installations across
+    // all distribution channels (Moodle.org, direct download, etc.). Failure is
+    // intentionally silent — the plugin must install cleanly even when the
+    // dashboard is unreachable or the site has no outbound network access.
+    block_mastermind_assistant_send_install_ping($CFG);
+
     return true;
 }
 
+/**
+ * Send a non-blocking install ping to the dashboard.
+ *
+ * Uses Moodle's curl wrapper with a short connection/response timeout so a
+ * slow or unreachable dashboard cannot hold up plugin installation. All
+ * exceptions are swallowed: the install must succeed regardless.
+ *
+ * @param object $cfg The Moodle $CFG global.
+ * @return void
+ */
+function block_mastermind_assistant_send_install_ping($cfg): void {
+    global $CFG;
+
+    require_once($CFG->libdir . '/filelib.php');
+
+    try {
+        $payload = json_encode([
+            'lms_url' => $cfg->wwwroot ?? '',
+            'plugin_version' => '2026041801',
+        ]);
+
+        $curl = new \curl();
+        $curl->setHeader('Content-Type: application/json');
+        $curl->setopt([
+            'CURLOPT_CONNECTTIMEOUT' => 2,
+            'CURLOPT_TIMEOUT' => 3,
+            'CURLOPT_RETURNTRANSFER' => true,
+        ]);
+        $curl->post('https://mastermindassistant.ai/api/plugin-install', $payload);
+    } catch (\Throwable $e) {
+        // Silently ignore — plugin install must never fail because of telemetry.
+        debugging('Mastermind install ping failed: ' . $e->getMessage(), DEBUG_DEVELOPER);
+    }
+}

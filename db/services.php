@@ -240,4 +240,12 @@ $functions = [
         'ajax'        => true,
         'loginrequired' => true,
     ],
+    'block_mastermind_assistant_generate_connect_nonce' => [
+        'classname'   => 'block_mastermind_assistant\external\generate_connect_nonce',
+        'methodname'  => 'execute',
+        'description' => 'Generate a single-use nonce and connect URL for the simplified setup flow',
+        'type'        => 'write',
+        'ajax'        => true,
+        'loginrequired' => true,
+    ],
 ];

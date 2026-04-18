@@ -331,6 +331,19 @@ $string['success_glossary_applied'] = 'Glossareintraege erfolgreich angewendet!'
 $string['success_book_applied'] = 'Buchinhalte erfolgreich angewendet!';
 $string['success_url_applied'] = 'URL erfolgreich angewendet!';
 
+// Verbindungsfluss (vereinfachte Einrichtung).
+$string['connect_title'] = 'Mastermind-Assistent';
+$string['connect_description'] = 'KI-gestuetzte Kursanalyse, Inhaltserstellung und Empfehlungen — direkt in Ihrem LMS.';
+$string['connect_button'] = 'Mit Mastermind verbinden';
+$string['connect_free'] = 'Kostenlos starten · Keine Kreditkarte erforderlich';
+$string['connect_admin_required'] = 'Bitten Sie Ihren Administrator, Mastermind-Assistent zu verbinden.';
+$string['connect_connecting'] = 'Verbinden...';
+$string['connect_waiting'] = 'Warte auf Verbindung...';
+$string['connect_popup_blocked'] = 'Popup blockiert? Oeffnen Sie die Verbindungsseite direkt:';
+$string['connection_success_redirect'] = 'Mastermind-Assistent ist jetzt verbunden! Sie werden weitergeleitet...';
+$string['invalid_nonce'] = 'Ungueltige oder abgelaufene Verbindungsanfrage. Bitte versuchen Sie es erneut.';
+$string['invalid_api_key_format'] = 'Das API-Schluessel-Format ist ungueltig.';
+
 // Datenschutz.
 $string['privacy:metadata:preference:ai_policy_accepted'] = 'Ob der Benutzer die KI-Nutzungsrichtlinie akzeptiert hat.';
 $string['privacy:metadata:mastermind_dashboard'] = 'Kurs- und Aktivitaetsdaten werden zur KI-gestuetzten Inhaltserstellung und Analyse an die Mastermind-Dashboard-API gesendet.';

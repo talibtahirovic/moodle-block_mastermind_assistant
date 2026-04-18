@@ -331,6 +331,19 @@ $string['success_glossary_applied'] = 'Glossary entries applied successfully!';
 $string['success_book_applied'] = 'Book content applied successfully!';
 $string['success_url_applied'] = 'URL applied successfully!';
 
+// Connect (simplified setup) flow strings.
+$string['connect_title'] = 'Mastermind Assistant';
+$string['connect_description'] = 'AI-powered course analysis, content creation, and recommendations — right inside your LMS.';
+$string['connect_button'] = 'Connect to Mastermind';
+$string['connect_free'] = 'Free to start · No credit card required';
+$string['connect_admin_required'] = 'Ask your site administrator to connect Mastermind Assistant.';
+$string['connect_connecting'] = 'Connecting...';
+$string['connect_waiting'] = 'Waiting for connection...';
+$string['connect_popup_blocked'] = 'Pop-up blocked? Open the connect page directly:';
+$string['connection_success_redirect'] = 'Mastermind Assistant is now connected! Redirecting...';
+$string['invalid_nonce'] = 'Invalid or expired connection request. Please try again.';
+$string['invalid_api_key_format'] = 'The API key format is invalid.';
+
 // Privacy strings.
 $string['privacy:metadata:preference:ai_policy_accepted'] = 'Whether the user has accepted the AI usage policy.';
 $string['privacy:metadata:mastermind_dashboard'] = 'Course and activity data is sent to the Mastermind Dashboard API for AI-powered content generation and analysis.';

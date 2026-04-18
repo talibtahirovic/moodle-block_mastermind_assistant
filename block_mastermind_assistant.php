@@ -96,8 +96,17 @@ class block_mastermind_assistant extends block_base {
         }
 
         $this->content = new stdClass();
-        
-        // Check if we're on the course management page
+
+        // Locked state: when the plugin is not yet configured, show a connect CTA
+        // on every page type. Site admins see the "Connect" button; regular
+        // teachers see a short message telling them to ask their administrator.
+        $apikey = get_config('block_mastermind_assistant', 'api_key');
+        $dashboardurl = get_config('block_mastermind_assistant', 'dashboard_url');
+        if (empty($apikey) || empty($dashboardurl)) {
+            return $this->get_connect_content();
+        }
+
+        // Check if we're on the course management page.
         if ($this->is_course_management_page()) {
             return $this->get_course_management_content();
         }
@@ -437,6 +446,34 @@ class block_mastermind_assistant extends block_base {
         }
 
         return false;
+    }
+
+    /**
+     * Render the locked "Connect to Mastermind" state when the plugin is not configured.
+     *
+     * @return stdClass
+     */
+    protected function get_connect_content(): stdClass {
+        $cancourseconfigure = has_capability('moodle/site:config', context_system::instance());
+
+        $data = (object) [
+            'can_configure' => $cancourseconfigure,
+        ];
+
+        $this->content->text = $this->page->get_renderer('block_mastermind_assistant')
+            ->render_from_template('block_mastermind_assistant/connect', $data);
+        $this->content->footer = '';
+
+        if ($cancourseconfigure) {
+            $returnurl = $this->page->url->out_as_local_url(false);
+            $this->page->requires->js_call_amd(
+                'block_mastermind_assistant/connect',
+                'init',
+                [$returnurl]
+            );
+        }
+
+        return $this->content;
     }
 
     /**
