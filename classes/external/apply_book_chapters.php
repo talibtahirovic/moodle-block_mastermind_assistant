@@ -41,7 +41,11 @@ use Exception;
  * Apply AI-generated book chapters by inserting them directly into the database.
  */
 class apply_book_chapters extends external_api {
-
+    /**
+     * Describe the parameters accepted by execute().
+     *
+     * @return \external_function_parameters
+     */
     public static function execute_parameters() {
         return new external_function_parameters([
             'courseid' => new external_value(PARAM_INT, 'Course ID'),
@@ -50,6 +54,11 @@ class apply_book_chapters extends external_api {
         ]);
     }
 
+    /**
+     * Execute the web service call.
+     *
+     * @return array
+     */
     public static function execute($courseid, $cmid, $chapters) {
         global $DB;
 
@@ -143,6 +152,11 @@ class apply_book_chapters extends external_api {
         ];
     }
 
+    /**
+     * Describe the return value of execute().
+     *
+     * @return \external_description
+     */
     public static function execute_returns() {
         return new external_single_structure([
             'success' => new external_value(PARAM_BOOL, 'Whether any chapters were created'),

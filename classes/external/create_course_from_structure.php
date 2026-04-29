@@ -45,7 +45,11 @@ use stdClass;
  * in previewonly mode, and creates the actual course.
  */
 class create_course_from_structure extends external_api {
-
+    /**
+     * Describe the parameters accepted by execute().
+     *
+     * @return \external_function_parameters
+     */
     public static function execute_parameters() {
         return new external_function_parameters([
             'structure' => new external_value(PARAM_RAW, 'JSON-encoded AI structure'),
@@ -53,6 +57,11 @@ class create_course_from_structure extends external_api {
         ]);
     }
 
+    /**
+     * Execute the web service call.
+     *
+     * @return array
+     */
     public static function execute($structure, $categoryid = 1) {
         @set_time_limit(300);
 
@@ -103,9 +112,8 @@ class create_course_from_structure extends external_api {
                 'coursename' => $course->fullname,
                 'courseurl' => (new \moodle_url('/course/view.php', ['id' => $course->id]))->out(false),
             ];
-
         } catch (Exception $e) {
-            error_log("Error creating course from structure: " . $e->getMessage());
+            debugging("Error creating course from structure: " . $e->getMessage());
             return [
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -113,6 +121,11 @@ class create_course_from_structure extends external_api {
         }
     }
 
+    /**
+     * Describe the return value of execute().
+     *
+     * @return \external_description
+     */
     public static function execute_returns() {
         return new external_single_structure([
             'success' => new external_value(PARAM_BOOL, 'Success status'),

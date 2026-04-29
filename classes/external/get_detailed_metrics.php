@@ -37,7 +37,6 @@ use external_single_structure;
  * External service class for getting detailed course metrics.
  */
 class get_detailed_metrics extends external_api {
-
     /**
      * Returns description of method parameters.
      *
@@ -62,12 +61,12 @@ class get_detailed_metrics extends external_api {
             'courseid' => $courseid,
         ]);
 
-        // Check capability
+        // Check capability.
         $context = \context_course::instance($params['courseid']);
         self::validate_context($context);
         require_capability('block/mastermind_assistant:view', $context);
 
-        // Calculate detailed metrics directly
+        // Calculate detailed metrics directly.
         $metrics = self::calculate_detailed_metrics($params['courseid']);
 
         return [
@@ -78,7 +77,7 @@ class get_detailed_metrics extends external_api {
 
     /**
      * Calculate detailed metrics for a course
-     * 
+     *
      * @param int $courseid
      * @return array
      */
@@ -120,7 +119,7 @@ class get_detailed_metrics extends external_api {
             'teacher_student_interactions' => 0,
         ];
 
-        // --- Category 1: Engagement & Participation ---
+        // Category 1 metrics: Engagement & Participation.
 
         // Enrollment count.
         $sql = "SELECT COUNT(DISTINCT ue.userid)
@@ -167,11 +166,14 @@ class get_detailed_metrics extends external_api {
             $metrics['dropout_point'] = $dropoutpoint->modname;
         }
 
-        // --- Category 2: Progress & Completion ---
+        // Category 2 metrics: Progress & Completion.
 
         // Course completion rate.
-        $completed = $DB->count_records_select('course_completions',
-            'course = ? AND timecompleted IS NOT NULL', [$courseid]);
+        $completed = $DB->count_records_select(
+            'course_completions',
+            'course = ? AND timecompleted IS NOT NULL',
+            [$courseid]
+        );
         if ($metrics['enrollment_count'] > 0) {
             $metrics['completion_rate'] = round(($completed / $metrics['enrollment_count']) * 100, 1);
         }
@@ -216,7 +218,7 @@ class get_detailed_metrics extends external_api {
             $metrics['most_incomplete_activity'] = $incomplete->modname;
         }
 
-        // --- Category 3: Assessment & Learning Outcomes ---
+        // Category 3 metrics: Assessment & Learning Outcomes.
 
         // Average quiz score.
         $sql = "SELECT AVG(CASE WHEN q.sumgrades > 0 THEN (qa.sumgrades / q.sumgrades) * 100 ELSE 0 END) AS avgscore
@@ -268,7 +270,7 @@ class get_detailed_metrics extends external_api {
                 WHERE q.course = ? AND qa.state = 'finished'
                 GROUP BY q.id, q.name";
         $quizzes = $DB->get_records_sql($sql, [$courseid]);
-        $metrics['quiz_performance'] = array_values(array_map(function($q) {
+        $metrics['quiz_performance'] = array_values(array_map(function ($q) {
             return ['name' => $q->name, 'avg_score' => round($q->avgscore, 1), 'attempts' => (int) $q->attempts];
         }, $quizzes));
 
@@ -279,7 +281,7 @@ class get_detailed_metrics extends external_api {
                 FROM {assign} a WHERE a.course = ?";
         $assigns = $DB->get_records_sql($sql, [$courseid]);
         $enrolled = $metrics['enrollment_count'];
-        $metrics['assignment_submissions'] = array_values(array_map(function($a) use ($enrolled) {
+        $metrics['assignment_submissions'] = array_values(array_map(function ($a) use ($enrolled) {
             $sub = (int) $a->submitted;
             return [
                 'name' => $a->name,
@@ -289,7 +291,7 @@ class get_detailed_metrics extends external_api {
             ];
         }, $assigns));
 
-        // --- Category 4: Satisfaction & Feedback ---
+        // Category 4 metrics: Satisfaction & Feedback.
 
         // Query feedback module if present.
         $avgfeedback = $DB->get_field_sql(
@@ -304,7 +306,7 @@ class get_detailed_metrics extends external_api {
             $metrics['satisfaction_score'] = round($avgfeedback, 1) . '/5';
         }
 
-        // --- Category 5: Retention & Dropout ---
+        // Category 5 metrics: Retention & Dropout.
 
         // Dropout rate (enrolled but not active in last 30 days).
         if ($metrics['enrollment_count'] > 0) {
@@ -332,7 +334,7 @@ class get_detailed_metrics extends external_api {
             }
         }
 
-        // --- Category 6: Interaction & Collaboration ---
+        // Category 6 metrics: Interaction & Collaboration.
 
         // Forum posts total.
         $sql = "SELECT COUNT(fp.id)
@@ -376,4 +378,3 @@ class get_detailed_metrics extends external_api {
         ]);
     }
 }
-

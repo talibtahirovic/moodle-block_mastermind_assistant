@@ -43,17 +43,31 @@ use stdClass;
  * Uses helper methods from create_course_with_ai for course structure application.
  */
 class create_course_from_document extends external_api {
-
+    /**
+     * Describe the parameters accepted by execute().
+     *
+     * @return \external_function_parameters
+     */
     public static function execute_parameters() {
         return new external_function_parameters([
             'filedata' => new external_value(PARAM_RAW, 'Base64-encoded file content'),
             'filetype' => new external_value(PARAM_TEXT, 'MIME type of the file'),
             'filename' => new external_value(PARAM_TEXT, 'Original file name'),
             'categoryid' => new external_value(PARAM_INT, 'Category ID', VALUE_DEFAULT, 1),
-            'previewonly' => new external_value(PARAM_BOOL, 'Return structure preview without creating course', VALUE_DEFAULT, false),
+            'previewonly' => new external_value(
+                PARAM_BOOL,
+                'Return structure preview without creating course',
+                VALUE_DEFAULT,
+                false
+            ),
         ]);
     }
 
+    /**
+     * Execute the web service call.
+     *
+     * @return array
+     */
     public static function execute($filedata, $filetype, $filename, $categoryid = 1, $previewonly = false) {
         global $DB;
 
@@ -142,9 +156,8 @@ class create_course_from_document extends external_api {
                 'coursename' => $course->fullname,
                 'courseurl' => (new \moodle_url('/course/view.php', ['id' => $course->id]))->out(false),
             ];
-
         } catch (Exception $e) {
-            error_log("Error creating course from document: " . $e->getMessage());
+            debugging("Error creating course from document: " . $e->getMessage());
             return [
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -152,6 +165,11 @@ class create_course_from_document extends external_api {
         }
     }
 
+    /**
+     * Describe the return value of execute().
+     *
+     * @return \external_description
+     */
     public static function execute_returns() {
         return new external_single_structure([
             'success' => new external_value(PARAM_BOOL, 'Success status'),

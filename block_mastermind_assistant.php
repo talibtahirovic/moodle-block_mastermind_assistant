@@ -22,10 +22,10 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
-
+/**
+ * Mastermind Assistant block class.
+ */
 class block_mastermind_assistant extends block_base {
-
     /**
      * Initialize the block.
      */
@@ -37,19 +37,17 @@ class block_mastermind_assistant extends block_base {
      * Specialize the title based on context.
      */
     public function specialization() {
-        global $PAGE;
-        
         if (empty($this->config)) {
             $this->config = new stdClass();
         }
-        
-        // Set title based on context
+
+        // Set title based on context.
         if ($this->is_course_management_page()) {
             $this->title = get_string('pluginname', 'block_mastermind_assistant');
         } else if ($this->is_mod_edit_page()) {
             $this->title = get_string('ai_content_assistant', 'block_mastermind_assistant');
         } else {
-            // Course view - show as "Insights"
+            // Course view - show as "Insights".
             $this->title = get_string('insights_title', 'block_mastermind_assistant');
         }
     }
@@ -61,7 +59,7 @@ class block_mastermind_assistant extends block_base {
      */
     public function applicable_formats() {
         return [
-            'all' => true, // Make available everywhere
+            'all' => true,
         ];
     }
 
@@ -89,7 +87,7 @@ class block_mastermind_assistant extends block_base {
      * @return stdClass
      */
     public function get_content() {
-        global $COURSE, $PAGE;
+        global $COURSE;
 
         if ($this->content !== null) {
             return $this->content;
@@ -126,17 +124,18 @@ class block_mastermind_assistant extends block_base {
         // Site-level page: show link to course management.
         if (empty($COURSE) || $COURSE->id == SITEID) {
             $systemcontext = context_system::instance();
-            if (has_capability('moodle/course:create', $systemcontext) ||
-                has_capability('moodle/category:manage', $systemcontext)) {
+            if (
+                has_capability('moodle/course:create', $systemcontext) ||
+                has_capability('moodle/category:manage', $systemcontext)
+            ) {
                 $links = [[
                     'url' => (new \moodle_url('/course/management.php'))->out(false),
                     'label' => get_string('nav_manage_courses', 'block_mastermind_assistant'),
                     'icon' => 'folder',
                 ]];
 
-
                 $data = (object) ['nav_links' => $links];
-                $this->content->text = $PAGE->get_renderer('block_mastermind_assistant')
+                $this->content->text = $this->page->get_renderer('block_mastermind_assistant')
                     ->render_from_template('block_mastermind_assistant/site_nav', $data);
             } else {
                 $this->content->text = '';
@@ -154,9 +153,9 @@ class block_mastermind_assistant extends block_base {
             return $this->content;
         }
 
-        // Test OpenAI connection
+        // Test OpenAI connection.
         $aistatus = self::test_ai_connection();
-        
+
         $metrics = self::calculate_metrics($COURSE->id);
 
         $data = (object) [
@@ -171,12 +170,13 @@ class block_mastermind_assistant extends block_base {
             'ai_message' => $aistatus['message'],
         ];
 
-        $this->content->text = $PAGE->get_renderer('block_mastermind_assistant')->render_from_template('block_mastermind_assistant/content', $data);
+        $this->content->text = $this->page->get_renderer('block_mastermind_assistant')
+            ->render_from_template('block_mastermind_assistant/content', $data);
         $this->content->footer = '';
-        
-        // Include the AMD module for handling recommendations button
-        $PAGE->requires->js_call_amd('block_mastermind_assistant/recommendations', 'init', [$COURSE->id]);
-        
+
+        // Include the AMD module for handling recommendations button.
+        $this->page->requires->js_call_amd('block_mastermind_assistant/recommendations', 'init', [$COURSE->id]);
+
         return $this->content;
     }
 
@@ -188,36 +188,30 @@ class block_mastermind_assistant extends block_base {
      * @return bool
      */
     protected function is_mod_page(): bool {
-        global $PAGE;
-
-        $pageurl = $PAGE->url->out_as_local_url(false);
+        $pageurl = $this->page->url->out_as_local_url(false);
 
         // Any /mod/xxx/ page or the modedit.php settings page.
         return (strpos($pageurl, '/mod/') !== false || strpos($pageurl, '/course/modedit.php') !== false);
     }
 
     /**
-     * Check if we're on the course management page
+     * Check if we're on the course management page.
      *
      * @return bool
      */
     protected function is_course_management_page(): bool {
-        global $PAGE;
-        
-        // Check if the page URL contains /course/management.php
-        $pageurl = $PAGE->url->out_as_local_url(false);
+        // Check if the page URL contains /course/management.php.
+        $pageurl = $this->page->url->out_as_local_url(false);
         return (strpos($pageurl, '/course/management.php') !== false);
     }
 
     /**
-     * Get content for course management page
+     * Get content for course management page.
      *
      * @return stdClass
      */
     protected function get_course_management_content(): stdClass {
-        global $PAGE;
-        
-        // Check if user has capability to manage courses
+        // Check if user has capability to manage courses.
         $systemcontext = context_system::instance();
         if (!has_capability('moodle/course:create', $systemcontext)) {
             $this->content->text = '';
@@ -225,7 +219,7 @@ class block_mastermind_assistant extends block_base {
             return $this->content;
         }
 
-        // Test OpenAI connection
+        // Test OpenAI connection.
         $aistatus = self::test_ai_connection();
 
         $data = (object) [
@@ -237,10 +231,11 @@ class block_mastermind_assistant extends block_base {
             'is_ai_error' => ($aistatus['status'] === 'error'),
         ];
 
-        // Include custom CSS for professional styling
-        $this->content->text = $PAGE->get_renderer('block_mastermind_assistant')->render_from_template('block_mastermind_assistant/course_search', $data);
+        // Include custom CSS for professional styling.
+        $this->content->text = $this->page->get_renderer('block_mastermind_assistant')
+            ->render_from_template('block_mastermind_assistant/course_search', $data);
         $this->content->footer = '';
-        
+
         // Load categories server-side for the filter dropdown.
         $categories = \core_course_category::make_categories_list();
         $catlist = [];
@@ -248,9 +243,9 @@ class block_mastermind_assistant extends block_base {
             $catlist[] = ['id' => (int) $catid, 'name' => $catname];
         }
 
-        // Include the AMD module for handling course search
-        $PAGE->requires->js_call_amd('block_mastermind_assistant/course_search', 'init', [$catlist]);
-        
+        // Include the AMD module for handling course search.
+        $this->page->requires->js_call_amd('block_mastermind_assistant/course_search', 'init', [$catlist]);
+
         return $this->content;
     }
 
@@ -303,13 +298,20 @@ class block_mastermind_assistant extends block_base {
         $totallearners = (int)$DB->get_field_sql($enrolledsql, [$courseid]);
 
         if ($totallearners) {
-            $completed = $DB->count_records_select('course_completions', 'course = ? AND timecompleted IS NOT NULL', [$courseid]);
+            $completed = $DB->count_records_select(
+                'course_completions',
+                'course = ? AND timecompleted IS NOT NULL',
+                [$courseid]
+            );
             $metrics['completionrate'] = round($completed / $totallearners * 100);
         }
 
         // 2. Average final grade.
         if ($gradeitem = $DB->get_record('grade_items', ['courseid' => $courseid, 'itemtype' => 'course'])) {
-            $avggrade = $DB->get_field_sql('SELECT AVG(finalgrade) FROM {grade_grades} WHERE itemid = ? AND finalgrade IS NOT NULL', [$gradeitem->id]);
+            $avggrade = $DB->get_field_sql(
+                'SELECT AVG(finalgrade) FROM {grade_grades} WHERE itemid = ? AND finalgrade IS NOT NULL',
+                [$gradeitem->id]
+            );
             if ($avggrade !== null && $gradeitem->grademax > 0) {
                 $scale = $gradeitem->grademax - $gradeitem->grademin;
                 if ($scale > 0) {
@@ -331,14 +333,25 @@ class block_mastermind_assistant extends block_base {
         $lowest = 101;
         $lowestsectionnum = null;
         foreach ($sections as $section) {
-            $cmids = $DB->get_fieldset_sql('SELECT id FROM {course_modules} WHERE course = ? AND section = ? AND visible = 1', [$courseid, $section->id]);
+            $cmids = $DB->get_fieldset_sql(
+                'SELECT id FROM {course_modules} WHERE course = ? AND section = ? AND visible = 1',
+                [$courseid, $section->id]
+            );
             if (!$cmids) {
                 continue;
             }
 
-            list($insql, $inparams) = $DB->get_in_or_equal($cmids, SQL_PARAMS_NAMED);
-            $completed = $DB->count_records_select('course_modules_completion', "coursemoduleid $insql AND completionstate = 1", $inparams);
-            $possible  = $DB->count_records_select('course_modules_completion', "coursemoduleid $insql", $inparams);
+            [$insql, $inparams] = $DB->get_in_or_equal($cmids, SQL_PARAMS_NAMED);
+            $completed = $DB->count_records_select(
+                'course_modules_completion',
+                "coursemoduleid $insql AND completionstate = 1",
+                $inparams
+            );
+            $possible = $DB->count_records_select(
+                'course_modules_completion',
+                "coursemoduleid $insql",
+                $inparams
+            );
             if ($possible) {
                 $rate = $completed / $possible * 100;
                 if ($rate < $lowest) {
@@ -403,9 +416,9 @@ class block_mastermind_assistant extends block_base {
      * @return bool
      */
     protected function is_mod_edit_page(): bool {
-        global $PAGE, $DB;
+        global $DB;
 
-        $pageurl = $PAGE->url->out_as_local_url(false);
+        $pageurl = $this->page->url->out_as_local_url(false);
         $supported = ['page', 'quiz', 'assign', 'forum', 'lesson', 'glossary', 'book', 'url'];
 
         // Settings edit form — only for supported module types.
@@ -502,7 +515,7 @@ class block_mastermind_assistant extends block_base {
      * @return stdClass
      */
     protected function get_mod_draft_content(): stdClass {
-        global $PAGE, $COURSE, $DB;
+        global $COURSE, $DB;
 
         // Check if user has capability to edit.
         $context = context_course::instance($COURSE->id);
@@ -512,9 +525,9 @@ class block_mastermind_assistant extends block_base {
             return $this->content;
         }
 
-        $cmid = optional_param('update', 0, PARAM_INT); // modedit.php
-        $add = optional_param('add', '', PARAM_ALPHA);   // Adding new
-        $id = optional_param('id', 0, PARAM_INT);        // View pages
+        $cmid = optional_param('update', 0, PARAM_INT);
+        $add = optional_param('add', '', PARAM_ALPHA);
+        $id = optional_param('id', 0, PARAM_INT);
 
         // Also check cmid parameter (quiz/edit.php, lesson/edit.php).
         if (!$cmid && !$id) {
@@ -533,60 +546,60 @@ class block_mastermind_assistant extends block_base {
         if ($cmid) {
             // Editing existing module via modedit.php.
             $cm = get_coursemodule_from_id('', $cmid, 0, false, MUST_EXIST);
-            list($modname, $pagename, $pagedescription, $instanceid) = $this->load_module_data($cm);
+            [$modname, $pagename, $pagedescription, $instanceid] = $this->load_module_data($cm);
         } else if ($add) {
             $modname = $add;
         } else if ($id) {
             // View page — look up the course module once, then check if it's a supported type.
             $cm = get_coursemodule_from_id('', $id, 0, false, IGNORE_MISSING);
             if ($cm) {
-                list($modname, $pagename, $pagedescription, $instanceid) = $this->load_module_data($cm);
+                [$modname, $pagename, $pagedescription, $instanceid] = $this->load_module_data($cm);
             }
         }
 
         // Only show for supported module types.
-        $supported_modules = ['page', 'quiz', 'assign', 'forum', 'lesson', 'glossary', 'book', 'url'];
-        if (!in_array($modname, $supported_modules)) {
+        $supportedmodules = ['page', 'quiz', 'assign', 'forum', 'lesson', 'glossary', 'book', 'url'];
+        if (!in_array($modname, $supportedmodules)) {
             $this->content->text = '';
             $this->content->footer = '';
             return $this->content;
         }
 
         $aistatus = self::test_ai_connection();
-        $pageurl = $PAGE->url->out_as_local_url(false);
+        $pageurl = $this->page->url->out_as_local_url(false);
 
         // For Page, Assign, URL — we need the settings edit page.
         // For Forum, Glossary, Book, Lesson — they work on their main pages.
-        $direct_action_modules = ['forum', 'glossary', 'book', 'lesson'];
-        $is_direct_action = in_array($modname, $direct_action_modules);
-        $is_on_edit_page = (strpos($pageurl, '/course/modedit.php') !== false);
+        $directactionmodules = ['forum', 'glossary', 'book', 'lesson'];
+        $isdirectaction = in_array($modname, $directactionmodules);
+        $isonedit = (strpos($pageurl, '/course/modedit.php') !== false);
 
         // For editor-based modules, build edit URL if on view page.
-        $edit_url = '';
-        if (!$is_direct_action && !$is_on_edit_page && $id) {
-            $edit_url = (new \moodle_url('/course/modedit.php', ['update' => $id, 'return' => 1]))->out(false);
+        $editurl = '';
+        if (!$isdirectaction && !$isonedit && $id) {
+            $editurl = (new \moodle_url('/course/modedit.php', ['update' => $id, 'return' => 1]))->out(false);
         }
 
         // For direct-action modules on their settings page, redirect to main page.
-        $main_page_url = '';
-        if ($is_direct_action && $is_on_edit_page && $cm) {
-            $main_page_url = (new \moodle_url('/mod/' . $modname . '/view.php', ['id' => $cm->id]))->out(false);
+        $mainpageurl = '';
+        if ($isdirectaction && $isonedit && $cm) {
+            $mainpageurl = (new \moodle_url('/mod/' . $modname . '/view.php', ['id' => $cm->id]))->out(false);
             if ($modname === 'lesson') {
-                $main_page_url = (new \moodle_url('/mod/lesson/edit.php', ['id' => $cm->id]))->out(false);
+                $mainpageurl = (new \moodle_url('/mod/lesson/edit.php', ['id' => $cm->id]))->out(false);
             }
         }
 
         // Get existing content counts for direct-action modules.
-        $existing_count = 0;
-        if ($is_direct_action && $instanceid) {
+        $existingcount = 0;
+        if ($isdirectaction && $instanceid) {
             if ($modname === 'forum') {
-                $existing_count = (int) $DB->count_records('forum_discussions', ['forum' => $instanceid]);
+                $existingcount = (int) $DB->count_records('forum_discussions', ['forum' => $instanceid]);
             } else if ($modname === 'glossary') {
-                $existing_count = (int) $DB->count_records('glossary_entries', ['glossaryid' => $instanceid]);
+                $existingcount = (int) $DB->count_records('glossary_entries', ['glossaryid' => $instanceid]);
             } else if ($modname === 'book') {
-                $existing_count = (int) $DB->count_records('book_chapters', ['bookid' => $instanceid]);
+                $existingcount = (int) $DB->count_records('book_chapters', ['bookid' => $instanceid]);
             } else if ($modname === 'lesson') {
-                $existing_count = (int) $DB->count_records('lesson_pages', ['lessonid' => $instanceid]);
+                $existingcount = (int) $DB->count_records('lesson_pages', ['lessonid' => $instanceid]);
             }
         }
 
@@ -613,18 +626,18 @@ class block_mastermind_assistant extends block_base {
             'ai_status' => $aistatus['status'],
             'ai_message' => $aistatus['message'],
             'is_ai_success' => ($aistatus['status'] === 'success'),
-            'is_on_edit_page' => $is_on_edit_page,
-            'is_direct_action' => $is_direct_action,
-            'edit_url' => $edit_url,
-            'main_page_url' => $main_page_url,
-            'existing_count' => $existing_count,
+            'is_on_edit_page' => $isonedit,
+            'is_direct_action' => $isdirectaction,
+            'edit_url' => $editurl,
+            'main_page_url' => $mainpageurl,
+            'existing_count' => $existingcount,
         ];
 
-        $this->content->text = $PAGE->get_renderer('block_mastermind_assistant')
+        $this->content->text = $this->page->get_renderer('block_mastermind_assistant')
             ->render_from_template('block_mastermind_assistant/mod_draft', $data);
         $this->content->footer = '';
 
-        $PAGE->requires->js_call_amd('block_mastermind_assistant/mod_draft', 'init', [$COURSE->id]);
+        $this->page->requires->js_call_amd('block_mastermind_assistant/mod_draft', 'init', [$COURSE->id]);
 
         return $this->content;
     }

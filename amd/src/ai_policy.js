@@ -28,16 +28,12 @@ function($, Ajax, Notification, ModalFactory, ModalEvents, Str) {
      * @return {Promise} Promise resolving to acceptance status
      */
     function checkPolicyAcceptance() {
-        try {
-            var requests = Ajax.call([{
-                methodname: 'block_mastermind_assistant_check_ai_policy',
-                args: {}
-            }]);
+        var requests = Ajax.call([{
+            methodname: 'block_mastermind_assistant_check_ai_policy',
+            args: {}
+        }]);
 
-            return requests[0];
-        } catch (error) {
-            throw error;
-        }
+        return requests[0];
     }
 
     /**

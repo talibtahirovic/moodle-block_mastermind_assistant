@@ -33,6 +33,9 @@ class module_factory {
     /** @var \stdClass $section */
     private $section;
 
+    /**
+     * Constructor.
+     */
     public function __construct(\stdClass $course, \stdClass $section) {
         $this->course  = $course;
         $this->section = $section;
@@ -54,13 +57,13 @@ class module_factory {
         $name = $activitydata['name'] ?? 'Untitled activity';
         $intro = $activitydata['intro'] ?? '';
 
-        // Check if module exists and is enabled
+        // Check if module exists and is enabled.
         $module = $DB->get_record('modules', ['name' => $modname, 'visible' => 1]);
         if (!$module) {
             return false;
         }
 
-        // Build moduleinfo object with all required fields
+        // Build moduleinfo object with all required fields.
         $moduleinfo = $this->build_moduleinfo($modname, $module->id, $name, $intro, $activitydata);
         if (!$moduleinfo) {
             return false;
@@ -75,7 +78,7 @@ class module_factory {
                 return false;
             }
         } catch (\Throwable $e) {
-            \error_log("Exception creating {$modname} '{$name}': " . $e->getMessage());
+            debugging("Exception creating {$modname} '{$name}': " . $e->getMessage());
             return false;
         }
     }
@@ -94,14 +97,14 @@ class module_factory {
         $info->introformat = FORMAT_HTML;
         $info->visible = 1;
         $info->visibleoncoursepage = 1;
-        $info->cmidnumber = ''; // Course module ID number (optional identifier)
+        $info->cmidnumber = ''; // Course module ID number (optional identifier).
         $info->groupmode = 0;
         $info->groupingid = 0;
         $info->completion = 0;
         $info->completionview = 0;
         $info->completionexpected = 0;
 
-        // Add module-specific required fields
+        // Add module-specific required fields.
         switch ($modname) {
             case 'assign':
                 $info->grade = 100;
@@ -112,7 +115,7 @@ class module_factory {
                 $info->submissiondrafts = 0;
                 $info->requiresubmissionstatement = 0;
                 $info->sendnotifications = 0;
-                $info->sendlatenotifications = 0; // REQUIRED: Missing field causing NULL error
+                $info->sendlatenotifications = 0; // REQUIRED: Missing field causing NULL error.
                 $info->sendstudentnotifications = 0;
                 $info->teamsubmission = 0;
                 $info->requireallteammemberssubmit = 0;
@@ -149,7 +152,7 @@ class module_factory {
                 $info->allowupdate = 0;
                 $info->showunanswered = 0;
                 $info->limitanswers = 0;
-                // Need at least one option
+                // Need at least one option.
                 $info->option = ['Option 1', 'Option 2'];
                 $info->limit = [0, 0];
                 break;
@@ -164,23 +167,23 @@ class module_factory {
                 $info->multiple_submit = 0;
                 $info->autonumbering = 1;
                 $info->page_after_submit_editor = ['text' => '', 'format' => FORMAT_HTML, 'itemid' => 0];
-                $info->page_after_submit = ''; // Also needed for database
+                $info->page_after_submit = ''; // Also needed for database.
                 $info->page_after_submitformat = FORMAT_HTML;
-                $info->site_after_submit = ''; // URL for redirect after submit
+                $info->site_after_submit = ''; // URL for redirect after submit.
                 $info->publish_stats = 0;
                 $info->timeopen = 0;
                 $info->timeclose = 0;
                 break;
 
             case 'folder':
-                // No extra required fields
+                // No extra required fields.
                 break;
 
             case 'forum':
                 $info->type = 'general';
                 $info->assessed = 0;
                 $info->scale = 0;
-                $info->grade_forum = 0; // Forum grade
+                $info->grade_forum = 0; // Forum grade.
                 $info->maxbytes = 0;
                 $info->maxattachments = 1;
                 $info->forcesubscribe = 0;
@@ -200,7 +203,7 @@ class module_factory {
                 $info->editalways = 0;
                 $info->approved = 1;
                 $info->globalglossary = 0;
-                $info->assessed = 0; // Rating/grading
+                $info->assessed = 0; // Rating/grading.
                 $info->scale = 0;
                 break;
 
@@ -212,11 +215,11 @@ class module_factory {
                 break;
 
             case 'imscp':
-                // No extra required fields beyond intro
+                // No extra required fields beyond intro.
                 break;
 
             case 'label':
-                // Label uses intro as content
+                // Label uses intro as content.
                 break;
 
             case 'lesson':
@@ -233,9 +236,9 @@ class module_factory {
                 $info->maxattempts = 1;
                 $info->retake = 1;
                 $info->minquestions = 0;
-                $info->mediafile = ''; // Media file path
-                $info->available = 0; // Availability date
-                $info->deadline = 0; // Deadline date
+                $info->mediafile = ''; // Media file path.
+                $info->available = 0; // Availability date.
+                $info->deadline = 0; // Deadline date.
                 break;
 
             case 'lti':
@@ -254,8 +257,8 @@ class module_factory {
                 $info->contentformat = FORMAT_HTML;
                 $info->display = 5;
                 $info->displayoptions = 'a:1:{s:12:"printheading";s:1:"1";}';
-                $info->printintro = 1; // Display description on course page
-                $info->printlastmodified = 0; // Display last modified date
+                $info->printintro = 1; // Display description on course page.
+                $info->printlastmodified = 0; // Display last modified date.
                 break;
 
             case 'quiz':
@@ -286,7 +289,7 @@ class module_factory {
                 $info->grade = 100;
                 $info->showuserpicture = 0;
                 $info->showblocks = 0;
-                $info->quizpassword = ''; // Note: quiz module expects 'quizpassword' not 'password'
+                $info->quizpassword = ''; // Note: quiz module expects 'quizpassword' not 'password'.
                 $info->subnet = '';
                 $info->delay1 = 0;
                 $info->delay2 = 0;
@@ -343,14 +346,14 @@ class module_factory {
                 $info->nattachments = 0;
                 $info->submissiontypetext = 1;
                 $info->submissiontypefile = 1;
-                // Required editor fields with itemid
+                // Required editor fields with itemid.
                 $info->instructauthorseditor = ['text' => '', 'format' => FORMAT_HTML, 'itemid' => 0];
                 $info->instructreviewerseditor = ['text' => '', 'format' => FORMAT_HTML, 'itemid' => 0];
                 $info->conclusioneditor = ['text' => '', 'format' => FORMAT_HTML, 'itemid' => 0];
-                // Grade categories
+                // Grade categories.
                 $info->gradecategory = 0;
                 $info->gradinggradecategory = 0;
-                // Date fields (0 = no restriction)
+                // Date fields (0 = no restriction).
                 $info->submissionstart = 0;
                 $info->submissionend = 0;
                 $info->assessmentstart = 0;

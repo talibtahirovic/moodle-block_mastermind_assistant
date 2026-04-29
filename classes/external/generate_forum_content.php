@@ -35,8 +35,15 @@ use external_value;
 use context_course;
 use Exception;
 
+/**
+ * External API for generate forum content.
+ */
 class generate_forum_content extends external_api {
-
+    /**
+     * Describe the parameters accepted by execute().
+     *
+     * @return \external_function_parameters
+     */
     public static function execute_parameters() {
         return new external_function_parameters([
             'courseid' => new external_value(PARAM_INT, 'Course ID'),
@@ -51,6 +58,11 @@ class generate_forum_content extends external_api {
         ]);
     }
 
+    /**
+     * Execute the web service call.
+     *
+     * @return array
+     */
     public static function execute(
         $courseid,
         $coursename,
@@ -111,7 +123,6 @@ class generate_forum_content extends external_api {
                 'participation_guidelines' => json_encode($response['participation_guidelines'] ?? []),
                 'message' => 'Forum content generated successfully',
             ];
-
         } catch (Exception $e) {
             return [
                 'success' => false,
@@ -123,6 +134,11 @@ class generate_forum_content extends external_api {
         }
     }
 
+    /**
+     * Describe the return value of execute().
+     *
+     * @return \external_description
+     */
     public static function execute_returns() {
         return new external_single_structure([
             'success' => new external_value(PARAM_BOOL, 'Whether the operation was successful'),

@@ -38,8 +38,15 @@ use context_course;
 use context_module;
 use Exception;
 
+/**
+ * External API for generate quiz questions.
+ */
 class generate_quiz_questions extends external_api {
-
+    /**
+     * Describe the parameters accepted by execute().
+     *
+     * @return \external_function_parameters
+     */
     public static function execute_parameters() {
         return new external_function_parameters([
             'courseid' => new external_value(PARAM_INT, 'Course ID'),
@@ -53,9 +60,17 @@ class generate_quiz_questions extends external_api {
             'courseactivities' => new external_value(PARAM_RAW, 'JSON array of course activity names', VALUE_DEFAULT, '[]'),
             'previewonly' => new external_value(PARAM_BOOL, 'If true, return questions without inserting', VALUE_DEFAULT, true),
             'selectedquestions' => new external_value(PARAM_RAW, 'JSON array of selected questions to insert', VALUE_DEFAULT, ''),
+            'filedata' => new external_value(PARAM_RAW, 'Base64-encoded source document', VALUE_DEFAULT, ''),
+            'filetype' => new external_value(PARAM_TEXT, 'MIME type of source document', VALUE_DEFAULT, ''),
+            'filename' => new external_value(PARAM_TEXT, 'Original file name', VALUE_DEFAULT, ''),
         ]);
     }
 
+    /**
+     * Execute the web service call.
+     *
+     * @return array
+     */
     public static function execute(
         $courseid,
         $quizid,
@@ -67,11 +82,14 @@ class generate_quiz_questions extends external_api {
         $sectionname = '',
         $courseactivities = '[]',
         $previewonly = true,
-        $selectedquestions = ''
+        $selectedquestions = '',
+        $filedata = '',
+        $filetype = '',
+        $filename = ''
     ) {
         global $DB;
 
-        @set_time_limit(300);
+        @set_time_limit(600);
 
         $params = self::validate_parameters(self::execute_parameters(), [
             'courseid' => $courseid,
@@ -85,6 +103,9 @@ class generate_quiz_questions extends external_api {
             'courseactivities' => $courseactivities,
             'previewonly' => $previewonly,
             'selectedquestions' => $selectedquestions,
+            'filedata' => $filedata,
+            'filetype' => $filetype,
+            'filename' => $filename,
         ]);
 
         $context = context_course::instance($params['courseid']);
@@ -127,28 +148,66 @@ class generate_quiz_questions extends external_api {
             // Phase 1: Generate questions via AI.
             $existingquestions = self::get_existing_quiz_questions($quiz);
 
-            // Gather course activities for context if not provided.
-            $activities = json_decode($params['courseactivities'], true) ?: [];
-            if (empty($activities)) {
-                $modinfo = get_fast_modinfo($params['courseid']);
-                foreach ($modinfo->get_cms() as $cminfo) {
-                    if ($cminfo->visible && $cminfo->has_view()) {
-                        $activities[] = $cminfo->name . ' (' . $cminfo->modname . ')';
+            $client = new \block_mastermind_assistant\api_client();
+
+            if (!empty($params['filedata'])) {
+                // Source-document path: validate file first, then route to the
+                // document-aware endpoint. Skips course-activity context since
+                // the document itself is the authoritative source.
+                $allowedtypes = [
+                    'application/pdf',
+                    'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                    'text/plain',
+                ];
+                if (!in_array($params['filetype'], $allowedtypes)) {
+                    throw new Exception('Unsupported file type. Please upload a PDF, DOCX, or TXT file.');
+                }
+                $rawdata = base64_decode($params['filedata'], true);
+                if ($rawdata === false) {
+                    throw new Exception('Invalid file data.');
+                }
+                $rawsize = strlen($rawdata);
+                if ($rawsize > 10 * 1024 * 1024) {
+                    throw new Exception('File exceeds maximum size of 10MB.');
+                }
+                if ($rawsize < 100) {
+                    throw new Exception('File appears to be empty or too small.');
+                }
+
+                $response = $client->generate_quiz_from_document(
+                    $params['quizname'],
+                    $params['quizdescription'],
+                    $params['filedata'],
+                    $params['filetype'],
+                    $params['filename'],
+                    $existingquestions,
+                    $params['difficultylevel'],
+                    $params['questioncount'],
+                    $params['academiclevel']
+                );
+            } else {
+                // Gather course activities for context if not provided.
+                $activities = json_decode($params['courseactivities'], true) ?: [];
+                if (empty($activities)) {
+                    $modinfo = get_fast_modinfo($params['courseid']);
+                    foreach ($modinfo->get_cms() as $cminfo) {
+                        if ($cminfo->visible && $cminfo->has_view()) {
+                            $activities[] = $cminfo->name . ' (' . $cminfo->modname . ')';
+                        }
                     }
                 }
-            }
 
-            $client = new \block_mastermind_assistant\api_client();
-            $response = $client->generate_quiz(
-                $params['quizname'],
-                $params['quizdescription'],
-                $existingquestions,
-                $params['difficultylevel'],
-                $params['questioncount'],
-                $params['academiclevel'],
-                $params['sectionname'],
-                $activities
-            );
+                $response = $client->generate_quiz(
+                    $params['quizname'],
+                    $params['quizdescription'],
+                    $existingquestions,
+                    $params['difficultylevel'],
+                    $params['questioncount'],
+                    $params['academiclevel'],
+                    $params['sectionname'],
+                    $activities
+                );
+            }
 
             $questions = $response['questions'] ?? [];
 
@@ -172,9 +231,8 @@ class generate_quiz_questions extends external_api {
                 'questions' => json_encode($createdquestions),
                 'message' => $newcount . ' question' . ($newcount != 1 ? 's' : '') . ' added successfully',
             ];
-
         } catch (Exception $e) {
-            error_log("generate_quiz_questions error: " . $e->getMessage());
+            debugging("generate_quiz_questions error: " . $e->getMessage());
             return [
                 'success' => false,
                 'questioncount' => 0,
@@ -184,6 +242,9 @@ class generate_quiz_questions extends external_api {
         }
     }
 
+    /**
+     * Get existing quiz questions.
+     */
     protected static function get_existing_quiz_questions($quiz) {
         global $DB, $USER, $CFG;
 
@@ -215,14 +276,16 @@ class generate_quiz_questions extends external_api {
                     'type' => $questiondata->qtype,
                 ];
             }
-
         } catch (Exception $e) {
-            error_log("Error retrieving existing questions: " . $e->getMessage());
+            debugging("Error retrieving existing questions: " . $e->getMessage());
         }
 
         return $existingquestions;
     }
 
+    /**
+     * Create moodle questions.
+     */
     protected static function create_moodle_questions($questions, $quiz, $cm, $context) {
         global $DB, $CFG;
         require_once($CFG->dirroot . '/question/engine/bank.php');
@@ -263,9 +326,8 @@ class generate_quiz_questions extends external_api {
                         'type' => $qdata['type'],
                     ];
                 }
-
             } catch (Exception $e) {
-                error_log("Error creating question: " . $e->getMessage());
+                debugging("Error creating question: " . $e->getMessage());
             }
         }
 
@@ -282,6 +344,9 @@ class generate_quiz_questions extends external_api {
         return $createdquestions;
     }
 
+    /**
+     * Create single question.
+     */
     protected static function create_single_question($qdata, $categoryid, $modulecontext) {
         global $USER;
 
@@ -332,7 +397,6 @@ class generate_quiz_questions extends external_api {
                 $fromform->fraction[] = $ans['fraction'];
                 $fromform->feedback[] = ['text' => $ans['feedback'] ?? '', 'format' => FORMAT_HTML];
             }
-
         } else if ($qdata['type'] === 'truefalse') {
             $trueanswer = null;
             $falseanswer = null;
@@ -348,7 +412,6 @@ class generate_quiz_questions extends external_api {
             $fromform->correctanswer = ($trueanswer && $trueanswer['fraction'] > 0) ? 1 : 0;
             $fromform->feedbacktrue = ['text' => $trueanswer['feedback'] ?? 'Correct!', 'format' => FORMAT_HTML];
             $fromform->feedbackfalse = ['text' => $falseanswer['feedback'] ?? 'Incorrect!', 'format' => FORMAT_HTML];
-
         } else if ($qdata['type'] === 'shortanswer') {
             $fromform->usecase = 0;
             $fromform->answer = [];
@@ -360,7 +423,6 @@ class generate_quiz_questions extends external_api {
                 $fromform->fraction[] = $ans['fraction'];
                 $fromform->feedback[] = ['text' => $ans['feedback'] ?? '', 'format' => FORMAT_HTML];
             }
-
         } else if ($qdata['type'] === 'match') {
             $fromform->shuffleanswers = 1;
             $fromform->correctfeedback = ['text' => 'Your answer is correct.', 'format' => FORMAT_HTML];
@@ -375,7 +437,6 @@ class generate_quiz_questions extends external_api {
                 $fromform->subquestions[] = ['text' => $sq['question'], 'format' => FORMAT_HTML];
                 $fromform->subanswers[] = $sq['answer'];
             }
-
         } else if ($qdata['type'] === 'gapselect') {
             $fromform->shuffleanswers = 1;
             $fromform->correctfeedback = ['text' => 'Your answer is correct.', 'format' => FORMAT_HTML];
@@ -390,7 +451,6 @@ class generate_quiz_questions extends external_api {
                     'choicegroup' => $choice['choicegroup'],
                 ];
             }
-
         } else if ($qdata['type'] === 'numerical') {
             $fromform->answer = [];
             $fromform->fraction = [];
@@ -420,6 +480,11 @@ class generate_quiz_questions extends external_api {
         return $savedquestion->id;
     }
 
+    /**
+     * Describe the return value of execute().
+     *
+     * @return \external_description
+     */
     public static function execute_returns() {
         return new external_single_structure([
             'success' => new external_value(PARAM_BOOL, 'Whether the operation was successful'),

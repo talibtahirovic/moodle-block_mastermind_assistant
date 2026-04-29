@@ -39,17 +39,29 @@ use context_course;
  * Sends the feedback to the dashboard for action consumption and training data collection.
  */
 class log_generation_feedback extends external_api {
-
+    /**
+     * Describe the parameters accepted by execute().
+     *
+     * @return \external_function_parameters
+     */
     public static function execute_parameters() {
         return new external_function_parameters([
             'courseid' => new external_value(PARAM_INT, 'Course ID'),
             'action' => new external_value(PARAM_ALPHA, 'User action: generate, apply, regenerate, or discard'),
-            'moduletype' => new external_value(PARAM_ALPHA, 'Module type: course, page, quiz, assign, forum, lesson, glossary, book, url'),
+            'moduletype' => new external_value(
+                PARAM_ALPHA,
+                'Module type: course, page, quiz, assign, forum, lesson, glossary, book, url'
+            ),
             'activityname' => new external_value(PARAM_TEXT, 'Activity name', VALUE_DEFAULT, ''),
             'coursename' => new external_value(PARAM_TEXT, 'Course name', VALUE_DEFAULT, ''),
         ]);
     }
 
+    /**
+     * Execute the web service call.
+     *
+     * @return array
+     */
     public static function execute($courseid, $action, $moduletype, $activityname = '', $coursename = '') {
         $params = self::validate_parameters(self::execute_parameters(), [
             'courseid' => $courseid,
@@ -79,6 +91,11 @@ class log_generation_feedback extends external_api {
         }
     }
 
+    /**
+     * Describe the return value of execute().
+     *
+     * @return \external_description
+     */
     public static function execute_returns() {
         return new external_single_structure([
             'success' => new external_value(PARAM_BOOL, 'Whether feedback was logged'),

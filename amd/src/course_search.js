@@ -283,8 +283,7 @@ function($, Ajax, Notification, AiPolicy, Str) {
                 $item.find('.mastermind-copy-btn').on('click', function(e) {
                     e.preventDefault();
                     var cid = $(this).data('courseid');
-                    var cname = $(this).data('coursename');
-                    copyCourse(cid, cname);
+                    copyCourse(cid);
                 });
 
                 $list.append($item);
@@ -322,9 +321,8 @@ function($, Ajax, Notification, AiPolicy, Str) {
     /**
      * Copy an existing course
      * @param {number} courseId Source course ID
-     * @param {string} courseName Source course name
      */
-    function copyCourse(courseId, courseName) {
+    function copyCourse(courseId) {
         var categoryId = getCategoryIdFromPage();
 
         hideResults();
@@ -343,7 +341,7 @@ function($, Ajax, Notification, AiPolicy, Str) {
                 $searchInput.val('');
 
                 if (response.success && response.courseurl) {
-                    showPostCopyGuide(response.courseid, response.courseurl, response.coursename);
+                    showPostCopyGuide(response.courseid, response.courseurl);
                 } else {
                     var errorMsg = response.error || 'Failed to copy course. Please try again.';
                     Notification.alert('Error', errorMsg, 'OK');
@@ -361,9 +359,8 @@ function($, Ajax, Notification, AiPolicy, Str) {
      * Show the post-copy guide with action links and audit findings
      * @param {number} newCourseId New course ID
      * @param {string} courseUrl New course URL
-     * @param {string} courseName New course name
      */
-    function showPostCopyGuide(newCourseId, courseUrl, courseName) {
+    function showPostCopyGuide(newCourseId, courseUrl) {
         var editUrl = M.cfg.wwwroot + '/course/edit.php?id=' + newCourseId;
         var viewUrl = courseUrl;
 
@@ -618,7 +615,9 @@ function($, Ajax, Notification, AiPolicy, Str) {
                         '<span class="toggle-icon-updated">&#9654;</span>' +
                     '</div>' +
                     '<div class="mastermind-course-preview-section-body" data-section-body="' + idx + '">' +
-                        (sectionDesc ? '<p class="mastermind-course-preview-section-desc">' + escapeHtml(sectionDesc) + '</p>' : '') +
+                        (sectionDesc
+                            ? '<p class="mastermind-course-preview-section-desc">' + escapeHtml(sectionDesc) + '</p>'
+                            : '') +
                         activitiesHtml +
                     '</div>' +
                 '</div>';
@@ -650,7 +649,8 @@ function($, Ajax, Notification, AiPolicy, Str) {
                         '</div>' +
                     '</div>' +
                     '<div class="mastermind-preview-footer">' +
-                        '<button class="mastermind-secondary-button mastermind-preview-btn" id="mastermind-course-preview-cancel">Cancel</button>' +
+                        '<button class="mastermind-secondary-button mastermind-preview-btn"' +
+                            ' id="mastermind-course-preview-cancel">Cancel</button>' +
                         '<button class="mastermind-action-button mastermind-preview-btn" id="mastermind-course-preview-create">' +
                             '&#9889; Create Course</button>' +
                     '</div>' +
@@ -766,27 +766,33 @@ function($, Ajax, Notification, AiPolicy, Str) {
         return 1;
     }
 
+    /** Show the search results panel. */
     function showResults() {
         $searchResults.show();
     }
 
+    /** Hide the search results panel. */
     function hideResults() {
         $searchResults.hide();
     }
 
+    /** Show the loading indicator and hide results. */
     function showLoading() {
         $searchLoading.show();
         $searchResults.hide();
     }
 
+    /** Hide the loading indicator. */
     function hideLoading() {
         $searchLoading.hide();
     }
 
+    /** Show the course-creation progress UI. */
     function showCreationProgress() {
         $creationProgress.show();
     }
 
+    /** Hide the course-creation progress UI. */
     function hideCreationProgress() {
         $creationProgress.hide();
     }

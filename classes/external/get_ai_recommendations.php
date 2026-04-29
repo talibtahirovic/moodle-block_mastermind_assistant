@@ -35,8 +35,10 @@ use external_value;
 use context_course;
 use Exception;
 
+/**
+ * External API for get ai recommendations.
+ */
 class get_ai_recommendations extends external_api {
-
     /**
      * Returns description of method parameters
      * @return external_function_parameters
@@ -44,7 +46,7 @@ class get_ai_recommendations extends external_api {
     public static function execute_parameters() {
         return new external_function_parameters([
             'courseid' => new external_value(PARAM_INT, 'Course ID'),
-            'coursedata' => new external_value(PARAM_RAW, 'Course data JSON')
+            'coursedata' => new external_value(PARAM_RAW, 'Course data JSON'),
         ]);
     }
 
@@ -61,7 +63,7 @@ class get_ai_recommendations extends external_api {
         try {
             $params = self::validate_parameters(self::execute_parameters(), [
                 'courseid' => $courseid,
-                'coursedata' => $coursedata
+                'coursedata' => $coursedata,
             ]);
 
             // Fix potential section ID vs course ID confusion.
@@ -94,9 +96,9 @@ class get_ai_recommendations extends external_api {
             $recommendations = $airesponse;
             if (isset($airesponse['recommendations'])) {
                 $recommendations = $airesponse['recommendations'];
-            } elseif (isset($airesponse['analysis'])) {
+            } else if (isset($airesponse['analysis'])) {
                 $recommendations = $airesponse['analysis'];
-            } elseif (isset($airesponse['result'])) {
+            } else if (isset($airesponse['result'])) {
                 $recommendations = $airesponse['result'];
             }
 
@@ -105,14 +107,13 @@ class get_ai_recommendations extends external_api {
 
             return [
                 'success' => true,
-                'recommendations' => $encoded
+                'recommendations' => $encoded,
             ];
-
         } catch (Exception $e) {
             debugging('get_ai_recommendations error: ' . $e->getMessage(), DEBUG_DEVELOPER);
             return [
                 'success' => false,
-                'error' => 'AI Analysis Error: ' . $e->getMessage()
+                'error' => 'AI Analysis Error: ' . $e->getMessage(),
             ];
         }
     }

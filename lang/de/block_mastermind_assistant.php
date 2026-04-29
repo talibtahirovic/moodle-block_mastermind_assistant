@@ -46,12 +46,12 @@ $string['openai_connected'] = 'OpenAI-Verbindung erfolgreich';
 $string['openai_failed'] = 'OpenAI-Verbindung fehlgeschlagen';
 $string['getting_ai_recommendations'] = 'KI-Empfehlungen werden abgerufen...';
 
-// Icon-Strings
+// Icon-Strings.
 $string['openai_success_icon'] = "\u2713";
 $string['openai_warning_icon'] = "\u26A0";
 $string['openai_error_icon'] = "\u2717";
 
-// Kurssuche
+// Kurssuche.
 $string['search_course_placeholder'] = 'Kursname eingeben...';
 $string['searching'] = 'Kurse werden gesucht...';
 $string['course_search_help'] = 'Geben Sie einen Suchbegriff ein, um bestehende Kurse zu finden oder neue mit KI-Unterstuetzung zu erstellen.';
@@ -59,12 +59,12 @@ $string['creating_course_ai'] = 'Kurs mit KI erstellen';
 $string['ai_working'] = 'Die KI erstellt Ihre Kursstruktur. Dies kann einen Moment dauern...';
 $string['course_created_success'] = 'Kurs erfolgreich mit KI erstellt! Weiterleitung...';
 
-// Block-Berechtigungen
+// Block-Berechtigungen.
 $string['mastermind_assistant:addinstance'] = 'Neuen Mastermind-Assistenten-Block hinzufuegen';
 $string['mastermind_assistant:myaddinstance'] = 'Neuen Mastermind-Assistenten-Block zur Mein-Moodle-Seite hinzufuegen';
 $string['mastermind_assistant:view'] = 'Mastermind-Assistenten-Block anzeigen';
 
-// Mod-Draft-Strings
+// Mod-Draft-Strings.
 $string['ai_content_assistant'] = 'KI-Inhaltsassistent';
 $string['go_to_settings_to_generate'] = 'Um die KI-Inhaltserstellung zu nutzen, oeffnen Sie bitte die Aktivitaetseinstellungen.';
 $string['open_activity_settings'] = 'Aktivitaetseinstellungen oeffnen';
@@ -93,7 +93,7 @@ $string['error_generating_content'] = 'Fehler bei der Inhaltserstellung. Bitte v
 $string['error_generating_questions'] = 'Fehler bei der Fragenerstellung. Bitte versuchen Sie es erneut.';
 $string['questions_count'] = '{$a} Fragen bereit zum Hinzufuegen';
 
-// Einstellungen
+// Einstellungen.
 $string['settings_dashboard_url'] = 'Dashboard-URL';
 $string['settings_dashboard_url_desc'] = 'Die URL Ihrer Mastermind-Dashboard-Instanz (z.B. https://mastermindassistant.ai)';
 $string['settings_api_key'] = 'API-Schluessel';
@@ -113,7 +113,7 @@ $string['settings_info_heading'] = 'Konto & Support';
 $string['settings_register_desc'] = 'Noch kein Konto? Registrieren Sie sich unter';
 $string['settings_support_desc'] = 'Brauchen Sie Hilfe? Kontaktieren Sie uns unter';
 
-// Kopier-UI
+// Kopier-UI.
 $string['copying_course'] = 'Kurs wird kopiert...';
 $string['copy_in_progress'] = 'Bitte warten Sie, waehrend der Kurs kopiert wird. Bei grossen Kursen kann dies einen Moment dauern.';
 $string['copy_success'] = 'Kurs erfolgreich kopiert!';
@@ -125,7 +125,7 @@ $string['view_course'] = 'Kurs anzeigen';
 $string['all_categories'] = 'Alle Kategorien';
 $string['filter_by_year'] = 'Jahr';
 
-// Dokument-Upload
+// Dokument-Upload.
 $string['or_upload_document'] = 'oder aus einem Dokument erstellen';
 $string['upload_document_prompt'] = 'Lehrplan oder Curriculum-Dokument hier ablegen';
 $string['supported_formats'] = 'PDF, DOCX oder TXT (max. 10 MB)';
@@ -136,7 +136,7 @@ $string['doc_creation_in_progress'] = 'Die KI analysiert Ihr Dokument und erstel
 $string['file_too_large'] = 'Die Datei ist zu gross. Maximale Groesse: 10 MB.';
 $string['unsupported_file_type'] = 'Nicht unterstuetzter Dateityp. Bitte laden Sie eine PDF-, DOCX- oder TXT-Datei hoch.';
 
-// Aufgaben-Anpassungsoptionen
+// Aufgaben-Anpassungsoptionen.
 $string['assignment_type_label'] = 'Aufgabentyp';
 $string['select_assignment_type'] = 'Typ auswaehlen (optional)...';
 $string['type_essay'] = 'Aufsatz';
@@ -151,10 +151,12 @@ $string['level_introductory'] = 'Einfuehrung';
 $string['level_intermediate'] = 'Mittelstufe';
 $string['level_advanced'] = 'Fortgeschritten';
 $string['level_graduate'] = 'Master/Promotion';
+$string['quiz_source_doc_label'] = 'Quelldokument (optional)';
+$string['quiz_source_doc_hint'] = 'PDF, DOCX oder TXT hochladen (max. 10 MB), um Fragen aus dem Dokumentinhalt zu generieren.';
 $string['scope_length_label'] = 'Umfang / Laenge';
 $string['scope_length_placeholder'] = 'z.B. 1500-2000 Woerter, 10 Seiten, 15-minuetige Praesentation';
 
-// Aufgaben-Vorschau-Modal
+// Aufgaben-Vorschau-Modal.
 $string['preview_title'] = 'Vorschau der erstellten Anweisungen';
 $string['suggested_title'] = 'Vorgeschlagener Titel';
 $string['instructions_preview'] = 'Anweisungen';
@@ -166,7 +168,7 @@ $string['cancel'] = 'Abbrechen';
 $string['regenerate'] = 'Neu erstellen';
 $string['apply_instructions'] = 'Auf Aufgabe anwenden';
 
-// Seiten-Anpassungsoptionen
+// Seiten-Anpassungsoptionen.
 $string['content_type_label'] = 'Inhaltstyp';
 $string['select_content_type'] = 'Automatisch aus Titel erkennen';
 $string['type_lecture_notes'] = 'Vorlesungsnotizen';
@@ -179,7 +181,7 @@ $string['length_brief'] = 'Kurz (200-400 Woerter)';
 $string['length_standard'] = 'Standard (400-700 Woerter)';
 $string['length_comprehensive'] = 'Umfassend (700-1000 Woerter)';
 
-// Seiten-Vorschau-Modal
+// Seiten-Vorschau-Modal.
 $string['page_preview_title'] = 'Vorschau des erstellten Inhalts';
 $string['content_preview'] = 'Seiteninhalt';
 $string['apply_content'] = 'Im Editor anwenden';
@@ -188,7 +190,7 @@ $string['content_summary_label'] = 'Zusammenfassung';
 $string['learning_objectives_label'] = 'Lernziele';
 $string['key_concepts_label'] = 'Schluesselbegriffe';
 
-// Test-Anpassungsoptionen
+// Test-Anpassungsoptionen.
 $string['difficulty_level_label'] = 'Schwierigkeitsgrad';
 $string['difficulty_mixed'] = 'Gemischt (empfohlen)';
 $string['difficulty_easy'] = 'Einfach';
@@ -196,14 +198,14 @@ $string['difficulty_medium'] = 'Mittel';
 $string['difficulty_hard'] = 'Schwer';
 $string['question_count_label'] = 'Anzahl der Fragen';
 
-// Test-Vorschau-Modal
+// Test-Vorschau-Modal.
 $string['quiz_preview_title'] = 'Vorschau der erstellten Fragen';
 $string['select_all'] = 'Alle auswaehlen';
 $string['deselect_all'] = 'Alle abwaehlen';
 $string['add_selected_questions'] = 'Ausgewaehlte Fragen hinzufuegen';
 $string['questions_selected_suffix'] = 'ausgewaehlt';
 
-// Kurs-Vorschau-Modal
+// Kurs-Vorschau-Modal.
 $string['course_preview_title'] = 'Vorschau der Kursstruktur';
 $string['course_preview_description'] = 'Beschreibung';
 $string['course_preview_sections'] = 'Abschnitte';
@@ -213,7 +215,7 @@ $string['course_preview_creating'] = 'Kurs wird erstellt...';
 $string['course_preview_section_count'] = '{$a} Abschnitte';
 $string['course_preview_activity_count'] = '{$a} Aktivitaeten';
 
-// Forum-Erstellung
+// Forum-Erstellung.
 $string['draft_forum_prompt_new'] = 'Ich erstelle Diskussionsthemen fuer dieses {$a}!';
 $string['draft_forum_prompt_edit'] = 'Kann ich Diskussionsanregungen fuer dieses {$a} erstellen?';
 $string['generating_forum'] = 'Foreninhalte werden erstellt...';
@@ -229,7 +231,7 @@ $string['forum_introduction_label'] = 'Foreneinleitung';
 $string['forum_discussions_label'] = 'Diskussionsthemen';
 $string['forum_guidelines_label'] = 'Teilnahmerichtlinien';
 
-// Lektion-Erstellung
+// Lektion-Erstellung.
 $string['draft_lesson_prompt_new'] = 'Ich erstelle Lektionsseiten fuer diese {$a}!';
 $string['draft_lesson_prompt_edit'] = 'Kann ich helfen, den Inhalt dieser {$a} zu verbessern?';
 $string['generating_lesson'] = 'Lektionsinhalte werden erstellt...';
@@ -238,7 +240,7 @@ $string['lesson_preview_title'] = 'Vorschau der Lektionsinhalte';
 $string['page_count_label'] = 'Anzahl der Seiten';
 $string['lesson_pages_label'] = 'Lektionsseiten';
 
-// Glossar-Erstellung
+// Glossar-Erstellung.
 $string['draft_glossary_prompt_new'] = 'Ich erstelle Eintraege fuer dieses {$a}!';
 $string['draft_glossary_prompt_edit'] = 'Kann ich weitere Eintraege zu diesem {$a} hinzufuegen?';
 $string['generating_glossary'] = 'Glossareintraege werden erstellt...';
@@ -248,7 +250,7 @@ $string['entry_count_label'] = 'Anzahl der Eintraege';
 $string['glossary_description_label'] = 'Glossarbeschreibung';
 $string['glossary_entries_label'] = 'Eintraege';
 
-// Buch-Erstellung
+// Buch-Erstellung.
 $string['draft_book_prompt_new'] = 'Ich erstelle Kapitel fuer dieses {$a}!';
 $string['draft_book_prompt_edit'] = 'Kann ich helfen, den Inhalt dieses {$a} zu verbessern?';
 $string['generating_book'] = 'Buchinhalte werden erstellt...';
@@ -257,7 +259,7 @@ $string['book_preview_title'] = 'Vorschau der Buchinhalte';
 $string['chapter_count_label'] = 'Anzahl der Kapitel';
 $string['book_chapters_label'] = 'Kapitel';
 
-// URL-Erstellung
+// URL-Erstellung.
 $string['draft_url_prompt_new'] = 'Ich empfehle Ressourcen fuer diese(s) {$a}!';
 $string['draft_url_prompt_edit'] = 'Soll ich alternative Ressourcen fuer diese(s) {$a} vorschlagen?';
 $string['generating_url'] = 'URL-Ressourcen werden gesucht...';
@@ -268,7 +270,7 @@ $string['url_topic_summary_label'] = 'Themenzusammenfassung';
 $string['url_recommendations_label'] = 'Empfohlene Ressourcen';
 $string['apply_url'] = 'Ausgewaehlte URL anwenden';
 
-// Direkt-Aktions-Modul-Strings
+// Direkt-Aktions-Modul-Strings.
 $string['go_to_main_page_to_generate'] = 'Um die KI-Inhaltserstellung zu nutzen, gehen Sie bitte zur Hauptseite der Aktivitaet.';
 $string['open_activity_main_page'] = 'Aktivitaetsseite oeffnen';
 $string['existing_items_count'] = '{$a} vorhandene(r) Eintrag/Eintraege';

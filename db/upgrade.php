@@ -21,8 +21,6 @@
  * @copyright  2026 The Namers <info@mastermindassistant.ai>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Upgrade script for Mastermind Assistant block
  *
@@ -32,25 +30,24 @@ defined('MOODLE_INTERNAL') || die();
 function xmldb_block_mastermind_assistant_upgrade($oldversion) {
     global $DB;
 
-    // Automatically add block as sticky block on upgrade to v1.0+
+    // Automatically add block as sticky block on upgrade to v1.0+.
     if ($oldversion < 2025100450) {
-        
         // Check if block already exists as a sticky block (showinsubcontexts = 1)
-        // Don't create a duplicate if user already configured one manually
+        // Don't create a duplicate if user already configured one manually.
         $existing = $DB->get_record('block_instances', [
             'blockname' => 'mastermind_assistant',
-            'showinsubcontexts' => 1
+            'showinsubcontexts' => 1,
         ]);
 
         if (!$existing) {
-            // Also check if there's ANY mastermind_assistant block in system context
+            // Also check if there's ANY mastermind_assistant block in system context.
             $systemblock = $DB->get_record('block_instances', [
                 'blockname' => 'mastermind_assistant',
-                'parentcontextid' => SYSCONTEXTID
+                'parentcontextid' => SYSCONTEXTID,
             ]);
-            
+
             if (!$systemblock) {
-                // Create sticky block instance only if no existing sticky or system-level block
+                // Create sticky block instance only if no existing sticky or system-level block.
                 $blockinstance = new stdClass();
                 $blockinstance->blockname = 'mastermind_assistant';
                 $blockinstance->parentcontextid = SYSCONTEXTID;
@@ -72,4 +69,3 @@ function xmldb_block_mastermind_assistant_upgrade($oldversion) {
 
     return true;
 }
-

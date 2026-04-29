@@ -29,6 +29,30 @@
     * ai_status - AI connection status
     * ai_message - AI status message
     * is_ai_success - Boolean, true if AI is connected
+
+    Example context (json):
+    {
+        "is_mod_draft": true,
+        "is_quiz": true,
+        "courseid": 2,
+        "coursename": "Demo Course",
+        "modname": "Quiz",
+        "modname_lower": "quiz",
+        "pagename": "Module 1 quiz",
+        "pagedescription": "",
+        "cmid": 12,
+        "instanceid": 4,
+        "quizid": 12,
+        "is_new": false,
+        "ai_status": "success",
+        "ai_message": "Connected",
+        "is_ai_success": true,
+        "is_on_edit_page": true,
+        "is_direct_action": false,
+        "edit_url": "",
+        "main_page_url": "",
+        "existing_count": 0
+    }
 }}
 
 <div class="mastermind-mod-draft-container">
@@ -232,6 +256,17 @@
                 <option value="advanced">{{#str}} level_advanced, block_mastermind_assistant {{/str}}</option>
                 <option value="graduate">{{#str}} level_graduate, block_mastermind_assistant {{/str}}</option>
             </select>
+        </div>
+        <div class="mastermind-assign-option-group">
+            <label class="mastermind-option-label" for="quiz-source-doc">
+                {{#str}} quiz_source_doc_label, block_mastermind_assistant {{/str}}
+            </label>
+            <input type="file" id="quiz-source-doc" class="mastermind-option-file"
+                   accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain">
+            <p class="mastermind-option-hint">
+                {{#str}} quiz_source_doc_hint, block_mastermind_assistant {{/str}}
+            </p>
+            <div id="quiz-source-doc-summary" class="mastermind-option-summary" hidden></div>
         </div>
     </div>
     <button id="generate-questions-btn" class="mastermind-action-button" data-courseid="{{courseid}}" data-quizid="{{quizid}}" data-quizname="{{pagename}}" data-quizdescription="{{pagedescription}}">

@@ -43,8 +43,10 @@ use restore_controller;
 use backup;
 use backup_setting;
 
+/**
+ * External API for copy course.
+ */
 class copy_course extends external_api {
-
     /**
      * Returns description of method parameters
      * @return external_function_parameters
@@ -53,7 +55,7 @@ class copy_course extends external_api {
         return new external_function_parameters([
             'courseid' => new external_value(PARAM_INT, 'Course ID to copy'),
             'categoryid' => new external_value(PARAM_INT, 'Target category ID', VALUE_DEFAULT, 1),
-            'newcoursename' => new external_value(PARAM_TEXT, 'Custom name for copied course', VALUE_DEFAULT, '')
+            'newcoursename' => new external_value(PARAM_TEXT, 'Custom name for copied course', VALUE_DEFAULT, ''),
         ]);
     }
 
@@ -70,14 +72,14 @@ class copy_course extends external_api {
         \core_php_time_limit::raise(300);
 
         try {
-            // Validate parameters
+            // Validate parameters.
             $params = self::validate_parameters(self::execute_parameters(), [
                 'courseid' => $courseid,
                 'categoryid' => $categoryid,
-                'newcoursename' => $newcoursename
+                'newcoursename' => $newcoursename,
             ]);
 
-            // Check source course exists
+            // Check source course exists.
             $sourcecourse = $DB->get_record('course', ['id' => $params['courseid']], '*', MUST_EXIST);
 
             // Validate category exists, fall back to default if not.
@@ -85,16 +87,16 @@ class copy_course extends external_api {
                 $params['categoryid'] = \core_course_category::get_default()->id;
             }
 
-            // Check capabilities
+            // Check capabilities.
             $categorycontext = context_coursecat::instance($params['categoryid']);
             self::validate_context($categorycontext);
             require_capability('moodle/course:create', $categorycontext);
-            
+
             $coursecontext = context_course::instance($params['courseid']);
             require_capability('moodle/backup:backupcourse', $coursecontext);
             require_capability('moodle/restore:restorecourse', $categorycontext);
 
-            // Generate unique shortname
+            // Generate unique shortname.
             $originalshortname = $sourcecourse->shortname;
             $newshortname = $originalshortname;
             $counter = 1;
@@ -103,13 +105,13 @@ class copy_course extends external_api {
                 $counter++;
             }
 
-            // Step 1: Backup the source course
+            // Step 1: Backup the source course.
             $bc = new backup_controller(
                 backup::TYPE_1COURSE,
                 $params['courseid'],
                 backup::FORMAT_MOODLE,
                 backup::INTERACTIVE_NO,
-                backup::MODE_IMPORT,  // Changed from MODE_COPY
+                backup::MODE_IMPORT, // Changed from MODE_COPY.
                 $USER->id
             );
 
@@ -141,13 +143,13 @@ class copy_course extends external_api {
                 }
             }
 
-            // Execute backup
+            // Execute backup.
             $bc->execute_plan();
             $backupid = $bc->get_backupid();
             $backupbasepath = $bc->get_plan()->get_basepath();
             $bc->destroy();
 
-            // Step 2: Create new course record
+            // Step 2: Create new course record.
             $newcoursedata = new \stdClass();
             $newcoursedata->fullname = !empty($params['newcoursename'])
                 ? $params['newcoursename']
@@ -164,20 +166,20 @@ class copy_course extends external_api {
             $newcoursedata->maxbytes = $sourcecourse->maxbytes;
             $newcoursedata->enablecompletion = $sourcecourse->enablecompletion;
 
-            // Create the course
+            // Create the course.
             $newcourse = \create_course($newcoursedata);
 
-            // Step 3: Restore backup into new course
+            // Step 3: Restore backup into new course.
             $rc = new restore_controller(
                 $backupid,
                 $newcourse->id,
                 backup::INTERACTIVE_NO,
-                backup::MODE_IMPORT,  // Changed from MODE_COPY
+                backup::MODE_IMPORT, // Changed from MODE_COPY.
                 $USER->id,
                 backup::TARGET_NEW_COURSE
             );
 
-            // Check precheck
+            // Check precheck.
             if (!$rc->execute_precheck()) {
                 $precheckresults = $rc->get_precheck_results();
                 if (is_array($precheckresults) && !empty($precheckresults['errors'])) {
@@ -185,15 +187,15 @@ class copy_course extends external_api {
                     if (empty($CFG->keeptempdirectoriesonbackup)) {
                         fulldelete($backupbasepath);
                     }
-                    throw new Exception('Restore precheck failed: ' . print_r($precheckresults['errors'], true));
+                    throw new Exception('Restore precheck failed: ' . json_encode($precheckresults['errors']));
                 }
             }
 
-            // Execute restore
+            // Execute restore.
             $rc->execute_plan();
             $rc->destroy();
 
-            // Clean up backup files
+            // Clean up backup files.
             if (empty($CFG->keeptempdirectoriesonbackup)) {
                 fulldelete($backupbasepath);
             }
@@ -221,14 +223,13 @@ class copy_course extends external_api {
                 'success' => true,
                 'courseid' => $newcourse->id,
                 'coursename' => $newcourse->fullname,
-                'courseurl' => (new \moodle_url('/course/view.php', ['id' => $newcourse->id]))->out(false)
+                'courseurl' => (new \moodle_url('/course/view.php', ['id' => $newcourse->id]))->out(false),
             ];
-
         } catch (Exception $e) {
             debugging('copy_course failed: ' . $e->getMessage(), DEBUG_DEVELOPER);
             return [
                 'success' => false,
-                'error' => 'Failed to copy course: ' . $e->getMessage()
+                'error' => 'Failed to copy course: ' . $e->getMessage(),
             ];
         }
     }
@@ -247,4 +248,3 @@ class copy_course extends external_api {
         ]);
     }
 }
-

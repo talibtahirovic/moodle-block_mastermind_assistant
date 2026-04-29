@@ -31,7 +31,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 /* global tinyMCE */
-/* eslint-disable jsdoc/require-param-type */
+
 define(['core/ajax', 'core/notification', 'block_mastermind_assistant/ai_policy', 'core/str', 'core/templates'],
 function(Ajax, Notification, AiPolicy, Str, Templates) {
 
@@ -50,8 +50,8 @@ function(Ajax, Notification, AiPolicy, Str, Templates) {
     /**
      * Log user feedback (apply/regenerate/discard) for training data.
      * Non-blocking — errors are silently ignored to avoid disrupting the UI.
-     * @param action 'apply' | 'regenerate' | 'discard'
-     * @param moduletype e.g. 'page', 'quiz', 'assign', 'forum', 'lesson', 'glossary', 'book', 'url'
+     * @param {string} action 'apply' | 'regenerate' | 'discard'
+     * @param {string} moduletype e.g. 'page', 'quiz', 'assign', 'forum', 'lesson', 'glossary', 'book', 'url'
      */
     function logFeedback(action, moduletype) {
         var btn = document.getElementById('generate-draft-btn') || document.getElementById('generate-questions-btn');
@@ -97,7 +97,8 @@ function(Ajax, Notification, AiPolicy, Str, Templates) {
 
     /**
      *
-     * @param modname
+     * @param {string} modname
+
      */
     function showCompletedState(modname) {
         var introDiv = document.querySelector('.mastermind-mod-draft-intro');
@@ -127,7 +128,8 @@ function(Ajax, Notification, AiPolicy, Str, Templates) {
 
     /**
      *
-     * @param btn
+     * @param {HTMLElement} btn
+
      */
     function readFormValues(btn) {
         var pagename = '';
@@ -151,7 +153,8 @@ function(Ajax, Notification, AiPolicy, Str, Templates) {
 
     /**
      *
-     * @param value
+     * @param {string} value
+
      */
     function parseJSON(value) {
         if (!value) {
@@ -173,7 +176,8 @@ function(Ajax, Notification, AiPolicy, Str, Templates) {
 
     /**
      *
-     * @param str
+     * @param {string} str
+
      */
     function escapeHtml(str) {
         var div = document.createElement('div');
@@ -183,7 +187,8 @@ function(Ajax, Notification, AiPolicy, Str, Templates) {
 
     /**
      *
-     * @param modal
+     * @param {HTMLElement} modal
+
      */
     function moveToBody(modal) {
         if (modal && modal.parentNode !== document.body) {
@@ -394,9 +399,12 @@ function(Ajax, Notification, AiPolicy, Str, Templates) {
 
     /**
      *
-     * @param coursename
-     * @param pagename
-     * @param pagedescription
+     * @param {string} coursename
+
+     * @param {string} pagename
+
+     * @param {string} pagedescription
+
      */
     function generatePageDraft(coursename, pagename, pagedescription) {
         var btn = document.getElementById('generate-draft-btn');
@@ -462,7 +470,8 @@ function(Ajax, Notification, AiPolicy, Str, Templates) {
 
     /**
      *
-     * @param response
+     * @param {Object} response
+
      */
     function showPagePreviewModal(response) {
         var modal = document.getElementById('page-preview-modal');
@@ -594,9 +603,12 @@ function(Ajax, Notification, AiPolicy, Str, Templates) {
 
     /**
      *
-     * @param coursename
-     * @param assignmentname
-     * @param assignmentdescription
+     * @param {string} coursename
+
+     * @param {string} assignmentname
+
+     * @param {string} assignmentdescription
+
      */
     function generateAssignmentDraft(coursename, assignmentname, assignmentdescription) {
         var btn = document.getElementById('generate-draft-btn');
@@ -663,7 +675,8 @@ function(Ajax, Notification, AiPolicy, Str, Templates) {
 
     /**
      *
-     * @param response
+     * @param {Object} response
+
      */
     function showAssignPreviewModal(response) {
         var modal = document.getElementById('assign-preview-modal');
@@ -756,7 +769,8 @@ function(Ajax, Notification, AiPolicy, Str, Templates) {
 
     /**
      *
-     * @param criteria
+     * @param {Object} criteria
+
      */
     function buildRubricTable(criteria) {
         if (!criteria.length) {
@@ -855,10 +869,45 @@ function(Ajax, Notification, AiPolicy, Str, Templates) {
     /**
      *
      */
+    /**
+     * Read a File from the upload input and resolve to a base64-encoded string
+     * (without the data URL prefix).
+     * @param {File} file
+     * @return {Promise<string>}
+     */
+    function readFileAsBase64(file) {
+        return new Promise(function(resolve, reject) {
+            var reader = new FileReader();
+            reader.onload = function() {
+                var result = reader.result || '';
+                var commaIdx = result.indexOf(',');
+                resolve(commaIdx >= 0 ? result.substring(commaIdx + 1) : result);
+            };
+            reader.onerror = function() {
+                reject(reader.error || new Error('Failed to read file'));
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    /** Kick off quiz question generation, optionally from an uploaded document. */
     function generateQuizDraft() {
         var btn = document.getElementById('generate-questions-btn');
         if (!btn) {
             return;
+        }
+
+        var fileInput = document.getElementById('quiz-source-doc');
+        var sourceFile = (fileInput && fileInput.files && fileInput.files[0]) || null;
+        if (sourceFile) {
+            var maxBytes = 10 * 1024 * 1024;
+            if (sourceFile.size > maxBytes) {
+                Notification.addNotification({
+                    message: 'File exceeds maximum size of 10MB.',
+                    type: 'error'
+                });
+                return;
+            }
         }
 
         var introDiv = document.querySelector('.mastermind-mod-draft-intro');
@@ -882,7 +931,7 @@ function(Ajax, Notification, AiPolicy, Str, Templates) {
         var levelSelect = document.getElementById('quiz-level-select');
         var sectionSelect = document.getElementById('id_section');
 
-        var args = {
+        var baseArgs = {
             courseid: courseid,
             quizid: parseInt(quizid, 10),
             quizname: quizname,
@@ -893,14 +942,33 @@ function(Ajax, Notification, AiPolicy, Str, Templates) {
             sectionname: sectionSelect ? sectionSelect.options[sectionSelect.selectedIndex].text : '',
             courseactivities: '[]',
             previewonly: true,
-            selectedquestions: ''
+            selectedquestions: '',
+            filedata: '',
+            filetype: '',
+            filename: ''
         };
 
+        var argsPromise;
+        if (sourceFile) {
+            argsPromise = readFileAsBase64(sourceFile).then(function(b64) {
+                baseArgs.filedata = b64;
+                baseArgs.filetype = sourceFile.type || 'application/octet-stream';
+                baseArgs.filename = sourceFile.name;
+                return baseArgs;
+            });
+        } else {
+            argsPromise = Promise.resolve(baseArgs);
+        }
+
         logFeedback('generate', 'quiz');
-        Ajax.call([{
-            methodname: 'block_mastermind_assistant_generate_quiz_questions',
-            args: args
-        }])[0]
+
+        argsPromise
+            .then(function(args) {
+                return Ajax.call([{
+                    methodname: 'block_mastermind_assistant_generate_quiz_questions',
+                    args: args
+                }])[0];
+            })
             .then(function(response) {
                 hideProgress();
                 if (response.success) {
@@ -937,8 +1005,10 @@ function(Ajax, Notification, AiPolicy, Str, Templates) {
 
     /**
      *
-     * @param question
-     * @param index
+     * @param {Object} question
+
+     * @param {number} index
+
      */
     function renderQuestionCard(question, index) {
         var typeLabel = TYPE_LABELS[question.type] || question.type;
@@ -1048,7 +1118,8 @@ function(Ajax, Notification, AiPolicy, Str, Templates) {
 
     /**
      *
-     * @param questions
+     * @param {Array} questions
+
      */
     function showQuizPreviewModal(questions) {
         var modal = document.getElementById('quiz-preview-modal');
@@ -1216,9 +1287,12 @@ function(Ajax, Notification, AiPolicy, Str, Templates) {
 
     /**
      *
-     * @param coursename
-     * @param forumname
-     * @param forumdescription
+     * @param {string} coursename
+
+     * @param {string} forumname
+
+     * @param {string} forumdescription
+
      */
     function generateForumDraft(coursename, forumname, forumdescription) {
         var btn = document.getElementById('generate-draft-btn');
@@ -1276,7 +1350,8 @@ function(Ajax, Notification, AiPolicy, Str, Templates) {
 
     /**
      *
-     * @param response
+     * @param {Object} response
+
      */
     function showForumPreviewModal(response) {
         var modal = document.getElementById('forum-preview-modal');
@@ -1371,7 +1446,9 @@ function(Ajax, Notification, AiPolicy, Str, Templates) {
                     message: result.message, type: 'success'
                 });
                 // Reload page to show new discussions.
-                setTimeout(function() { window.location.reload(); }, 1500);
+                setTimeout(function() {
+ window.location.reload();
+}, 1500);
             } else {
                 Notification.addNotification({
                     message: result.message, type: 'error'
@@ -1410,9 +1487,12 @@ function(Ajax, Notification, AiPolicy, Str, Templates) {
 
     /**
      *
-     * @param coursename
-     * @param lessonname
-     * @param lessondescription
+     * @param {string} coursename
+
+     * @param {string} lessonname
+
+     * @param {string} lessondescription
+
      */
     function generateLessonDraft(coursename, lessonname, lessondescription) {
         var btn = document.getElementById('generate-draft-btn');
@@ -1468,7 +1548,8 @@ function(Ajax, Notification, AiPolicy, Str, Templates) {
 
     /**
      *
-     * @param response
+     * @param {Object} response
+
      */
     function showLessonPreviewModal(response) {
         var modal = document.getElementById('lesson-preview-modal');
@@ -1593,7 +1674,9 @@ function(Ajax, Notification, AiPolicy, Str, Templates) {
                 Notification.addNotification({
                     message: result.message, type: 'success'
                 });
-                setTimeout(function() { window.location.reload(); }, 1500);
+                setTimeout(function() {
+ window.location.reload();
+}, 1500);
             } else {
                 Notification.addNotification({
                     message: result.message, type: 'error'
@@ -1632,9 +1715,12 @@ function(Ajax, Notification, AiPolicy, Str, Templates) {
 
     /**
      *
-     * @param coursename
-     * @param glossaryname
-     * @param glossarydescription
+     * @param {string} coursename
+
+     * @param {string} glossaryname
+
+     * @param {string} glossarydescription
+
      */
     function generateGlossaryDraft(coursename, glossaryname, glossarydescription) {
         var btn = document.getElementById('generate-draft-btn');
@@ -1690,7 +1776,8 @@ function(Ajax, Notification, AiPolicy, Str, Templates) {
 
     /**
      *
-     * @param response
+     * @param {Object} response
+
      */
     function showGlossaryPreviewModal(response) {
         var modal = document.getElementById('glossary-preview-modal');
@@ -1768,7 +1855,9 @@ function(Ajax, Notification, AiPolicy, Str, Templates) {
                 Notification.addNotification({
                     message: result.message, type: 'success'
                 });
-                setTimeout(function() { window.location.reload(); }, 1500);
+                setTimeout(function() {
+ window.location.reload();
+}, 1500);
             } else {
                 Notification.addNotification({
                     message: result.message, type: 'error'
@@ -1807,9 +1896,12 @@ function(Ajax, Notification, AiPolicy, Str, Templates) {
 
     /**
      *
-     * @param coursename
-     * @param bookname
-     * @param bookdescription
+     * @param {string} coursename
+
+     * @param {string} bookname
+
+     * @param {string} bookdescription
+
      */
     function generateBookDraft(coursename, bookname, bookdescription) {
         var btn = document.getElementById('generate-draft-btn');
@@ -1867,7 +1959,8 @@ function(Ajax, Notification, AiPolicy, Str, Templates) {
 
     /**
      *
-     * @param response
+     * @param {Object} response
+
      */
     function showBookPreviewModal(response) {
         var modal = document.getElementById('book-preview-modal');
@@ -1977,7 +2070,9 @@ function(Ajax, Notification, AiPolicy, Str, Templates) {
                 Notification.addNotification({
                     message: result.message, type: 'success'
                 });
-                setTimeout(function() { window.location.reload(); }, 1500);
+                setTimeout(function() {
+ window.location.reload();
+}, 1500);
             } else {
                 Notification.addNotification({
                     message: result.message, type: 'error'
@@ -2016,9 +2111,12 @@ function(Ajax, Notification, AiPolicy, Str, Templates) {
 
     /**
      *
-     * @param coursename
-     * @param urlname
-     * @param urldescription
+     * @param {string} coursename
+
+     * @param {string} urlname
+
+     * @param {string} urldescription
+
      */
     function generateUrlDraft(coursename, urlname, urldescription) {
         var btn = document.getElementById('generate-draft-btn');
@@ -2077,7 +2175,8 @@ function(Ajax, Notification, AiPolicy, Str, Templates) {
 
     /**
      *
-     * @param response
+     * @param {Object} response
+
      */
     function showUrlPreviewModal(response) {
         var modal = document.getElementById('url-preview-modal');
@@ -2208,11 +2307,16 @@ function(Ajax, Notification, AiPolicy, Str, Templates) {
 
     /**
      *
-     * @param prefix
-     * @param closeFn
-     * @param resetFn
-     * @param applyFn
-     * @param regenFn
+     * @param {string} prefix
+
+     * @param {Function} closeFn
+
+     * @param {Function} resetFn
+
+     * @param {Function} applyFn
+
+     * @param {Function} regenFn
+
      */
     function bindModalButtons(prefix, closeFn, resetFn, applyFn, regenFn) {
         var applyBtn = document.getElementById(prefix + '-preview-apply-btn');
@@ -2262,7 +2366,8 @@ function(Ajax, Notification, AiPolicy, Str, Templates) {
 
     /**
      *
-     * @param cid
+     * @param {number} cid
+
      */
     function init(cid) {
         courseid = cid;
@@ -2303,6 +2408,23 @@ function(Ajax, Notification, AiPolicy, Str, Templates) {
                 AiPolicy.checkAndProceed(function() {
                     generateQuizDraft();
                 });
+            });
+        }
+
+        // Quiz source-document upload preview.
+        var quizSourceInput = document.getElementById('quiz-source-doc');
+        var quizSourceSummary = document.getElementById('quiz-source-doc-summary');
+        if (quizSourceInput && quizSourceSummary) {
+            quizSourceInput.addEventListener('change', function() {
+                var file = this.files && this.files[0];
+                if (!file) {
+                    quizSourceSummary.hidden = true;
+                    quizSourceSummary.textContent = '';
+                    return;
+                }
+                var sizeKb = Math.round(file.size / 1024);
+                quizSourceSummary.textContent = file.name + ' (' + sizeKb + ' KB)';
+                quizSourceSummary.hidden = false;
             });
         }
 

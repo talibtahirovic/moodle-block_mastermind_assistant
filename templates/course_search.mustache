@@ -22,6 +22,16 @@
     Context variables required for this template:
     * ai_status - Status of AI connection (success/warning/error)
     * ai_message - AI connection status message
+
+    Example context (json):
+    {
+        "is_course_management": true,
+        "ai_status": "success",
+        "ai_message": "Connected to Mastermind",
+        "is_ai_success": true,
+        "is_ai_warning": false,
+        "is_ai_error": false
+    }
 }}
 <div class="mastermind-course-search-container">
     <div class="mastermind-search-header">

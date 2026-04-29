@@ -23,8 +23,6 @@
  */
 namespace block_mastermind_assistant\privacy;
 
-defined('MOODLE_INTERNAL') || die();
-
 use core_privacy\local\metadata\collection;
 use core_privacy\local\request\writer;
 use core_privacy\local\metadata\provider as metadata_provider;
@@ -39,7 +37,6 @@ use core_privacy\local\request\user_preference_provider;
 class provider implements
     \core_privacy\local\metadata\provider,
     \core_privacy\local\request\user_preference_provider {
-
     /**
      * Returns metadata about the data this plugin stores and transmits.
      *
@@ -48,8 +45,10 @@ class provider implements
      */
     public static function get_metadata(collection $collection): collection {
         // User preference for AI policy acceptance.
-        $collection->add_user_preference('mastermind_ai_policy_accepted',
-            'privacy:metadata:preference:ai_policy_accepted');
+        $collection->add_user_preference(
+            'mastermind_ai_policy_accepted',
+            'privacy:metadata:preference:ai_policy_accepted'
+        );
 
         // Data sent to the external Mastermind Dashboard API.
         $collection->add_external_location_link('mastermind_dashboard', [

@@ -23,8 +23,6 @@
  */
 namespace block_mastermind_assistant;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Centralized HTTP client for all Mastermind Dashboard API calls.
  *
@@ -32,7 +30,6 @@ defined('MOODLE_INTERNAL') || die();
  * The dashboard handles all AI logic (prompts, function schemas, OpenAI calls).
  */
 class api_client {
-
     /** @var string Dashboard base URL */
     private string $baseurl;
 
@@ -205,6 +202,47 @@ class api_client {
             'section_name' => $sectionname,
             'course_activities' => $courseactivities,
         ]);
+    }
+
+    /**
+     * Generate quiz questions from an uploaded source document (PDF, DOCX, TXT).
+     *
+     * The dashboard extracts text from the document and uses it as the
+     * authoritative source for question generation.
+     *
+     * @param string $quizname
+     * @param string $quizdescription
+     * @param string $filedata Base64-encoded file content
+     * @param string $filetype MIME type (application/pdf, etc.)
+     * @param string $filename Original file name
+     * @param array $existingquestions
+     * @param string $difficultylevel
+     * @param int $questioncount
+     * @param string $academiclevel
+     * @return array
+     */
+    public function generate_quiz_from_document(
+        string $quizname,
+        string $quizdescription,
+        string $filedata,
+        string $filetype,
+        string $filename,
+        array $existingquestions = [],
+        string $difficultylevel = '',
+        int $questioncount = 8,
+        string $academiclevel = ''
+    ): array {
+        return $this->request('/api/ma/generate-quiz-from-document', [
+            'quizname' => $quizname,
+            'quizdescription' => $quizdescription,
+            'file_data' => $filedata,
+            'file_type' => $filetype,
+            'file_name' => $filename,
+            'existing_questions' => $existingquestions,
+            'difficulty_level' => $difficultylevel,
+            'question_count' => $questioncount,
+            'academic_level' => $academiclevel,
+        ], 'POST', 600);
     }
 
     /**

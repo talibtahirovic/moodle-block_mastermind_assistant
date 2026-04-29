@@ -36,8 +36,10 @@ use external_value;
 use context_system;
 use Exception;
 
+/**
+ * External API for search courses.
+ */
 class search_courses extends external_api {
-
     /**
      * Returns description of method parameters
      * @return external_function_parameters
@@ -46,7 +48,7 @@ class search_courses extends external_api {
         return new external_function_parameters([
             'query' => new external_value(PARAM_TEXT, 'Search query'),
             'categoryid' => new external_value(PARAM_INT, 'Filter by category ID (0 = all)', VALUE_DEFAULT, 0),
-            'year' => new external_value(PARAM_TEXT, 'Filter by year in shortname', VALUE_DEFAULT, '')
+            'year' => new external_value(PARAM_TEXT, 'Filter by year in shortname', VALUE_DEFAULT, ''),
         ]);
     }
 
@@ -61,14 +63,14 @@ class search_courses extends external_api {
         global $DB;
 
         try {
-            // Validate parameters
+            // Validate parameters.
             $params = self::validate_parameters(self::execute_parameters(), [
                 'query' => $query,
                 'categoryid' => $categoryid,
-                'year' => $year
+                'year' => $year,
             ]);
 
-            // Check capability
+            // Check capability.
             $context = context_system::instance();
             self::validate_context($context);
             require_capability('moodle/course:create', $context);
@@ -77,7 +79,7 @@ class search_courses extends external_api {
             if (empty($query)) {
                 return [
                     'found' => false,
-                    'courses' => []
+                    'courses' => [],
                 ];
             }
 
@@ -146,14 +148,13 @@ class search_courses extends external_api {
 
             return [
                 'found' => !empty($results),
-                'courses' => $results
+                'courses' => $results,
             ];
-
         } catch (Exception $e) {
             return [
                 'found' => false,
                 'courses' => [],
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
             ];
         }
     }

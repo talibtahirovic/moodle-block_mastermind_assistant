@@ -35,23 +35,35 @@ use external_value;
 use context_course;
 use Exception;
 
+/**
+ * External API for get updated structure.
+ */
 class get_updated_structure extends external_api {
-
+    /**
+     * Describe the parameters accepted by execute().
+     *
+     * @return \external_function_parameters
+     */
     public static function execute_parameters() {
         return new external_function_parameters([
             'courseid' => new external_value(PARAM_INT, 'Course ID'),
             'coursedata' => new external_value(PARAM_RAW, 'JSON string of comprehensive course data'),
-            'recommendations' => new external_value(PARAM_RAW, 'Analysis and recommendations from first request')
+            'recommendations' => new external_value(PARAM_RAW, 'Analysis and recommendations from first request'),
         ]);
     }
 
+    /**
+     * Execute the web service call.
+     *
+     * @return array
+     */
     public static function execute($courseid, $coursedata, $recommendations) {
         @set_time_limit(300);
 
         $params = self::validate_parameters(self::execute_parameters(), [
             'courseid' => $courseid,
             'coursedata' => $coursedata,
-            'recommendations' => $recommendations
+            'recommendations' => $recommendations,
         ]);
 
         // Fix potential section ID vs course ID confusion.
@@ -85,7 +97,7 @@ class get_updated_structure extends external_api {
             $structure = $airesponse;
             if (isset($airesponse['structure']) && is_array($airesponse['structure'])) {
                 $structure = $airesponse['structure'];
-            } elseif (isset($airesponse['result']) && is_array($airesponse['result'])) {
+            } else if (isset($airesponse['result']) && is_array($airesponse['result'])) {
                 $structure = $airesponse['result'];
             }
 
@@ -93,7 +105,7 @@ class get_updated_structure extends external_api {
             if (isset($structure['sections']) && is_array($structure['sections'])) {
                 return [
                     'success' => true,
-                    'structure' => json_encode($structure)
+                    'structure' => json_encode($structure),
                 ];
             }
 
@@ -101,30 +113,34 @@ class get_updated_structure extends external_api {
             if (is_string($airesponse)) {
                 return [
                     'success' => true,
-                    'structure' => $airesponse
+                    'structure' => $airesponse,
                 ];
             }
 
             // Last resort — return the full response as JSON.
             return [
                 'success' => true,
-                'structure' => is_string($structure) ? $structure : json_encode($structure)
+                'structure' => is_string($structure) ? $structure : json_encode($structure),
             ];
-
         } catch (Exception $e) {
-            error_log("get_updated_structure error: " . $e->getMessage());
+            debugging("get_updated_structure error: " . $e->getMessage());
             return [
                 'success' => false,
-                'error' => 'Error generating updated structure: ' . $e->getMessage()
+                'error' => 'Error generating updated structure: ' . $e->getMessage(),
             ];
         }
     }
 
+    /**
+     * Describe the return value of execute().
+     *
+     * @return \external_description
+     */
     public static function execute_returns() {
         return new external_single_structure([
             'success' => new external_value(PARAM_BOOL, 'Success status'),
             'structure' => new external_value(PARAM_RAW, 'AI-generated updated course structure', VALUE_OPTIONAL),
-            'error' => new external_value(PARAM_RAW, 'Error message if failed', VALUE_OPTIONAL)
+            'error' => new external_value(PARAM_RAW, 'Error message if failed', VALUE_OPTIONAL),
         ]);
     }
 }

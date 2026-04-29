@@ -23,11 +23,12 @@
  */
 namespace block_mastermind_assistant;
 
-defined('MOODLE_INTERNAL') || die();
-
 use context_course;
 use core\event\course_created;
 
+/**
+ * External API for observer.
+ */
 class observer {
     /**
      * Course created handler – automatically add block instance.
@@ -65,10 +66,10 @@ class observer {
         $record->parentcontextid  = $context->id;
         $record->showinsubcontexts = 0;
         $record->pagetypepattern  = 'course-view-*';
-        $record->subpagepattern   = NULL;
+        $record->subpagepattern   = null;
         $record->defaultregion    = 'side-pre';
         $record->defaultweight    = 5;
-        $record->configdata       = NULL;
+        $record->configdata       = null;
         $record->timecreated      = time();
         $record->timemodified     = time();
 

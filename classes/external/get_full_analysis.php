@@ -43,7 +43,11 @@ use Exception;
  * endpoints (analyze-course + generate-structure = 2 calls).
  */
 class get_full_analysis extends external_api {
-
+    /**
+     * Describe the parameters accepted by execute().
+     *
+     * @return \external_function_parameters
+     */
     public static function execute_parameters() {
         return new external_function_parameters([
             'courseid' => new external_value(PARAM_INT, 'Course ID'),
@@ -51,6 +55,11 @@ class get_full_analysis extends external_api {
         ]);
     }
 
+    /**
+     * Execute the web service call.
+     *
+     * @return array
+     */
     public static function execute($courseid, $coursedata) {
         @set_time_limit(600);
 
@@ -109,7 +118,6 @@ class get_full_analysis extends external_api {
                 'recommendations' => $recommendationsstr,
                 'structure' => $structurestr,
             ];
-
         } catch (Exception $e) {
             debugging('get_full_analysis error: ' . $e->getMessage(), DEBUG_DEVELOPER);
             return [
@@ -126,9 +134,9 @@ class get_full_analysis extends external_api {
         $rec = $response;
         if (isset($response['recommendations'])) {
             $rec = $response['recommendations'];
-        } elseif (isset($response['analysis'])) {
+        } else if (isset($response['analysis'])) {
             $rec = $response['analysis'];
-        } elseif (isset($response['result'])) {
+        } else if (isset($response['result'])) {
             $rec = $response['result'];
         }
         return is_string($rec) ? $rec : json_encode($rec);
@@ -141,7 +149,7 @@ class get_full_analysis extends external_api {
         $structure = $response;
         if (isset($response['structure']) && is_array($response['structure'])) {
             $structure = $response['structure'];
-        } elseif (isset($response['result']) && is_array($response['result'])) {
+        } else if (isset($response['result']) && is_array($response['result'])) {
             $structure = $response['result'];
         }
 
@@ -151,6 +159,11 @@ class get_full_analysis extends external_api {
         return is_string($structure) ? $structure : json_encode($structure);
     }
 
+    /**
+     * Describe the return value of execute().
+     *
+     * @return \external_description
+     */
     public static function execute_returns() {
         return new external_single_structure([
             'success' => new external_value(PARAM_BOOL, 'Success status'),

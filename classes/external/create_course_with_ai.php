@@ -37,8 +37,10 @@ use context_system;
 use Exception;
 use stdClass;
 
+/**
+ * External API for create course with ai.
+ */
 class create_course_with_ai extends external_api {
-
     /**
      * Returns description of method parameters
      * @return external_function_parameters
@@ -47,7 +49,12 @@ class create_course_with_ai extends external_api {
         return new external_function_parameters([
             'coursename' => new external_value(PARAM_TEXT, 'Course name'),
             'categoryid' => new external_value(PARAM_INT, 'Category ID', VALUE_DEFAULT, 1),
-            'previewonly' => new external_value(PARAM_BOOL, 'Return structure preview without creating course', VALUE_DEFAULT, false),
+            'previewonly' => new external_value(
+                PARAM_BOOL,
+                'Return structure preview without creating course',
+                VALUE_DEFAULT,
+                false
+            ),
         ]);
     }
 
@@ -118,9 +125,8 @@ class create_course_with_ai extends external_api {
                 'coursename' => $course->fullname,
                 'courseurl' => (new \moodle_url('/course/view.php', ['id' => $course->id]))->out(false),
             ];
-
         } catch (Exception $e) {
-            error_log("Error creating course with AI: " . $e->getMessage());
+            debugging("Error creating course with AI: " . $e->getMessage());
             return [
                 'success' => false,
                 'error' => $e->getMessage(),
@@ -184,7 +190,7 @@ class create_course_with_ai extends external_api {
             'moodle_type' => $modulename,
             'type' => $modulename,
             'status' => 'NEW',
-            'intro' => $activitydata['description'] ?? ''
+            'intro' => $activitydata['description'] ?? '',
         ];
 
         $factory = new \block_mastermind_assistant\module_factory($course, $section);

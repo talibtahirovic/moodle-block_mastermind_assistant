@@ -50,7 +50,11 @@ use Exception;
  * multichoice, truefalse, shortanswer, matching, essay.
  */
 class apply_lesson_pages extends external_api {
-
+    /**
+     * Describe the parameters accepted by execute().
+     *
+     * @return \external_function_parameters
+     */
     public static function execute_parameters() {
         return new external_function_parameters([
             'courseid' => new external_value(PARAM_INT, 'Course ID'),
@@ -59,6 +63,11 @@ class apply_lesson_pages extends external_api {
         ]);
     }
 
+    /**
+     * Execute the web service call.
+     *
+     * @return array
+     */
     public static function execute($courseid, $cmid, $pages) {
         global $DB;
 
@@ -158,7 +167,6 @@ class apply_lesson_pages extends external_api {
                         $properties->jumpto[0] = \LESSON_NEXTPAGE;
                         $properties->score[0] = 0;
                     }
-
                 } else if ($qtype === 'truefalse') {
                     // True/False question — exactly 2 answers.
                     $properties->qtype = \LESSON_PAGE_TRUEFALSE;
@@ -183,7 +191,6 @@ class apply_lesson_pages extends external_api {
                         $properties->jumpto[$i] = $iscorrect ? \LESSON_NEXTPAGE : \LESSON_THISPAGE;
                         $properties->score[$i] = $iscorrect ? 1 : 0;
                     }
-
                 } else if ($qtype === 'shortanswer') {
                     // Short answer — text patterns to match.
                     $properties->qtype = \LESSON_PAGE_SHORTANSWER;
@@ -206,7 +213,6 @@ class apply_lesson_pages extends external_api {
                         $properties->jumpto[$i] = $iscorrect ? \LESSON_NEXTPAGE : \LESSON_THISPAGE;
                         $properties->score[$i] = $iscorrect ? 1 : 0;
                     }
-
                 } else if ($qtype === 'matching') {
                     // Matching question — pairs of answer/response.
                     // Moodle matching: first answer = prompt text, first response = prompt text.
@@ -245,7 +251,6 @@ class apply_lesson_pages extends external_api {
                         $properties->jumpto[$idx] = 0;
                         $properties->score[$idx] = 0;
                     }
-
                 } else if ($qtype === 'essay') {
                     // Essay question — no predefined answers, just prompt.
                     $properties->qtype = \LESSON_PAGE_ESSAY;
@@ -258,7 +263,6 @@ class apply_lesson_pages extends external_api {
                     ];
                     $properties->jumpto = [0 => \LESSON_NEXTPAGE];
                     $properties->score = [0 => 0];
-
                 } else {
                     // Default: Multichoice question.
                     $properties->qtype = \LESSON_PAGE_MULTICHOICE;
@@ -286,7 +290,6 @@ class apply_lesson_pages extends external_api {
                 $page = \lesson_page::create($properties, $lesson, $modcontext, $cm->id);
                 $lastpageid = $page->id;
                 $created++;
-
             } catch (Exception $e) {
                 $errors[] = $title . ': ' . $e->getMessage();
             }
@@ -323,6 +326,11 @@ class apply_lesson_pages extends external_api {
         }
     }
 
+    /**
+     * Describe the return value of execute().
+     *
+     * @return \external_description
+     */
     public static function execute_returns() {
         return new external_single_structure([
             'success' => new external_value(PARAM_BOOL, 'Whether any pages were created'),

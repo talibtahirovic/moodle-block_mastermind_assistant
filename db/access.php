@@ -31,10 +31,10 @@ $capabilities = [
         'contextlevel' => CONTEXT_BLOCK,
         'archetypes' => [
             'editingteacher' => CAP_ALLOW,
-            'manager' => CAP_ALLOW
+            'manager' => CAP_ALLOW,
         ],
 
-        'clonepermissionsfrom' => 'moodle/site:manageblocks'
+        'clonepermissionsfrom' => 'moodle/site:manageblocks',
     ],
 
     'block/mastermind_assistant:myaddinstance' => [
@@ -45,7 +45,7 @@ $capabilities = [
             'user' => CAP_ALLOW,
         ],
 
-        'clonepermissionsfrom' => 'moodle/my:manageblocks'
+        'clonepermissionsfrom' => 'moodle/my:manageblocks',
     ],
 
     'block/mastermind_assistant:view' => [

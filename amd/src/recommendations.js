@@ -20,7 +20,7 @@
  * @copyright  2026 The Namers <info@mastermindassistant.ai>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define(['core/ajax', 'core/notification', 'core/str', 'block_mastermind_assistant/ai_policy'], 
+define(['core/ajax', 'core/notification', 'core/str', 'block_mastermind_assistant/ai_policy'],
 function(Ajax, Notification, Str, AiPolicy) {
     /**
      * Get course data for recommendations
@@ -51,15 +51,12 @@ function(Ajax, Notification, Str, AiPolicy) {
         Ajax.call([request])[0]
             .then(function(response) {
                 if (response.success) {
-                    // Parse the JSON data
-                    var data = JSON.parse(response.data);
-                    
                     // Now send to OpenAI for recommendations
                     return getAIRecommendations(courseid, response.data, btn, originalText);
                 } else {
                     // Parse error from response
                     var errorData = JSON.parse(response.data);
-                    
+
                     // Show error notification
                     Notification.addNotification({
                         message: errorData.error || errorData.message || 'error',
@@ -125,7 +122,7 @@ function(Ajax, Notification, Str, AiPolicy) {
                 courseid: courseid,
                 coursedata: coursedata
             },
-            timeout: 600000  // 10 minutes — single call does both steps
+            timeout: 600000 // 10 minutes — single call does both steps
         }])[0]
             .then(function(response) {
                 if (!response.success) {
@@ -399,10 +396,10 @@ function(Ajax, Notification, Str, AiPolicy) {
                 } else {
                     result.improvements = jsonData.course_structure_improvements;
                 }
-                
+
                 // Use analysis summary as main recommendations
                 result.mainRecommendations = jsonData.analysis_summary || 'Course analysis completed.';
-                
+
                 return result;
             }
         } catch (e) {
@@ -416,7 +413,7 @@ function(Ajax, Notification, Str, AiPolicy) {
             result.improvements = improvementsMatch[1].trim();
         }
 
-        // Find Updated Course Structure section  
+        // Find Updated Course Structure section
         var structureMatch = response.match(/Updated Course Structure:([\s\S]*)$/i);
         if (structureMatch) {
             result.updatedStructure = structureMatch[1].trim();
@@ -483,7 +480,7 @@ function(Ajax, Notification, Str, AiPolicy) {
                             if (activity.type) {
                                 activityLabel += '<small>[' + activity.type + ']</small>';
                             }
-                            html += '<div class="updated-activity-box ' + activityStatus + '">' + 
+                            html += '<div class="updated-activity-box ' + activityStatus + '">' +
                                    activityLabel + '</div>';
                         });
                 html += '</div>';
@@ -554,7 +551,7 @@ function(Ajax, Notification, Str, AiPolicy) {
             function parseUpdatedCourseStructure(text) {
                 // First try to extract JSON from markdown code blocks
                 var cleanJsonText = text;
-                
+
                 // Remove markdown code blocks if present
                 if (text.includes('```json')) {
                     var match = text.match(/```json\s*(\{[\s\S]*?\})\s*```/);
@@ -568,7 +565,7 @@ function(Ajax, Notification, Str, AiPolicy) {
                         cleanJsonText = genericMatch[1];
                     }
                 }
-                
+
                 // Try to parse as JSON
                 try {
                     var jsonData = JSON.parse(cleanJsonText);
@@ -585,7 +582,9 @@ function(Ajax, Notification, Str, AiPolicy) {
                             // Fix status: if section is UNCHANGED but has NEW activities, mark as MODIFIED.
                             var sectionStatus = section.status || 'NEW';
                             if (sectionStatus === 'UNCHANGED') {
-                                var hasNew = activities.some(function(a) { return a.status === 'NEW'; });
+                                var hasNew = activities.some(function(a) {
+ return a.status === 'NEW';
+});
                                 if (hasNew) {
                                     sectionStatus = 'MODIFIED';
                                 }
@@ -602,7 +601,7 @@ function(Ajax, Notification, Str, AiPolicy) {
                     }
                 } catch (e) {
                     // JSON parsing failed, try more extraction methods
-                    
+
                     // Try to find JSON object in the text
                     var jsonMatch = text.match(/\{[\s\S]*\}/);
                     if (jsonMatch) {
@@ -618,7 +617,9 @@ function(Ajax, Notification, Str, AiPolicy) {
                                         };
                                     });
                                     var secStatus = section.status || 'NEW';
-                                    if (secStatus === 'UNCHANGED' && acts.some(function(a) { return a.status === 'NEW'; })) {
+                                    if (secStatus === 'UNCHANGED' && acts.some(function(a) {
+ return a.status === 'NEW';
+})) {
                                         secStatus = 'MODIFIED';
                                     }
                                     return {
@@ -696,7 +697,7 @@ function(Ajax, Notification, Str, AiPolicy) {
                         var item = line.replace(/^[-*•]\s*/, '').trim();
                         if (currentSection) {
                             if (inActivities) {
-                                // Parse activity with enhanced status format: "Name (KEEP - type)" or "Name (NEW - type)" 
+                                // Parse activity with enhanced status format: "Name (KEEP - type)" or "Name (NEW - type)"
                                 var enhancedMatch = item.match(/^(.+?)\s+\((KEEP|NEW|MODIFIED)\s*-\s*([^)]+)\)$/);
                                 if (enhancedMatch) {
                                     currentSection.activities.push({
@@ -738,7 +739,8 @@ function(Ajax, Notification, Str, AiPolicy) {
                     sections.push({
                         title: 'Updated Course Structure',
                         status: 'NEW',
-                        description: 'Review the AI-generated recommendations and implement the suggested improvements to enhance your course structure and student engagement.',
+                        description: 'Review the AI-generated recommendations and implement the suggested ' +
+                            'improvements to enhance your course structure and student engagement.',
                         activities: [{name: 'Review the recommendations above', status: 'NEW', type: ''}],
                         objectives: ['Implement suggested improvements', 'Enhance student engagement']
                     });
@@ -754,7 +756,7 @@ function(Ajax, Notification, Str, AiPolicy) {
             function applyCourseStructureChanges(structureText) {
                 // Get course ID from the current context
                 var courseid = getCourseId();
-                
+
                 if (!courseid || isNaN(courseid)) {
                     Notification.addNotification({
                         message: 'Error: Could not determine course ID (courseid=' + courseid + ')',
@@ -764,7 +766,9 @@ function(Ajax, Notification, Str, AiPolicy) {
                 }
 
                 // Show confirmation dialog
-                if (!confirm('Are you sure you want to apply these changes to your course structure? This will modify your actual course and cannot be easily undone.')) {
+                var confirmMessage = 'Are you sure you want to apply these changes to your course structure? '
+                    + 'This will modify your actual course and cannot be easily undone.';
+                if (!confirm(confirmMessage)) {
                     return;
                 }
 
@@ -789,7 +793,7 @@ function(Ajax, Notification, Str, AiPolicy) {
                         structuretext: structureText
                     }
                 };
-                
+
             Ajax.call([applyRequest])[0]
                 .then(function(response) {
                     if (response.success) {
@@ -797,7 +801,7 @@ function(Ajax, Notification, Str, AiPolicy) {
                             message: '✅ Course structure updated successfully! ' + response.message,
                             type: 'success'
                         });
-                        
+
                         // Optionally reload the page to see changes
                         setTimeout(function() {
                             if (confirm('Would you like to reload the page to see the updated course structure?')) {
@@ -807,7 +811,7 @@ function(Ajax, Notification, Str, AiPolicy) {
                     } else {
                         throw new Error(response.error || 'Unknown error occurred while applying changes');
                     }
-                    
+
                     // Re-enable button on success
                     if (applyButton) {
                         applyButton.disabled = false;
@@ -823,34 +827,38 @@ function(Ajax, Notification, Str, AiPolicy) {
                     } else {
                         errorMessage += 'Unknown error occurred. Please check the browser console and Moodle logs for details.';
                     }
-                    
+
                     Notification.addNotification({
                         message: errorMessage,
                         type: 'error'
                     });
-                    
+
                     // Re-enable button on error
                     if (applyButton) {
                         applyButton.disabled = false;
                         applyButton.innerHTML = '✨ Apply Course Structure Changes';
                     }
                 });
-                
+
                 // Safety timeout to ensure button is never stuck permanently
                 setTimeout(function() {
                     if (applyButton && applyButton.disabled) {
                         applyButton.disabled = false;
                         applyButton.innerHTML = '✨ Apply Course Structure Changes';
-                        
+
                         Notification.addNotification({
-                            message: 'The apply operation may have timed out. Please check your course to see if changes were applied.',
+                            message: 'The apply operation may have timed out. ' +
+                                'Please check your course to see if changes were applied.',
                             type: 'warning'
                         });
                     }
                 }, 150000); // 2.5 minutes safety timeout
             }
 
-    // Helper to reliably obtain the course ID on any course page
+    /**
+     * Helper to reliably obtain the course ID on any course page.
+     * @return {number} Course ID, or 0 if not detectable.
+     */
     function getCourseId() {
         // 1) Moodle global (set on every course page)
         if (window.M && M.cfg && M.cfg.courseId && !isNaN(parseInt(M.cfg.courseId))) {
@@ -870,7 +878,7 @@ function(Ajax, Notification, Str, AiPolicy) {
         // Fallback – id param may be a course or a section id
         var idParam = params.get('id');
         if (idParam && !isNaN(parseInt(idParam))) {
-            return parseInt(idParam); // backend will auto-correct if this is a section id
+            return parseInt(idParam); // Backend will auto-correct if this is a section id
         }
         return null;
     }
@@ -966,7 +974,8 @@ function(Ajax, Notification, Str, AiPolicy) {
             '<div class="metric-item"><div class="metric-label">Active Users (30 Days)</div>' +
             '<div class="metric-value">' + metrics.active_users + '</div></div>' +
             '<div class="metric-item"><div class="metric-label">Avg Login Frequency</div>' +
-            '<div class="metric-value">' + metrics.avg_login_frequency + ' <span style="font-size:14px;">sessions</span></div></div>' +
+            '<div class="metric-value">' + metrics.avg_login_frequency +
+                ' <span style="font-size:14px;">sessions</span></div></div>' +
             '<div class="metric-item"><div class="metric-label">Primary Dropout Point</div>' +
             '<div class="metric-value text">' + escapeHtml(metrics.dropout_point) + '</div></div>' +
             '</div></div>' +

@@ -294,7 +294,7 @@
 .mastermind-insights-title {
     font-size: 20px;
     font-weight: 700;
-    color: #ffffff;
+    color: #fff;
     margin: 0;
     letter-spacing: -0.01em;
 }
@@ -434,7 +434,7 @@
 .mastermind-metric-value {
     font-size: 22px;
     font-weight: 700;
-    color: #ffffff;
+    color: #fff;
     line-height: 1;
 }
 
@@ -577,7 +577,7 @@
     margin-top: 18px;
     padding: 12px 20px;
     background: #3a4556;
-    color: #ffffff;
+    color: #fff;
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 10px;
     font-size: 14px;
@@ -601,7 +601,7 @@
     margin-top: 12px;
     padding: 14px 20px;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: #ffffff;
+    color: #fff;
     border: none;
     border-radius: 10px;
     font-size: 15px;
@@ -1161,8 +1161,12 @@
 }
 
 @keyframes mastermindFadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
 
 .detailed-metrics-content {
@@ -1177,8 +1181,14 @@
 }
 
 @keyframes mastermindSlideUp {
-    from { transform: translateY(50px); opacity: 0; }
-    to { transform: translateY(0); opacity: 1; }
+    from {
+        transform: translateY(50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }
 
 .detailed-metrics-header {
@@ -1196,7 +1206,7 @@
 .detailed-metrics-title {
     font-size: 24px;
     font-weight: 700;
-    color: #ffffff;
+    color: #fff;
     margin: 0;
 }
 
@@ -1211,7 +1221,7 @@
     align-items: center;
     justify-content: center;
     transition: all 0.2s ease;
-    color: #ffffff;
+    color: #fff;
     font-size: 24px;
 }
 
@@ -1252,7 +1262,7 @@
 .category-title {
     font-size: 18px;
     font-weight: 600;
-    color: #ffffff;
+    color: #fff;
     margin: 0;
 }
 
@@ -1286,7 +1296,7 @@
 .metric-value {
     font-size: 24px;
     font-weight: 700;
-    color: #ffffff;
+    color: #fff;
 }
 
 .metric-value.text {
@@ -1353,7 +1363,7 @@
 .ai-results-title {
     font-size: 22px;
     font-weight: 700;
-    color: #ffffff;
+    color: #fff;
     margin: 0;
 }
 
@@ -1447,30 +1457,30 @@
 
 .mastermind-filter-select {
     flex: 1;
-    background: #1a202c !important;
-    color: #e2e8f0 !important;
-    border: 1px solid #4a5568 !important;
-    border-radius: 6px !important;
-    font-size: 13px !important;
-    padding: 6px 10px !important;
+    background: #1a202c;
+    color: #e2e8f0;
+    border: 1px solid #4a5568;
+    border-radius: 6px;
+    font-size: 13px;
+    padding: 6px 10px;
 }
 
 .mastermind-filter-year {
-    width: 80px !important;
+    width: 80px;
     flex: none;
-    background: #1a202c !important;
-    color: #e2e8f0 !important;
-    border: 1px solid #4a5568 !important;
-    border-radius: 6px !important;
-    font-size: 13px !important;
-    padding: 6px 10px !important;
+    background: #1a202c;
+    color: #e2e8f0;
+    border: 1px solid #4a5568;
+    border-radius: 6px;
+    font-size: 13px;
+    padding: 6px 10px;
 }
 
 .mastermind-filter-select:focus,
 .mastermind-filter-year:focus {
-    border-color: #3182ce !important;
-    box-shadow: 0 0 0 2px rgba(49, 130, 206, 0.15) !important;
-    outline: none !important;
+    border-color: #3182ce;
+    box-shadow: 0 0 0 2px rgba(49, 130, 206, 0.15);
+    outline: none;
 }
 
 /* ===== Result Metadata ===== */
@@ -1822,13 +1832,23 @@
 
 /* ===== Assignment Preview Modal ===== */
 @keyframes mastermindFadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
 
 @keyframes mastermindSlideUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .mastermind-preview-overlay {
@@ -1848,7 +1868,7 @@
 }
 
 .mastermind-preview-modal {
-    background: #ffffff;
+    background: #fff;
     border-radius: 16px;
     max-width: 1000px;
     width: 100%;
@@ -1873,7 +1893,7 @@
 .mastermind-preview-title {
     font-size: 20px;
     font-weight: 700;
-    color: #ffffff;
+    color: #fff;
     margin: 0;
 }
 
@@ -1904,7 +1924,7 @@
     padding: 24px;
     overflow-y: auto;
     max-height: calc(90vh - 140px);
-    background: #ffffff;
+    background: #fff;
 }
 
 .mastermind-preview-sidebar {
@@ -2016,10 +2036,10 @@
 }
 
 .mastermind-preview-btn {
-    width: auto !important;
-    margin-top: 0 !important;
-    padding: 10px 20px !important;
-    font-size: 14px !important;
+    width: auto;
+    margin-top: 0;
+    padding: 10px 20px;
+    font-size: 14px;
 }
 
 .mastermind-secondary-button {
@@ -2032,7 +2052,7 @@
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s;
-    background: #ffffff;
+    background: #fff;
     color: #475569;
     border: 1px solid #cbd5e0;
 }
@@ -2087,7 +2107,7 @@
 
 /* ===== Preview Cards (used in JS-generated content) ===== */
 .mastermind-preview-card {
-    background: #ffffff;
+    background: #fff;
     border: 1px solid #e2e8f0;
     border-radius: 8px;
     padding: 16px;
@@ -2102,7 +2122,7 @@
 }
 
 .mastermind-preview-card h5 span {
-    color: #64748b !important;
+    color: #64748b;
 }
 
 /* ===== Preview Modal Responsive ===== */
@@ -2126,7 +2146,7 @@
 }
 
 .mastermind-quiz-preview-body {
-    display: block !important;
+    display: block;
     padding: 20px;
     overflow-y: auto;
     max-height: 65vh;
@@ -2139,7 +2159,7 @@
 }
 
 .mastermind-quiz-question-card {
-    background: #ffffff;
+    background: #fff;
     border: 2px solid #e2e8f0;
     border-radius: 10px;
     padding: 16px;
@@ -2187,12 +2207,30 @@
     flex-shrink: 0;
 }
 
-.mastermind-quiz-type-multichoice { background: rgba(102, 126, 234, 0.12); color: #4f46e5; }
-.mastermind-quiz-type-truefalse { background: rgba(22, 163, 74, 0.12); color: #15803d; }
-.mastermind-quiz-type-shortanswer { background: rgba(234, 88, 12, 0.12); color: #c2410c; }
-.mastermind-quiz-type-match { background: rgba(147, 51, 234, 0.12); color: #7c3aed; }
-.mastermind-quiz-type-gapselect { background: rgba(13, 148, 136, 0.12); color: #0f766e; }
-.mastermind-quiz-type-numerical { background: rgba(220, 38, 38, 0.12); color: #dc2626; }
+.mastermind-quiz-type-multichoice {
+    background: rgba(102, 126, 234, 0.12);
+    color: #4f46e5;
+}
+.mastermind-quiz-type-truefalse {
+    background: rgba(22, 163, 74, 0.12);
+    color: #15803d;
+}
+.mastermind-quiz-type-shortanswer {
+    background: rgba(234, 88, 12, 0.12);
+    color: #c2410c;
+}
+.mastermind-quiz-type-match {
+    background: rgba(147, 51, 234, 0.12);
+    color: #7c3aed;
+}
+.mastermind-quiz-type-gapselect {
+    background: rgba(13, 148, 136, 0.12);
+    color: #0f766e;
+}
+.mastermind-quiz-type-numerical {
+    background: rgba(220, 38, 38, 0.12);
+    color: #dc2626;
+}
 
 .mastermind-quiz-question-name {
     color: #1e293b;
@@ -2229,7 +2267,7 @@
 }
 
 .mastermind-quiz-answer-correct {
-    color: #15803d !important;
+    color: #15803d;
     font-weight: 600;
 }
 
@@ -2353,7 +2391,7 @@
 
 /* ===== Course Preview Modal ===== */
 .mastermind-course-preview-body {
-    display: block !important;
+    display: block;
     padding: 24px;
     overflow-y: auto;
     max-height: calc(90vh - 140px);
@@ -2410,7 +2448,7 @@
 }
 
 .mastermind-course-preview-section {
-    background: #ffffff;
+    background: #fff;
     border-radius: 10px;
     border: 1px solid #e2e8f0;
     overflow: hidden;
@@ -2423,7 +2461,7 @@
     padding: 14px 16px;
     cursor: pointer;
     transition: background 0.2s;
-    background: #ffffff;
+    background: #fff;
 }
 
 .mastermind-course-preview-section-header:hover {

@@ -34,8 +34,10 @@ use external_single_structure;
 use external_value;
 use Exception;
 
+/**
+ * External API for test connection.
+ */
 class test_connection extends external_api {
-
     /**
      * Returns description of method parameters
      * @return external_function_parameters
@@ -66,14 +68,14 @@ class test_connection extends external_api {
                 'success' => true,
                 'tier' => $accountresult['tier'] ?? '',
                 'status' => $accountresult['status'] ?? '',
-                'message' => get_string('connection_success', 'block_mastermind_assistant')
+                'message' => get_string('connection_success', 'block_mastermind_assistant'),
             ];
         } catch (Exception $e) {
             return [
                 'success' => false,
                 'tier' => '',
                 'status' => '',
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
             ];
         }
     }

@@ -33,8 +33,10 @@ use external_function_parameters;
 use external_single_structure;
 use external_value;
 
+/**
+ * External API for check ai policy.
+ */
 class check_ai_policy extends external_api {
-
     /**
      * Returns description of method parameters
      * @return external_function_parameters
@@ -56,11 +58,11 @@ class check_ai_policy extends external_api {
         require_login();
         require_capability('block/mastermind_assistant:view', $context);
 
-        // Check user preference
+        // Check user preference.
         $accepted = \get_user_preferences('mastermind_ai_policy_accepted', 0, $USER);
 
         return [
-            'accepted' => (bool)$accepted
+            'accepted' => (bool)$accepted,
         ];
     }
 
@@ -70,8 +72,7 @@ class check_ai_policy extends external_api {
      */
     public static function execute_returns() {
         return new external_single_structure([
-            'accepted' => new external_value(PARAM_BOOL, 'Whether user has accepted AI policy')
+            'accepted' => new external_value(PARAM_BOOL, 'Whether user has accepted AI policy'),
         ]);
     }
 }
-

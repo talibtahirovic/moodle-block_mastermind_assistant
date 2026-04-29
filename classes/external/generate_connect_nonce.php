@@ -64,7 +64,7 @@ class generate_connect_nonce extends external_api {
      * @return array Array containing the connect_url and the generated nonce.
      */
     public static function execute($returnurl = '') {
-        global $CFG, $SESSION;
+        global $CFG, $SESSION, $USER;
 
         $context = \context_system::instance();
         self::validate_context($context);
@@ -90,9 +90,26 @@ class generate_connect_nonce extends external_api {
         }
         $dashboardbase = rtrim($dashboardbase, '/');
 
-        $connecturl = $dashboardbase . '/connect?'
-            . 'callback_url=' . rawurlencode($callbackurl)
-            . '&nonce=' . rawurlencode($nonce);
+        // Pre-fill the dashboard signup form with the connecting admin's details
+        // so the user only has to confirm and click — no retyping required.
+        $sitename = format_string(get_site()->fullname ?? '', true);
+        $email = !empty($USER->email) ? $USER->email : '';
+        $fullname = trim(fullname($USER));
+
+        $connectparams = [
+            'callback_url' => $callbackurl,
+            'nonce' => $nonce,
+            'site_url' => $CFG->wwwroot,
+            'site_name' => $sitename,
+        ];
+        if ($email !== '') {
+            $connectparams['email'] = $email;
+        }
+        if ($fullname !== '') {
+            $connectparams['name'] = $fullname;
+        }
+
+        $connecturl = $dashboardbase . '/connect?' . http_build_query($connectparams, '', '&', PHP_QUERY_RFC3986);
 
         return [
             'connect_url' => $connecturl,

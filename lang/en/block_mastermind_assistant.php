@@ -46,12 +46,12 @@ $string['openai_connected'] = 'OpenAI connection successful';
 $string['openai_failed'] = 'OpenAI connection failed';
 $string['getting_ai_recommendations'] = 'Getting AI Recommendations...';
 
-// Icon strings
+// Icon strings.
 $string['openai_success_icon'] = '✓';
 $string['openai_warning_icon'] = '⚠';
 $string['openai_error_icon'] = '✗';
 
-// Course search strings
+// Course search strings.
 $string['search_course_placeholder'] = 'Type a course name...';
 $string['searching'] = 'Searching courses...';
 $string['course_search_help'] = 'Type to search for existing courses or create new ones with AI assistance.';
@@ -59,12 +59,12 @@ $string['creating_course_ai'] = 'Creating Course with AI';
 $string['ai_working'] = 'AI is generating your course structure. This may take a minute...';
 $string['course_created_success'] = 'Course created successfully with AI! Redirecting...';
 
-// Block instance capability strings
+// Block instance capability strings.
 $string['mastermind_assistant:addinstance'] = 'Add a new Mastermind Assistant block';
 $string['mastermind_assistant:myaddinstance'] = 'Add a new Mastermind Assistant block to the My Moodle page';
 $string['mastermind_assistant:view'] = 'View Mastermind Assistant block';
 
-// Mod draft strings
+// Mod draft strings.
 $string['ai_content_assistant'] = 'AI Content Assistant';
 $string['go_to_settings_to_generate'] = 'To use AI content generation, please open the activity settings.';
 $string['open_activity_settings'] = 'Open Activity Settings';
@@ -151,6 +151,8 @@ $string['level_introductory'] = 'Introductory';
 $string['level_intermediate'] = 'Intermediate';
 $string['level_advanced'] = 'Advanced';
 $string['level_graduate'] = 'Graduate';
+$string['quiz_source_doc_label'] = 'Source document (optional)';
+$string['quiz_source_doc_hint'] = 'Upload a PDF, DOCX or TXT (max 10 MB) to base questions on the document content.';
 $string['scope_length_label'] = 'Scope / Length';
 $string['scope_length_placeholder'] = 'e.g., 1500-2000 words, 10 pages, 15-minute presentation';
 

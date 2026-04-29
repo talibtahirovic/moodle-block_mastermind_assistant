@@ -38,15 +38,17 @@ use context_course;
 use Exception;
 use moodle_exception;
 
+/**
+ * External API for get course data.
+ */
 class get_course_data extends external_api {
-
     /**
      * Returns description of method parameters
      * @return external_function_parameters
      */
     public static function execute_parameters() {
         return new external_function_parameters([
-            'courseid' => new external_value(PARAM_INT, 'Course ID')
+            'courseid' => new external_value(PARAM_INT, 'Course ID'),
         ]);
     }
 
@@ -59,41 +61,40 @@ class get_course_data extends external_api {
         global $DB, $CFG;
 
         try {
-            // Validate parameters
+            // Validate parameters.
             $params = self::validate_parameters(self::execute_parameters(), [
-                'courseid' => $courseid
+                'courseid' => $courseid,
             ]);
-            
-            // Debug and fix potential section ID vs course ID confusion
+
+            // Debug and fix potential section ID vs course ID confusion.
             $courseexists = $DB->record_exists('course', ['id' => $params['courseid']]);
             if (!$courseexists) {
-                // Check if the provided ID is actually a section ID
+                // Check if the provided ID is actually a section ID.
                 $sectionrecord = $DB->get_record('course_sections', ['id' => $params['courseid']], 'id, course, section');
                 if ($sectionrecord) {
                     $params['courseid'] = $sectionrecord->course;
                 }
             }
 
-            // Check course access
+            // Check course access.
             $course = get_course($params['courseid']);
             $context = context_course::instance($params['courseid']);
             self::validate_context($context);
-            
-            // Check capability
+
+            // Check capability.
             require_capability('block/mastermind_assistant:view', $context);
 
-            // Gather comprehensive course data
+            // Gather comprehensive course data.
             $data = self::gather_course_data($params['courseid']);
-            
+
             return [
                 'success' => true,
-                'data' => json_encode($data)
+                'data' => json_encode($data),
             ];
-            
         } catch (Exception $e) {
             return [
                 'success' => false,
-                'data' => json_encode(['error' => $e->getMessage()])
+                'data' => json_encode(['error' => $e->getMessage()]),
             ];
         }
     }
@@ -111,16 +112,16 @@ class get_course_data extends external_api {
 
     /**
      * Gather comprehensive course data including sections and activities
-     * 
+     *
      * @param int $courseid
      * @return array
      */
     protected static function gather_course_data($courseid) {
         global $DB, $CFG;
-        
+
         $course = get_course($courseid);
         $modinfo = get_fast_modinfo($course);
-        
+
         $data = [
             'course' => [
                 'id' => $course->id,
@@ -142,29 +143,29 @@ class get_course_data extends external_api {
             'grades' => [],
             'completions' => [],
             'forum_posts' => [],
-            'feedback' => []
+            'feedback' => [],
         ];
-        
+
         // Build a map of activities grouped by section number.
         $activitiesbysection = [];
         foreach ($modinfo->get_cms() as $cm) {
-            $module_data = [];
+            $moduledata = [];
 
-            // Add module-specific data
+            // Add module-specific data.
             if ($cm->modname === 'forum') {
                 $forum = $DB->get_record('forum', ['id' => $cm->instance]);
                 if ($forum) {
-                    $module_data = [
+                    $moduledata = [
                         'type' => $forum->type,
                         'intro' => strip_tags($forum->intro),
                         'assessed' => $forum->assessed,
                         'scale' => $forum->scale,
                     ];
                 }
-            } elseif ($cm->modname === 'assign') {
+            } else if ($cm->modname === 'assign') {
                 $assignment = $DB->get_record('assign', ['id' => $cm->instance]);
                 if ($assignment) {
-                    $module_data = [
+                    $moduledata = [
                         'intro' => strip_tags($assignment->intro ?? ''),
                         'duedate' => $assignment->duedate ?? 0,
                         'allowsubmissionsfromdate' => $assignment->allowsubmissionsfromdate ?? 0,
@@ -172,10 +173,10 @@ class get_course_data extends external_api {
                         'maxattempts' => $assignment->maxattempts ?? 0,
                     ];
                 }
-            } elseif ($cm->modname === 'quiz') {
+            } else if ($cm->modname === 'quiz') {
                 $quiz = $DB->get_record('quiz', ['id' => $cm->instance]);
                 if ($quiz) {
-                    $module_data = [
+                    $moduledata = [
                         'intro' => strip_tags($quiz->intro ?? ''),
                         'timeopen' => $quiz->timeopen ?? 0,
                         'timeclose' => $quiz->timeclose ?? 0,
@@ -198,7 +199,7 @@ class get_course_data extends external_api {
                 'added' => $cm->added,
                 'indent' => $cm->indent,
                 'url' => $cm->url ? $cm->url->out() : '',
-                'module_data' => $module_data,
+                'module_data' => $moduledata,
             ];
 
             $activitiesbysection[$cm->sectionnum][] = $activityentry;
@@ -220,8 +221,8 @@ class get_course_data extends external_api {
                 'activities' => $activitiesbysection[$section->section] ?? [],
             ];
         }
-        
-        // Get enrolled users
+
+        // Get enrolled users.
         $users = get_enrolled_users(context_course::instance($courseid));
         foreach ($users as $user) {
             $data['users'][] = [
@@ -235,7 +236,7 @@ class get_course_data extends external_api {
                 'timeenrolled' => $user->timeenrolled ?? 0,
             ];
         }
-        
+
         // Get grade data and encode as JSON for simplicity.
         $grades = [];
         $gradeitems = $DB->get_records('grade_items', ['courseid' => $courseid]);
@@ -244,7 +245,7 @@ class get_course_data extends external_api {
         $allitemgrades = [];
         if ($gradeitems) {
             $itemids = array_keys($gradeitems);
-            list($insql, $inparams) = $DB->get_in_or_equal($itemids, SQL_PARAMS_NAMED);
+            [$insql, $inparams] = $DB->get_in_or_equal($itemids, SQL_PARAMS_NAMED);
             $graderecords = $DB->get_records_select('grade_grades', "itemid $insql", $inparams);
             foreach ($graderecords as $grade) {
                 $allitemgrades[$grade->itemid][] = $grade;
@@ -262,7 +263,7 @@ class get_course_data extends external_api {
                     'grademin' => $gradeitem->grademin,
                     'gradepass' => $gradeitem->gradepass,
                 ],
-                'grades' => []
+                'grades' => [],
             ];
 
             $itemgrades = $allitemgrades[$gradeitem->id] ?? [];
@@ -279,14 +280,17 @@ class get_course_data extends external_api {
             $grades[] = $gradedata;
         }
         $data['grades'] = $grades;
-        
-        // Get completion data
+
+        // Get completion data.
         $completions = [];
         if (!empty($modinfo->get_cms())) {
             $cmids = array_keys($modinfo->get_cms());
-            list($insql, $inparams) = $DB->get_in_or_equal($cmids, SQL_PARAMS_NAMED);
-            $completionrecords = $DB->get_records_select('course_modules_completion', 
-                "coursemoduleid $insql", $inparams);
+            [$insql, $inparams] = $DB->get_in_or_equal($cmids, SQL_PARAMS_NAMED);
+            $completionrecords = $DB->get_records_select(
+                'course_modules_completion',
+                "coursemoduleid $insql",
+                $inparams
+            );
             foreach ($completionrecords as $completion) {
                 $completions[] = [
                     'coursemoduleid' => $completion->coursemoduleid,
@@ -298,18 +302,18 @@ class get_course_data extends external_api {
             }
         }
         $data['completions'] = $completions;
-        
-        // Get forum posts
+
+        // Get forum posts.
         $forumposts = [];
         $forumpostrecords = $DB->get_records_sql("
-            SELECT fp.*, fd.course 
+            SELECT fp.*, fd.course
             FROM {forum_posts} fp
-            JOIN {forum_discussions} fd ON fd.id = fp.discussion 
+            JOIN {forum_discussions} fd ON fd.id = fp.discussion
             WHERE fd.course = ?
             ORDER BY fp.created DESC
             LIMIT 100
         ", [$courseid]);
-        
+
         foreach ($forumpostrecords as $post) {
             $forumposts[] = [
                 'id' => $post->id,
@@ -324,8 +328,8 @@ class get_course_data extends external_api {
             ];
         }
         $data['forum_posts'] = $forumposts;
-        
-        // Get feedback data
+
+        // Get feedback data.
         $feedbackdata = [];
         $feedbacks = $DB->get_records('feedback', ['course' => $courseid]);
         foreach ($feedbacks as $feedback) {
@@ -338,10 +342,10 @@ class get_course_data extends external_api {
                     'timeclose' => $feedback->timeclose,
                 ],
                 'items' => [],
-                'values' => []
+                'values' => [],
             ];
-            
-            // Get feedback items
+
+            // Get feedback items.
             $items = $DB->get_records('feedback_item', ['feedback' => $feedback->id]);
             foreach ($items as $item) {
                 $fbdata['items'][] = [
@@ -353,15 +357,15 @@ class get_course_data extends external_api {
                     'required' => $item->required,
                 ];
             }
-            
-            // Get feedback values
+
+            // Get feedback values.
             $values = $DB->get_records_sql("
-                SELECT fv.*, fi.name as itemname, fi.typ 
+                SELECT fv.*, fi.name as itemname, fi.typ
                 FROM {feedback_value} fv
                 JOIN {feedback_item} fi ON fi.id = fv.item
                 WHERE fi.feedback = ?
             ", [$feedback->id]);
-            
+
             foreach ($values as $value) {
                 $fbdata['values'][] = [
                     'id' => $value->id,
@@ -373,7 +377,7 @@ class get_course_data extends external_api {
                     'itemtype' => $value->typ,
                 ];
             }
-            
+
             $feedbackdata[] = $fbdata;
         }
         $data['feedback'] = $feedbackdata;
@@ -391,7 +395,7 @@ class get_course_data extends external_api {
             [$courseid, $now]
         );
         if ($pastdue) {
-            $auditflags['past_due_dates'] = array_values(array_map(function($a) {
+            $auditflags['past_due_dates'] = array_values(array_map(function ($a) {
                 return ['name' => $a->name, 'duedate' => userdate($a->duedate)];
             }, $pastdue));
         }
@@ -414,7 +418,7 @@ class get_course_data extends external_api {
             $yearparams
         );
         if ($pagesold) {
-            $auditflags['old_year_references'] = array_values(array_map(function($p) {
+            $auditflags['old_year_references'] = array_values(array_map(function ($p) {
                 return $p->name;
             }, $pagesold));
         }
@@ -426,7 +430,7 @@ class get_course_data extends external_api {
             [$courseid]
         );
         if ($emptysections) {
-            $auditflags['empty_sections'] = array_values(array_map(function($s) {
+            $auditflags['empty_sections'] = array_values(array_map(function ($s) {
                 return $s->name ?: 'Section ' . $s->section;
             }, $emptysections));
         }

@@ -33,15 +33,17 @@ use external_function_parameters;
 use external_single_structure;
 use external_value;
 
+/**
+ * External API for save ai policy.
+ */
 class save_ai_policy extends external_api {
-
     /**
      * Returns description of method parameters
      * @return external_function_parameters
      */
     public static function execute_parameters() {
         return new external_function_parameters([
-            'accepted' => new external_value(PARAM_BOOL, 'Whether user accepted AI policy')
+            'accepted' => new external_value(PARAM_BOOL, 'Whether user accepted AI policy'),
         ]);
     }
 
@@ -53,9 +55,9 @@ class save_ai_policy extends external_api {
     public static function execute($accepted) {
         global $USER;
 
-        // Validate parameters
+        // Validate parameters.
         $params = self::validate_parameters(self::execute_parameters(), [
-            'accepted' => $accepted
+            'accepted' => $accepted,
         ]);
 
         // Validate context and capability.
@@ -64,13 +66,13 @@ class save_ai_policy extends external_api {
         require_login();
         require_capability('block/mastermind_assistant:view', $context);
 
-        // Save user preference
+        // Save user preference.
         $value = $params['accepted'] ? 1 : 0;
         \set_user_preference('mastermind_ai_policy_accepted', $value, $USER);
 
         return [
             'success' => true,
-            'message' => $params['accepted'] ? 'AI policy accepted' : 'AI policy declined'
+            'message' => $params['accepted'] ? 'AI policy accepted' : 'AI policy declined',
         ];
     }
 
@@ -81,8 +83,7 @@ class save_ai_policy extends external_api {
     public static function execute_returns() {
         return new external_single_structure([
             'success' => new external_value(PARAM_BOOL, 'Whether the operation was successful'),
-            'message' => new external_value(PARAM_TEXT, 'Status message')
+            'message' => new external_value(PARAM_TEXT, 'Status message'),
         ]);
     }
 }
-
