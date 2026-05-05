@@ -1451,33 +1451,39 @@
 /* ===== Search Filters ===== */
 .mastermind-search-filters {
     display: flex;
+    flex-wrap: wrap;
     gap: 8px;
     margin-bottom: 12px;
 }
 
-.mastermind-filter-select {
-    flex: 1;
+/* Scope under the parent container so we beat Bootstrap's .form-control
+   without relying on !important. The category select shrinks down to fit
+   narrow blocks; the year field is fixed-width. */
+.mastermind-course-search-container .mastermind-filter-select.form-control,
+.mastermind-course-search-container .mastermind-filter-year.form-control {
+    height: auto;
     background: #1a202c;
     color: #e2e8f0;
     border: 1px solid #4a5568;
     border-radius: 6px;
     font-size: 13px;
     padding: 6px 10px;
+    box-shadow: none;
 }
 
-.mastermind-filter-year {
-    width: 80px;
-    flex: none;
-    background: #1a202c;
-    color: #e2e8f0;
-    border: 1px solid #4a5568;
-    border-radius: 6px;
-    font-size: 13px;
-    padding: 6px 10px;
+.mastermind-course-search-container .mastermind-filter-select.form-control {
+    flex: 1 1 120px;
+    min-width: 0;
 }
 
-.mastermind-filter-select:focus,
-.mastermind-filter-year:focus {
+.mastermind-course-search-container .mastermind-filter-year.form-control {
+    flex: 0 0 70px;
+    width: 70px;
+    max-width: 70px;
+}
+
+.mastermind-course-search-container .mastermind-filter-select.form-control:focus,
+.mastermind-course-search-container .mastermind-filter-year.form-control:focus {
     border-color: #3182ce;
     box-shadow: 0 0 0 2px rgba(49, 130, 206, 0.15);
     outline: none;
