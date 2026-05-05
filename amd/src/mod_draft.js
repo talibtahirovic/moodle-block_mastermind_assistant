@@ -2411,20 +2411,80 @@ function(Ajax, Notification, AiPolicy, Str, Templates) {
             });
         }
 
-        // Quiz source-document upload preview.
+        // Quiz source-document dropzone (mirrors the course-creation upload UX).
         var quizSourceInput = document.getElementById('quiz-source-doc');
-        var quizSourceSummary = document.getElementById('quiz-source-doc-summary');
-        if (quizSourceInput && quizSourceSummary) {
-            quizSourceInput.addEventListener('change', function() {
-                var file = this.files && this.files[0];
-                if (!file) {
-                    quizSourceSummary.hidden = true;
-                    quizSourceSummary.textContent = '';
-                    return;
+        var quizSourcePicker = document.getElementById('quiz-source-doc-btn');
+        var quizSourceDropzone = document.getElementById('quiz-upload-dropzone');
+        var quizSourceSelected = document.getElementById('quiz-source-doc-selected');
+        var quizSourceName = document.getElementById('quiz-source-doc-name');
+        var quizSourceSize = document.getElementById('quiz-source-doc-size');
+        var quizSourceRemove = document.getElementById('quiz-source-doc-remove');
+
+        /**
+         * Toggle the quiz source-document UI between dropzone and selected-file states.
+         * @param {File|null} file Selected file, or null to clear.
+         */
+        function setQuizSourceFile(file) {
+            if (!file) {
+                if (quizSourceInput) {
+                    quizSourceInput.value = '';
                 }
+                if (quizSourceDropzone) {
+                    quizSourceDropzone.style.display = '';
+                }
+                if (quizSourceSelected) {
+                    quizSourceSelected.style.display = 'none';
+                }
+                return;
+            }
+            if (quizSourceName) {
+                quizSourceName.textContent = file.name;
+            }
+            if (quizSourceSize) {
                 var sizeKb = Math.round(file.size / 1024);
-                quizSourceSummary.textContent = file.name + ' (' + sizeKb + ' KB)';
-                quizSourceSummary.hidden = false;
+                quizSourceSize.textContent = '(' + sizeKb + ' KB)';
+            }
+            if (quizSourceDropzone) {
+                quizSourceDropzone.style.display = 'none';
+            }
+            if (quizSourceSelected) {
+                quizSourceSelected.style.display = '';
+            }
+        }
+
+        if (quizSourcePicker && quizSourceInput) {
+            quizSourcePicker.addEventListener('click', function() {
+                quizSourceInput.click();
+            });
+        }
+        if (quizSourceInput) {
+            quizSourceInput.addEventListener('change', function() {
+                setQuizSourceFile(this.files && this.files[0]);
+            });
+        }
+        if (quizSourceRemove) {
+            quizSourceRemove.addEventListener('click', function() {
+                setQuizSourceFile(null);
+            });
+        }
+        if (quizSourceDropzone && quizSourceInput) {
+            quizSourceDropzone.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.classList.add('mastermind-dropzone-active');
+            });
+            quizSourceDropzone.addEventListener('dragleave', function() {
+                this.classList.remove('mastermind-dropzone-active');
+            });
+            quizSourceDropzone.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.classList.remove('mastermind-dropzone-active');
+                var dropped = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+                if (dropped) {
+                    var dt = new DataTransfer();
+                    dt.items.add(dropped);
+                    quizSourceInput.files = dt.files;
+                    setQuizSourceFile(dropped);
+                }
             });
         }
 

@@ -151,8 +151,9 @@ $string['level_introductory'] = 'Introductory';
 $string['level_intermediate'] = 'Intermediate';
 $string['level_advanced'] = 'Advanced';
 $string['level_graduate'] = 'Graduate';
-$string['quiz_source_doc_label'] = 'Source document (optional)';
-$string['quiz_source_doc_hint'] = 'Upload a PDF, DOCX or TXT (max 10 MB) to base questions on the document content.';
+$string['quiz_source_doc_divider'] = 'or generate from a document';
+$string['quiz_source_doc_prompt'] = 'Drop a source document here';
+$string['quiz_source_doc_hint'] = 'PDF, DOCX, or TXT (max 10MB)';
 $string['scope_length_label'] = 'Scope / Length';
 $string['scope_length_placeholder'] = 'e.g., 1500-2000 words, 10 pages, 15-minute presentation';
 

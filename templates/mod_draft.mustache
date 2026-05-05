@@ -257,16 +257,47 @@
                 <option value="graduate">{{#str}} level_graduate, block_mastermind_assistant {{/str}}</option>
             </select>
         </div>
-        <div class="mastermind-assign-option-group">
-            <label class="mastermind-option-label" for="quiz-source-doc">
-                {{#str}} quiz_source_doc_label, block_mastermind_assistant {{/str}}
-            </label>
-            <input type="file" id="quiz-source-doc" class="mastermind-option-file"
-                   accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain">
-            <p class="mastermind-option-hint">
-                {{#str}} quiz_source_doc_hint, block_mastermind_assistant {{/str}}
-            </p>
-            <div id="quiz-source-doc-summary" class="mastermind-option-summary" hidden></div>
+    </div>
+    {{! Optional source-document uploader — mirrors the course-creation dropzone. }}
+    <div class="mastermind-document-upload-section">
+        <div class="mastermind-upload-divider">
+            <span class="mastermind-divider-text">
+                {{#str}} quiz_source_doc_divider, block_mastermind_assistant {{/str}}
+            </span>
+        </div>
+        <div class="mastermind-upload-area" id="quiz-upload-area">
+            <div class="mastermind-upload-dropzone" id="quiz-upload-dropzone">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21 15V19A2 2 0 0 1 19 21H5A2 2 0 0 1 3 19V15"
+                          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <polyline points="17 8 12 3 7 8"
+                              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <line x1="12" y1="3" x2="12" y2="15"
+                          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <p class="mastermind-upload-text">
+                    {{#str}} quiz_source_doc_prompt, block_mastermind_assistant {{/str}}
+                </p>
+                <p class="mastermind-upload-formats">
+                    {{#str}} quiz_source_doc_hint, block_mastermind_assistant {{/str}}
+                </p>
+                <input type="file" id="quiz-source-doc"
+                       accept=".pdf,.docx,.txt,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,text/plain"
+                       style="display: none;">
+                <button type="button" class="btn btn-outline-primary btn-sm" id="quiz-source-doc-btn">
+                    {{#str}} choose_file, block_mastermind_assistant {{/str}}
+                </button>
+            </div>
+            <div class="mastermind-upload-selected" id="quiz-source-doc-selected" style="display: none;">
+                <div class="mastermind-selected-file">
+                    <span class="mastermind-file-icon">&#128196;</span>
+                    <span class="mastermind-file-name" id="quiz-source-doc-name"></span>
+                    <span class="mastermind-file-size" id="quiz-source-doc-size"></span>
+                    <button type="button" class="btn btn-link btn-sm mastermind-file-remove" id="quiz-source-doc-remove">
+                        &times;
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
     <button id="generate-questions-btn" class="mastermind-action-button" data-courseid="{{courseid}}" data-quizid="{{quizid}}" data-quizname="{{pagename}}" data-quizdescription="{{pagedescription}}">

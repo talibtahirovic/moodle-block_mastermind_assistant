@@ -151,8 +151,9 @@ $string['level_introductory'] = 'Einfuehrung';
 $string['level_intermediate'] = 'Mittelstufe';
 $string['level_advanced'] = 'Fortgeschritten';
 $string['level_graduate'] = 'Master/Promotion';
-$string['quiz_source_doc_label'] = 'Quelldokument (optional)';
-$string['quiz_source_doc_hint'] = 'PDF, DOCX oder TXT hochladen (max. 10 MB), um Fragen aus dem Dokumentinhalt zu generieren.';
+$string['quiz_source_doc_divider'] = 'oder aus einem Dokument generieren';
+$string['quiz_source_doc_prompt'] = 'Quelldokument hier ablegen';
+$string['quiz_source_doc_hint'] = 'PDF, DOCX oder TXT (max. 10 MB)';
 $string['scope_length_label'] = 'Umfang / Laenge';
 $string['scope_length_placeholder'] = 'z.B. 1500-2000 Woerter, 10 Seiten, 15-minuetige Praesentation';
 
