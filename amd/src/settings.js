@@ -24,9 +24,10 @@
 define(['core/ajax', 'core/notification', 'core/str', 'core/templates'], function(Ajax, Notification, Str, Templates) {
 
     /**
-     * Call the test_connection web service and display results.
-     * @param {HTMLElement} button
-     * @param {HTMLElement} resultDiv
+     * Update a button's text using a localised string with a fallback.
+     * @param {HTMLElement} button Button element to update.
+     * @param {string} key Language string key.
+     * @param {string} fallback Fallback text if the string fails to load.
      */
     function setButtonLabel(button, key, fallback) {
         Str.get_string(key, 'block_mastermind_assistant').then(function(s) {
@@ -37,6 +38,11 @@ define(['core/ajax', 'core/notification', 'core/str', 'core/templates'], functio
         });
     }
 
+    /**
+     * Call the test_connection web service and display results.
+     * @param {HTMLElement} button Trigger button.
+     * @param {HTMLElement} resultDiv Container for the rendered result.
+     */
     function testConnection(button, resultDiv) {
         button.disabled = true;
         Str.get_string('testing_connection', 'block_mastermind_assistant').then(function(s) {

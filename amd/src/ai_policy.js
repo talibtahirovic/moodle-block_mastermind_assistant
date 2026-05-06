@@ -143,6 +143,7 @@ function($, Ajax, Notification, ModalFactory, ModalEvents, Str) {
             return response.accepted;
         }).then(function(accepted) {
             if (accepted) {
+                // eslint-disable-next-line promise/no-callback-in-promise
                 callback();
             } else {
                 showPolicyModal(callback, null);

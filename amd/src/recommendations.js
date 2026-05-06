@@ -127,7 +127,14 @@ function(Ajax, Notification, Str, AiPolicy) {
         }])[0]
             .then(function(response) {
                 if (!response.success) {
-                    throw new Error(response.error || 'Analysis failed');
+                    Notification.addNotification({
+                        message: 'AI Analysis Error: ' + (response.error || 'Analysis failed'),
+                        type: 'error'
+                    });
+                    hideProgress();
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                    return response;
                 }
 
                 // Update progress through all steps
@@ -763,27 +770,50 @@ function(Ajax, Notification, Str, AiPolicy) {
                     return;
                 }
 
-                // Show confirmation dialog
                 var confirmMessage = 'Are you sure you want to apply these changes to your course structure? '
                     + 'This will modify your actual course and cannot be easily undone.';
-                if (!confirm(confirmMessage)) {
-                    return;
-                }
 
-            // Disable apply button and show loading state
-            var applyButton = document.getElementById('apply-course-structure');
-            if (applyButton) {
-                applyButton.disabled = true;
-                applyButton.innerHTML = '⏳ Applying Changes... (This may take up to 2 minutes)';
+                Notification.saveCancel(
+                    'Apply Course Structure Changes',
+                    confirmMessage,
+                    'Apply',
+                    function() {
+                        performApplyCourseStructure(structureText, courseid);
+                    }
+                ).catch(Notification.exception);
             }
 
-            // Add progress indicator
-            Notification.addNotification({
-                message: 'Started applying course structure changes. This may take some time...',
-                type: 'info'
-            });
+            /**
+             * Prompt the user to reload the page after a successful apply.
+             */
+            function promptReloadAfterApply() {
+                Notification.saveCancel(
+                    'Reload Page',
+                    'Would you like to reload the page to see the updated course structure?',
+                    'Reload',
+                    function() {
+                        window.location.reload();
+                    }
+                ).catch(Notification.exception);
+            }
 
-                // Call web service to apply changes
+            /**
+             * Execute the apply-course-structure web service call after the user confirms.
+             * @param {string} structureText Raw updated structure text.
+             * @param {number} courseid Target course id.
+             */
+            function performApplyCourseStructure(structureText, courseid) {
+                var applyButton = document.getElementById('apply-course-structure');
+                if (applyButton) {
+                    applyButton.disabled = true;
+                    applyButton.innerHTML = '⏳ Applying Changes... (This may take up to 2 minutes)';
+                }
+
+                Notification.addNotification({
+                    message: 'Started applying course structure changes. This may take some time...',
+                    type: 'info'
+                });
+
                 var applyRequest = {
                     methodname: 'block_mastermind_assistant_apply_course_structure',
                     args: {
@@ -792,52 +822,57 @@ function(Ajax, Notification, Str, AiPolicy) {
                     }
                 };
 
-            Ajax.call([applyRequest])[0]
-                .then(function(response) {
-                    if (!response.success) {
-                        throw new Error(response.error || 'Unknown error occurred while applying changes');
-                    }
-
-                    Notification.addNotification({
-                        message: '✅ Course structure updated successfully! ' + response.message,
-                        type: 'success'
-                    });
-
-                    // Optionally reload the page to see changes
-                    setTimeout(function() {
-                        if (confirm('Would you like to reload the page to see the updated course structure?')) {
-                            window.location.reload();
+                Ajax.call([applyRequest])[0]
+                    .then(function(response) {
+                        if (!response.success) {
+                            Notification.addNotification({
+                                message: 'Error applying changes: '
+                                    + (response.error || 'Unknown error occurred while applying changes'),
+                                type: 'error'
+                            });
+                            if (applyButton) {
+                                applyButton.disabled = false;
+                                applyButton.innerHTML = '✨ Apply Course Structure Changes';
+                            }
+                            return response;
                         }
-                    }, 2000);
 
-                    // Re-enable button on success
-                    if (applyButton) {
-                        applyButton.disabled = false;
-                        applyButton.innerHTML = '✨ Apply Course Structure Changes';
-                    }
-                    return response;
-                })
-                .catch(function(error) {
-                    var errorMessage = 'Error applying changes: ';
-                    if (error && error.message) {
-                        errorMessage += error.message;
-                    } else if (typeof error === 'string') {
-                        errorMessage += error;
-                    } else {
-                        errorMessage += 'Unknown error occurred. Please check the browser console and Moodle logs for details.';
-                    }
+                        Notification.addNotification({
+                            message: '✅ Course structure updated successfully! ' + response.message,
+                            type: 'success'
+                        });
 
-                    Notification.addNotification({
-                        message: errorMessage,
-                        type: 'error'
+                        // Optionally reload the page to see changes
+                        setTimeout(promptReloadAfterApply, 2000);
+
+                        // Re-enable button on success
+                        if (applyButton) {
+                            applyButton.disabled = false;
+                            applyButton.innerHTML = '✨ Apply Course Structure Changes';
+                        }
+                        return response;
+                    })
+                    .catch(function(error) {
+                        var errorMessage = 'Error applying changes: ';
+                        if (error && error.message) {
+                            errorMessage += error.message;
+                        } else if (typeof error === 'string') {
+                            errorMessage += error;
+                        } else {
+                            errorMessage += 'Unknown error occurred. Please check the browser console and Moodle logs for details.';
+                        }
+
+                        Notification.addNotification({
+                            message: errorMessage,
+                            type: 'error'
+                        });
+
+                        // Re-enable button on error
+                        if (applyButton) {
+                            applyButton.disabled = false;
+                            applyButton.innerHTML = '✨ Apply Course Structure Changes';
+                        }
                     });
-
-                    // Re-enable button on error
-                    if (applyButton) {
-                        applyButton.disabled = false;
-                        applyButton.innerHTML = '✨ Apply Course Structure Changes';
-                    }
-                });
 
                 // Safety timeout to ensure button is never stuck permanently
                 setTimeout(function() {
