@@ -56,6 +56,9 @@ class apply_forum_discussions extends external_api {
     /**
      * Execute the web service call.
      *
+     * @param int $courseid Course ID.
+     * @param int $cmid Course module ID.
+     * @param string $discussions JSON array of discussions [{subject, message}].
      * @return array
      */
     public static function execute($courseid, $cmid, $discussions) {

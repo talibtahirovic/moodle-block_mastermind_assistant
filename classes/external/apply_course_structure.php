@@ -58,6 +58,8 @@ class apply_course_structure extends external_api {
     /**
      * Execute the web service call.
      *
+     * @param int $courseid Course ID.
+     * @param string $structuretext JSON-encoded course structure to apply.
      * @return array
      */
     public static function execute($courseid, $structuretext) {

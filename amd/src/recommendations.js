@@ -96,6 +96,7 @@ function(Ajax, Notification, Str, AiPolicy) {
         // Update button and show progress
         Str.get_string('processing', 'block_mastermind_assistant').then(function(s) {
             btn.innerHTML = s;
+            return null;
         }).catch(function() {
             // Fallback handled below.
         });
@@ -205,11 +206,13 @@ function(Ajax, Notification, Str, AiPolicy) {
      * @return {string} HTML formatted checklist
      */
     function formatRecommendationsAsChecklist(text) {
+        var html;
+
         // Try to parse as JSON first (structured recommendations)
         try {
             var jsonData = JSON.parse(text);
             if (jsonData && Array.isArray(jsonData.course_structure_improvements)) {
-                var html = '<ul class="recommendation-checklist">';
+                html = '<ul class="recommendation-checklist">';
 
                 jsonData.course_structure_improvements.forEach(function(item) {
                     html += '<li class="recommendation-item">' +
@@ -227,7 +230,7 @@ function(Ajax, Notification, Str, AiPolicy) {
 
         // Parse as plain text with bullet points
         var lines = text.split('\n');
-        var html = '<ul class="recommendation-checklist">';
+        html = '<ul class="recommendation-checklist">';
         var hasItems = false;
 
         lines.forEach(function(line) {
@@ -238,7 +241,7 @@ function(Ajax, Notification, Str, AiPolicy) {
 
             // Check if line is a bullet point or numbered item
             var bulletMatch = line.match(/^[-•*]\s*(.+)$/);
-            var numberMatch = line.match(/^\d+[\.)]\s*(.+)$/);
+            var numberMatch = line.match(/^\d+[.)]\s*(.+)$/);
 
             if (bulletMatch) {
                 html += '<li class="recommendation-item">' +
@@ -650,8 +653,8 @@ function(Ajax, Notification, Str, AiPolicy) {
                         return;
                     }
 
-                    // Section headers
                     if (line.match(/^Section\s+\d+:/i)) {
+                        // Section headers.
                         if (currentSection) {
                             sections.push(currentSection);
                         }
@@ -665,35 +668,30 @@ function(Ajax, Notification, Str, AiPolicy) {
                         };
                         inActivities = false;
                         inObjectives = false;
-                    }
-                    // Status line
-                    else if (line.match(/^Status:/i)) {
+                    } else if (line.match(/^Status:/i)) {
+                        // Status line.
                         if (currentSection) {
                             var status = line.replace(/^Status:\s*/i, '').trim();
                             currentSection.status = status;
                         }
-                    }
-                    // Description line
-                    else if (line.match(/^Description:/i)) {
+                    } else if (line.match(/^Description:/i)) {
+                        // Description line.
                         if (currentSection) {
                             var description = line.replace(/^Description:\s*/i, '').trim();
                             currentSection.description = description;
                         }
                         inActivities = false;
                         inObjectives = false;
-                    }
-                    // Activities section
-                    else if (line.match(/^Activities:/i)) {
+                    } else if (line.match(/^Activities:/i)) {
+                        // Activities section.
                         inActivities = true;
                         inObjectives = false;
-                    }
-                    // Learning objectives section
-                    else if (line.match(/^Learning\s+Objectives:/i)) {
+                    } else if (line.match(/^Learning\s+Objectives:/i)) {
+                        // Learning objectives section.
                         inObjectives = true;
                         inActivities = false;
-                    }
-                    // Activity or objective items
-                    else if (line.match(/^[-*•]\s*/)) {
+                    } else if (line.match(/^[-*•]\s*/)) {
+                        // Activity or objective items.
                         var item = line.replace(/^[-*•]\s*/, '').trim();
                         if (currentSection) {
                             if (inActivities) {
@@ -796,27 +794,28 @@ function(Ajax, Notification, Str, AiPolicy) {
 
             Ajax.call([applyRequest])[0]
                 .then(function(response) {
-                    if (response.success) {
-                        Notification.addNotification({
-                            message: '✅ Course structure updated successfully! ' + response.message,
-                            type: 'success'
-                        });
-
-                        // Optionally reload the page to see changes
-                        setTimeout(function() {
-                            if (confirm('Would you like to reload the page to see the updated course structure?')) {
-                                window.location.reload();
-                            }
-                        }, 2000);
-                    } else {
+                    if (!response.success) {
                         throw new Error(response.error || 'Unknown error occurred while applying changes');
                     }
+
+                    Notification.addNotification({
+                        message: '✅ Course structure updated successfully! ' + response.message,
+                        type: 'success'
+                    });
+
+                    // Optionally reload the page to see changes
+                    setTimeout(function() {
+                        if (confirm('Would you like to reload the page to see the updated course structure?')) {
+                            window.location.reload();
+                        }
+                    }, 2000);
 
                     // Re-enable button on success
                     if (applyButton) {
                         applyButton.disabled = false;
                         applyButton.innerHTML = '✨ Apply Course Structure Changes';
                     }
+                    return response;
                 })
                 .catch(function(error) {
                     var errorMessage = 'Error applying changes: ';
@@ -907,6 +906,7 @@ function(Ajax, Notification, Str, AiPolicy) {
                         type: 'error'
                     });
                 }
+                return null;
             })
             .catch(function(error) {
                 Notification.addNotification({
@@ -1099,7 +1099,12 @@ function(Ajax, Notification, Str, AiPolicy) {
         }
 
         if (m.completion_rate > 0) {
-            var descriptor = m.completion_rate >= 70 ? 'strong' : m.completion_rate >= 40 ? 'moderate' : 'low';
+            var descriptor = 'low';
+            if (m.completion_rate >= 70) {
+                descriptor = 'strong';
+            } else if (m.completion_rate >= 40) {
+                descriptor = 'moderate';
+            }
             parts.push(descriptor.charAt(0).toUpperCase() + descriptor.slice(1) + ' completion at ' + m.completion_rate + '%.');
         }
 

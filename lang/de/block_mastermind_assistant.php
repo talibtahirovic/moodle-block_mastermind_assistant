@@ -21,288 +21,22 @@
  * @copyright  2026 The Namers <info@mastermindassistant.ai>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-// Sprachstrings fuer den Mastermind-Assistenten-Block (Deutsch).
 
-$string['pluginname'] = 'Mastermind-Assistent';
-$string['insights_title'] = 'Erkenntnisse';
-$string['coursecompletionrate'] = 'Kursabschlussrate: {$a}%';
-$string['averagefinalgrade'] = 'Durchschnittliche Endnote: {$a}%';
-$string['dropoffsection'] = 'Absprungabschnitt: {$a}';
-$string['forumactivity'] = 'Forenaktivitaet: {$a} Beitraege/Teilnehmer';
-$string['averagetimeincourse'] = 'Durchschnittliche Kursdauer: {$a}';
-$string['learnersatisfaction'] = 'Zufriedenheit der Lernenden: {$a}/5';
-$string['unknown'] = 'Unbekannt';
-$string['no_activity'] = 'Keine Aktivitaet';
-$string['last_activity'] = 'Letzte Aktivitaet';
-$string['resources'] = 'Ressourcen';
-$string['no_feedback'] = 'Keine Feedback-Aktivitaet';
-$string['notapplicable'] = 'Kurserkenntnisse sind auf dieser Seite nicht verfuegbar.';
-$string['nav_manage_courses'] = 'Kurse und Kategorien verwalten';
-$string['nav_search_courses'] = 'Kurse suchen';
-$string['nav_browse_categories'] = 'Kategorien durchsuchen';
-$string['getrecommendations'] = 'Empfehlungen abrufen';
-$string['errorgetcoursedata'] = 'Fehler beim Abrufen der Kursdaten';
-$string['openai_connected'] = 'OpenAI-Verbindung erfolgreich';
-$string['openai_failed'] = 'OpenAI-Verbindung fehlgeschlagen';
-$string['getting_ai_recommendations'] = 'KI-Empfehlungen werden abgerufen...';
-
-// Icon-Strings.
-$string['openai_success_icon'] = "\u2713";
-$string['openai_warning_icon'] = "\u26A0";
-$string['openai_error_icon'] = "\u2717";
-
-// Kurssuche.
-$string['search_course_placeholder'] = 'Kursname eingeben...';
-$string['searching'] = 'Kurse werden gesucht...';
-$string['course_search_help'] = 'Geben Sie einen Suchbegriff ein, um bestehende Kurse zu finden oder neue mit KI-Unterstuetzung zu erstellen.';
-$string['creating_course_ai'] = 'Kurs mit KI erstellen';
-$string['ai_working'] = 'Die KI erstellt Ihre Kursstruktur. Dies kann einen Moment dauern...';
-$string['course_created_success'] = 'Kurs erfolgreich mit KI erstellt! Weiterleitung...';
-
-// Block-Berechtigungen.
-$string['mastermind_assistant:addinstance'] = 'Neuen Mastermind-Assistenten-Block hinzufuegen';
-$string['mastermind_assistant:myaddinstance'] = 'Neuen Mastermind-Assistenten-Block zur Mein-Moodle-Seite hinzufuegen';
-$string['mastermind_assistant:view'] = 'Mastermind-Assistenten-Block anzeigen';
-
-// Mod-Draft-Strings.
-$string['ai_content_assistant'] = 'KI-Inhaltsassistent';
-$string['go_to_settings_to_generate'] = 'Um die KI-Inhaltserstellung zu nutzen, oeffnen Sie bitte die Aktivitaetseinstellungen.';
-$string['open_activity_settings'] = 'Aktivitaetseinstellungen oeffnen';
-$string['draft_page_prompt_new'] = 'Ich erstelle einen Entwurf fuer diese(s) {$a}!';
-$string['draft_page_prompt_edit'] = 'Kann ich Ihnen helfen, diese(s) {$a} zu verbessern?';
-$string['draft_quiz_prompt_new'] = 'Ich erstelle Fragen fuer diese(s) {$a}!';
-$string['draft_quiz_prompt_edit'] = 'Soll ich weitere Fragen zu diesem/dieser {$a} hinzufuegen?';
-$string['draft_assign_prompt_new'] = 'Ich erstelle Anweisungen fuer diese(s) {$a}!';
-$string['draft_assign_prompt_edit'] = 'Kann ich helfen, die Anweisungen fuer diese(s) {$a} zu verbessern?';
-$string['content_applied'] = 'Inhalt erfolgreich angewendet!';
-$string['questions_added'] = 'Fragen erfolgreich hinzugefuegt!';
-$string['instructions_applied'] = 'Anweisungen erfolgreich angewendet!';
-$string['generate_draft'] = 'Entwurf erstellen';
-$string['generate_questions'] = 'Fragen erstellen';
-$string['generate_instructions'] = 'Anweisungen erstellen';
-$string['generating_content'] = 'Inhalt wird erstellt...';
-$string['generating_questions'] = 'Fragen werden erstellt...';
-$string['analyzing_context'] = 'Kurskontext wird analysiert und Inhalt erstellt...';
-$string['analyzing_quiz_context'] = 'Testthema wird analysiert und Fragen erstellt...';
-$string['content_generated'] = 'Inhalt erfolgreich erstellt';
-$string['questions_generated'] = 'Fragen erfolgreich erstellt';
-$string['apply_to_page'] = 'Auf Seite anwenden';
-$string['apply_to_assignment'] = 'Auf Aufgabe anwenden';
-$string['add_to_quiz'] = 'Zum Test hinzufuegen';
-$string['error_generating_content'] = 'Fehler bei der Inhaltserstellung. Bitte versuchen Sie es erneut.';
-$string['error_generating_questions'] = 'Fehler bei der Fragenerstellung. Bitte versuchen Sie es erneut.';
-$string['questions_count'] = '{$a} Fragen bereit zum Hinzufuegen';
-
-// Einstellungen.
-$string['settings_dashboard_url'] = 'Dashboard-URL';
-$string['settings_dashboard_url_desc'] = 'Die URL Ihrer Mastermind-Dashboard-Instanz (z.B. https://mastermindassistant.ai)';
-$string['settings_api_key'] = 'API-Schluessel';
-$string['settings_api_key_desc'] = 'Ihr Mastermind-API-Schluessel (beginnt mit ma_live_)';
-$string['connection_status'] = 'Verbindungsstatus';
-$string['test_connection'] = 'Verbindung testen';
-$string['test_connection_desc'] = 'Speichern Sie zuerst Ihre Einstellungen und klicken Sie dann auf Verbindung testen, um Ihren API-Schluessel zu ueberpruefen.';
-$string['testing_connection'] = 'Verbindung wird getestet...';
-$string['connection_success'] = 'Verbindung erfolgreich hergestellt';
-$string['connection_failed'] = 'Verbindung fehlgeschlagen: {$a}';
-$string['account_tier'] = 'Tarif';
-$string['account_status'] = 'Status';
-$string['account_usage_requests'] = 'Anfragen gesamt';
-$string['account_usage_cost'] = 'Kosten gesamt';
-$string['settings_not_configured'] = 'Dashboard-URL und API-Schluessel muessen konfiguriert werden.';
-$string['settings_info_heading'] = 'Konto & Support';
-$string['settings_register_desc'] = 'Noch kein Konto? Registrieren Sie sich unter';
-$string['settings_support_desc'] = 'Brauchen Sie Hilfe? Kontaktieren Sie uns unter';
-
-// Kopier-UI.
-$string['copying_course'] = 'Kurs wird kopiert...';
-$string['copy_in_progress'] = 'Bitte warten Sie, waehrend der Kurs kopiert wird. Bei grossen Kursen kann dies einen Moment dauern.';
-$string['copy_success'] = 'Kurs erfolgreich kopiert!';
-$string['copy_failed'] = 'Kurs konnte nicht kopiert werden. Bitte versuchen Sie es erneut.';
-$string['enrolled_as_teacher'] = 'Als Trainer/in eingeschrieben';
-$string['update_dates'] = 'Kursdaten aktualisieren';
-$string['run_analysis'] = 'KI-Analyse fuer veraltete Inhalte starten';
-$string['view_course'] = 'Kurs anzeigen';
-$string['all_categories'] = 'Alle Kategorien';
-$string['filter_by_year'] = 'Jahr';
-
-// Dokument-Upload.
-$string['or_upload_document'] = 'oder aus einem Dokument erstellen';
-$string['upload_document_prompt'] = 'Lehrplan oder Curriculum-Dokument hier ablegen';
-$string['supported_formats'] = 'PDF, DOCX oder TXT (max. 10 MB)';
-$string['choose_file'] = 'Datei auswaehlen';
-$string['create_from_document'] = 'Kurs aus Dokument erstellen';
-$string['creating_from_document'] = 'Dokument wird analysiert und Kurs erstellt...';
-$string['doc_creation_in_progress'] = 'Die KI analysiert Ihr Dokument und erstellt eine Kursstruktur. Bei grossen Dokumenten kann dies bis zu 2 Minuten dauern.';
-$string['file_too_large'] = 'Die Datei ist zu gross. Maximale Groesse: 10 MB.';
-$string['unsupported_file_type'] = 'Nicht unterstuetzter Dateityp. Bitte laden Sie eine PDF-, DOCX- oder TXT-Datei hoch.';
-
-// Aufgaben-Anpassungsoptionen.
-$string['assignment_type_label'] = 'Aufgabentyp';
-$string['select_assignment_type'] = 'Typ auswaehlen (optional)...';
-$string['type_essay'] = 'Aufsatz';
-$string['type_group_project'] = 'Gruppenprojekt';
-$string['type_presentation'] = 'Praesentation';
-$string['type_lab_report'] = 'Laborbericht';
-$string['type_case_study'] = 'Fallstudie';
-$string['type_research_paper'] = 'Forschungsarbeit';
 $string['academic_level_label'] = 'Akademisches Niveau';
-$string['select_academic_level'] = 'Niveau auswaehlen (optional)...';
-$string['level_introductory'] = 'Einfuehrung';
-$string['level_intermediate'] = 'Mittelstufe';
-$string['level_advanced'] = 'Fortgeschritten';
-$string['level_graduate'] = 'Master/Promotion';
-$string['quiz_source_doc_divider'] = 'oder aus einem Dokument generieren';
-$string['quiz_source_doc_prompt'] = 'Quelldokument hier ablegen';
-$string['quiz_source_doc_hint'] = 'PDF, DOCX oder TXT (max. 10 MB)';
-$string['scope_length_label'] = 'Umfang / Laenge';
-$string['scope_length_placeholder'] = 'z.B. 1500-2000 Woerter, 10 Seiten, 15-minuetige Praesentation';
-
-// Aufgaben-Vorschau-Modal.
-$string['preview_title'] = 'Vorschau der erstellten Anweisungen';
-$string['suggested_title'] = 'Vorgeschlagener Titel';
-$string['instructions_preview'] = 'Anweisungen';
-$string['rubric_criteria_label'] = 'Bewertungskriterien';
-$string['estimated_time_label'] = 'Geschaetzte Zeit';
-$string['key_requirements_label'] = 'Hauptanforderungen';
-$string['learning_outcomes_label'] = 'Lernziele';
-$string['cancel'] = 'Abbrechen';
-$string['regenerate'] = 'Neu erstellen';
-$string['apply_instructions'] = 'Auf Aufgabe anwenden';
-
-// Seiten-Anpassungsoptionen.
-$string['content_type_label'] = 'Inhaltstyp';
-$string['select_content_type'] = 'Automatisch aus Titel erkennen';
-$string['type_lecture_notes'] = 'Vorlesungsnotizen';
-$string['type_tutorial'] = 'Anleitung / How-To';
-$string['type_reference'] = 'Referenzmaterial';
-$string['type_case_study_page'] = 'Fallstudie';
-$string['type_overview'] = 'Themenuebersicht';
-$string['target_length_label'] = 'Inhaltslaenge';
-$string['length_brief'] = 'Kurz (200-400 Woerter)';
-$string['length_standard'] = 'Standard (400-700 Woerter)';
-$string['length_comprehensive'] = 'Umfassend (700-1000 Woerter)';
-
-// Seiten-Vorschau-Modal.
-$string['page_preview_title'] = 'Vorschau des erstellten Inhalts';
-$string['content_preview'] = 'Seiteninhalt';
-$string['apply_content'] = 'Im Editor anwenden';
-$string['estimated_reading_time_label'] = 'Lesezeit';
-$string['content_summary_label'] = 'Zusammenfassung';
-$string['learning_objectives_label'] = 'Lernziele';
-$string['key_concepts_label'] = 'Schluesselbegriffe';
-
-// Test-Anpassungsoptionen.
-$string['difficulty_level_label'] = 'Schwierigkeitsgrad';
-$string['difficulty_mixed'] = 'Gemischt (empfohlen)';
-$string['difficulty_easy'] = 'Einfach';
-$string['difficulty_medium'] = 'Mittel';
-$string['difficulty_hard'] = 'Schwer';
-$string['question_count_label'] = 'Anzahl der Fragen';
-
-// Test-Vorschau-Modal.
-$string['quiz_preview_title'] = 'Vorschau der erstellten Fragen';
-$string['select_all'] = 'Alle auswaehlen';
-$string['deselect_all'] = 'Alle abwaehlen';
-$string['add_selected_questions'] = 'Ausgewaehlte Fragen hinzufuegen';
-$string['questions_selected_suffix'] = 'ausgewaehlt';
-
-// Kurs-Vorschau-Modal.
-$string['course_preview_title'] = 'Vorschau der Kursstruktur';
-$string['course_preview_description'] = 'Beschreibung';
-$string['course_preview_sections'] = 'Abschnitte';
-$string['course_preview_activities'] = 'Aktivitaeten';
-$string['course_preview_create'] = 'Kurs erstellen';
-$string['course_preview_creating'] = 'Kurs wird erstellt...';
-$string['course_preview_section_count'] = '{$a} Abschnitte';
-$string['course_preview_activity_count'] = '{$a} Aktivitaeten';
-
-// Forum-Erstellung.
-$string['draft_forum_prompt_new'] = 'Ich erstelle Diskussionsthemen fuer dieses {$a}!';
-$string['draft_forum_prompt_edit'] = 'Kann ich Diskussionsanregungen fuer dieses {$a} erstellen?';
-$string['generating_forum'] = 'Foreninhalte werden erstellt...';
-$string['generate_forum_content'] = 'Foreninhalte erstellen';
-$string['forum_preview_title'] = 'Vorschau der Foreninhalte';
-$string['forum_type_label'] = 'Forentyp';
-$string['forum_type_general'] = 'Allgemeines Forum';
-$string['forum_type_single'] = 'Einzeldiskussion';
-$string['forum_type_qanda'] = 'Frage-Antwort-Forum';
-$string['forum_type_eachuser'] = 'Jeder schreibt einen Beitrag';
-$string['discussion_count_label'] = 'Anzahl der Diskussionen';
-$string['forum_introduction_label'] = 'Foreneinleitung';
-$string['forum_discussions_label'] = 'Diskussionsthemen';
-$string['forum_guidelines_label'] = 'Teilnahmerichtlinien';
-
-// Lektion-Erstellung.
-$string['draft_lesson_prompt_new'] = 'Ich erstelle Lektionsseiten fuer diese {$a}!';
-$string['draft_lesson_prompt_edit'] = 'Kann ich helfen, den Inhalt dieser {$a} zu verbessern?';
-$string['generating_lesson'] = 'Lektionsinhalte werden erstellt...';
-$string['generate_lesson_content'] = 'Lektionsinhalte erstellen';
-$string['lesson_preview_title'] = 'Vorschau der Lektionsinhalte';
-$string['page_count_label'] = 'Anzahl der Seiten';
-$string['lesson_pages_label'] = 'Lektionsseiten';
-
-// Glossar-Erstellung.
-$string['draft_glossary_prompt_new'] = 'Ich erstelle Eintraege fuer dieses {$a}!';
-$string['draft_glossary_prompt_edit'] = 'Kann ich weitere Eintraege zu diesem {$a} hinzufuegen?';
-$string['generating_glossary'] = 'Glossareintraege werden erstellt...';
-$string['generate_glossary_entries'] = 'Glossareintraege erstellen';
-$string['glossary_preview_title'] = 'Vorschau der Glossareintraege';
-$string['entry_count_label'] = 'Anzahl der Eintraege';
-$string['glossary_description_label'] = 'Glossarbeschreibung';
-$string['glossary_entries_label'] = 'Eintraege';
-
-// Buch-Erstellung.
-$string['draft_book_prompt_new'] = 'Ich erstelle Kapitel fuer dieses {$a}!';
-$string['draft_book_prompt_edit'] = 'Kann ich helfen, den Inhalt dieses {$a} zu verbessern?';
-$string['generating_book'] = 'Buchinhalte werden erstellt...';
-$string['generate_book_content'] = 'Buchinhalte erstellen';
-$string['book_preview_title'] = 'Vorschau der Buchinhalte';
-$string['chapter_count_label'] = 'Anzahl der Kapitel';
-$string['book_chapters_label'] = 'Kapitel';
-
-// URL-Erstellung.
-$string['draft_url_prompt_new'] = 'Ich empfehle Ressourcen fuer diese(s) {$a}!';
-$string['draft_url_prompt_edit'] = 'Soll ich alternative Ressourcen fuer diese(s) {$a} vorschlagen?';
-$string['generating_url'] = 'URL-Ressourcen werden gesucht...';
-$string['generate_url_recommendations'] = 'URL-Ressourcen finden';
-$string['url_preview_title'] = 'Empfohlene URL-Ressourcen';
-$string['resource_count_label'] = 'Anzahl der Empfehlungen';
-$string['url_topic_summary_label'] = 'Themenzusammenfassung';
-$string['url_recommendations_label'] = 'Empfohlene Ressourcen';
-$string['apply_url'] = 'Ausgewaehlte URL anwenden';
-
-// Direkt-Aktions-Modul-Strings.
-$string['go_to_main_page_to_generate'] = 'Um die KI-Inhaltserstellung zu nutzen, gehen Sie bitte zur Hauptseite der Aktivitaet.';
-$string['open_activity_main_page'] = 'Aktivitaetsseite oeffnen';
-$string['existing_items_count'] = '{$a} vorhandene(r) Eintrag/Eintraege';
+$string['account_status'] = 'Status';
+$string['account_tier'] = 'Tarif';
+$string['account_usage_cost'] = 'Kosten gesamt';
+$string['account_usage_requests'] = 'Anfragen gesamt';
+$string['add_book_chapters'] = 'Kapitel zum Buch hinzufuegen';
 $string['add_discussions'] = 'Diskussionen hinzufuegen';
 $string['add_glossary_entries'] = 'Eintraege zum Glossar hinzufuegen';
-$string['add_book_chapters'] = 'Kapitel zum Buch hinzufuegen';
 $string['add_lesson_pages'] = 'Seiten zur Lektion hinzufuegen';
-
-// Pruefungsstrings.
-$string['audit_items_need_updating'] = 'Elemente, die moeglicherweise aktualisiert werden muessen:';
-
-// Berechtigungen.
-$string['mastermind_assistant:applychanges'] = 'KI-generierte Aenderungen auf Kurse anwenden';
-
-// Metrik-Beschriftungen.
-$string['metric_completion_rate'] = 'Abschlussrate';
-$string['metric_avg_final_grade'] = 'Durchschnittliche Endnote';
-$string['metric_dropoff_section'] = 'Abbruch-Abschnitt';
-$string['metric_forum_activity'] = 'Forumsaktivitaet';
-$string['metric_posts_per_learner'] = 'Beitraege/Lernende';
-
-// Fortschrittsanzeige.
+$string['add_selected_questions'] = 'Ausgewaehlte Fragen hinzufuegen';
+$string['add_to_quiz'] = 'Zum Test hinzufuegen';
 $string['ai_analysis_progress'] = 'KI-Analyse Fortschritt';
-$string['progress_analyzing'] = 'Kursstruktur wird analysiert und Empfehlungen werden generiert...';
-$string['progress_generating_structure'] = 'Aktualisierte Kursstruktur wird erstellt...';
-$string['progress_analysis_complete'] = 'Analyse abgeschlossen!';
-$string['processing'] = 'Verarbeitung...';
-$string['show_detailed_metrics'] = 'Detaillierte Metriken anzeigen';
-
-// KI-Richtlinien-Modal.
-$string['ai_policy_title'] = 'KI-Nutzungsrichtlinie';
+$string['ai_content_assistant'] = 'KI-Inhaltsassistent';
+$string['ai_policy_accept_button'] = 'Akzeptieren und fortfahren';
+$string['ai_policy_accepted_msg'] = 'KI-Richtlinie akzeptiert. Ihre Anfrage wird verarbeitet...';
 $string['ai_policy_body'] = '<h4>Willkommen bei den KI-gestuetzten Funktionen!</h4>
 <p>Diese Kuenstliche-Intelligenz-Funktion (KI) basiert auf externen grossen Sprachmodellen (LLM), um Ihre Lern- und Lehrerfahrung zu verbessern. Bevor Sie diese KI-Dienste nutzen, lesen Sie bitte diese Nutzungsrichtlinie.</p>
 <h5>Genauigkeit von KI-generierten Inhalten</h5>
@@ -311,47 +45,252 @@ $string['ai_policy_body'] = '<h4>Willkommen bei den KI-gestuetzten Funktionen!</
 <p>Diese KI-Funktion verwendet externe grosse Sprachmodelle (LLM). Wenn Sie diese Funktion nutzen, werden alle Informationen oder persoenlichen Daten, die Sie teilen, gemaess der Datenschutzrichtlinie dieser LLMs behandelt. Wir empfehlen Ihnen, deren Datenschutzrichtlinie zu lesen, um zu verstehen, wie sie mit Ihren Daten umgehen. Zusaetzlich kann eine Aufzeichnung Ihrer Interaktionen mit den KI-Funktionen auf dieser Website gespeichert werden.</p>
 <p>Wenn Sie Fragen zur Verarbeitung Ihrer Daten haben, wenden Sie sich bitte an Ihre Lehrenden oder Bildungseinrichtung.</p>
 <p><strong>Durch Fortfahren bestaetigen Sie, dass Sie diese Richtlinie verstehen und ihr zustimmen.</strong></p>';
-$string['ai_policy_accept_button'] = 'Akzeptieren und fortfahren';
-$string['ai_policy_accepted_msg'] = 'KI-Richtlinie akzeptiert. Ihre Anfrage wird verarbeitet...';
 $string['ai_policy_declined_msg'] = 'Sie muessen die KI-Nutzungsrichtlinie akzeptieren, um KI-Funktionen zu nutzen.';
-
-// Audit-Strings.
-$string['audit_past_due_date'] = 'Ueberfaelliges Faelligkeitsdatum';
-$string['audit_old_year_reference'] = 'Alte Jahresreferenz in';
+$string['ai_policy_title'] = 'KI-Nutzungsrichtlinie';
+$string['ai_working'] = 'Die KI erstellt Ihre Kursstruktur. Dies kann einen Moment dauern...';
+$string['all_categories'] = 'Alle Kategorien';
+$string['analyzing_context'] = 'Kurskontext wird analysiert und Inhalt erstellt...';
+$string['analyzing_quiz_context'] = 'Testthema wird analysiert und Fragen erstellt...';
+$string['apply_content'] = 'Im Editor anwenden';
+$string['apply_instructions'] = 'Auf Aufgabe anwenden';
+$string['apply_to_assignment'] = 'Auf Aufgabe anwenden';
+$string['apply_to_page'] = 'Auf Seite anwenden';
+$string['apply_url'] = 'Ausgewaehlte URL anwenden';
+$string['assignment_type_label'] = 'Aufgabentyp';
 $string['audit_empty_section'] = 'Leerer Abschnitt';
+$string['audit_items_need_updating'] = 'Elemente, die moeglicherweise aktualisiert werden muessen:';
 $string['audit_no_students'] = 'Noch keine Studierenden eingeschrieben';
-
-// Einstellungs-JS-Strings.
-$string['settings_save_api_key_first'] = 'Bitte geben Sie oben Ihren API-Schluessel ein und speichern Sie die Aenderungen zuerst.';
-
-// Erfolgsmeldungen (mod_draft).
-$string['success_content_applied'] = 'Inhalt erfolgreich angewendet!';
-$string['success_questions_added'] = 'Fragen erfolgreich hinzugefuegt!';
-$string['success_instructions_applied'] = 'Anweisungen erfolgreich angewendet!';
-$string['success_forum_applied'] = 'Forumsinhalte erfolgreich angewendet!';
-$string['success_lesson_applied'] = 'Lektionsinhalte erfolgreich angewendet!';
-$string['success_glossary_applied'] = 'Glossareintraege erfolgreich angewendet!';
-$string['success_book_applied'] = 'Buchinhalte erfolgreich angewendet!';
-$string['success_url_applied'] = 'URL erfolgreich angewendet!';
-
-// Verbindungsfluss (vereinfachte Einrichtung).
-$string['connect_title'] = 'Mastermind-Assistent';
-$string['connect_description'] = 'KI-gestuetzte Kursanalyse, Inhaltserstellung und Empfehlungen — direkt in Ihrem LMS.';
-$string['connect_button'] = 'Mit Mastermind verbinden';
-$string['connect_free'] = 'Kostenlos starten · Keine Kreditkarte erforderlich';
+$string['audit_old_year_reference'] = 'Alte Jahresreferenz in';
+$string['audit_past_due_date'] = 'Ueberfaelliges Faelligkeitsdatum';
+$string['averagefinalgrade'] = 'Durchschnittliche Endnote: {$a}%';
+$string['averagetimeincourse'] = 'Durchschnittliche Kursdauer: {$a}';
+$string['book_chapters_label'] = 'Kapitel';
+$string['book_preview_title'] = 'Vorschau der Buchinhalte';
+$string['cancel'] = 'Abbrechen';
+$string['chapter_count_label'] = 'Anzahl der Kapitel';
+$string['choose_file'] = 'Datei auswaehlen';
 $string['connect_admin_required'] = 'Bitten Sie Ihren Administrator, Mastermind-Assistent zu verbinden.';
+$string['connect_button'] = 'Mit Mastermind verbinden';
 $string['connect_connecting'] = 'Verbinden...';
-$string['connect_waiting'] = 'Warte auf Verbindung...';
+$string['connect_description'] = 'KI-gestuetzte Kursanalyse, Inhaltserstellung und Empfehlungen — direkt in Ihrem LMS.';
+$string['connect_free'] = 'Kostenlos starten · Keine Kreditkarte erforderlich';
 $string['connect_popup_blocked'] = 'Popup blockiert? Oeffnen Sie die Verbindungsseite direkt:';
+$string['connect_title'] = 'Mastermind-Assistent';
+$string['connect_waiting'] = 'Warte auf Verbindung...';
+$string['connection_failed'] = 'Verbindung fehlgeschlagen: {$a}';
+$string['connection_status'] = 'Verbindungsstatus';
+$string['connection_success'] = 'Verbindung erfolgreich hergestellt';
 $string['connection_success_redirect'] = 'Mastermind-Assistent ist jetzt verbunden! Sie werden weitergeleitet...';
-$string['invalid_nonce'] = 'Ungueltige oder abgelaufene Verbindungsanfrage. Bitte versuchen Sie es erneut.';
+$string['content_applied'] = 'Inhalt erfolgreich angewendet!';
+$string['content_generated'] = 'Inhalt erfolgreich erstellt';
+$string['content_preview'] = 'Seiteninhalt';
+$string['content_summary_label'] = 'Zusammenfassung';
+$string['content_type_label'] = 'Inhaltstyp';
+$string['copy_failed'] = 'Kurs konnte nicht kopiert werden. Bitte versuchen Sie es erneut.';
+$string['copy_in_progress'] = 'Bitte warten Sie, waehrend der Kurs kopiert wird. Bei grossen Kursen kann dies einen Moment dauern.';
+$string['copy_success'] = 'Kurs erfolgreich kopiert!';
+$string['copying_course'] = 'Kurs wird kopiert...';
+$string['course_created_success'] = 'Kurs erfolgreich mit KI erstellt! Weiterleitung...';
+$string['course_preview_activities'] = 'Aktivitaeten';
+$string['course_preview_activity_count'] = '{$a} Aktivitaeten';
+$string['course_preview_create'] = 'Kurs erstellen';
+$string['course_preview_creating'] = 'Kurs wird erstellt...';
+$string['course_preview_description'] = 'Beschreibung';
+$string['course_preview_section_count'] = '{$a} Abschnitte';
+$string['course_preview_sections'] = 'Abschnitte';
+$string['course_preview_title'] = 'Vorschau der Kursstruktur';
+$string['course_search_help'] = 'Geben Sie einen Suchbegriff ein, um bestehende Kurse zu finden oder neue mit KI-Unterstuetzung zu erstellen.';
+$string['coursecompletionrate'] = 'Kursabschlussrate: {$a}%';
+$string['create_from_document'] = 'Kurs aus Dokument erstellen';
+$string['creating_course_ai'] = 'Kurs mit KI erstellen';
+$string['creating_from_document'] = 'Dokument wird analysiert und Kurs erstellt...';
+$string['deselect_all'] = 'Alle abwaehlen';
+$string['difficulty_easy'] = 'Einfach';
+$string['difficulty_hard'] = 'Schwer';
+$string['difficulty_level_label'] = 'Schwierigkeitsgrad';
+$string['difficulty_medium'] = 'Mittel';
+$string['difficulty_mixed'] = 'Gemischt (empfohlen)';
+$string['discussion_count_label'] = 'Anzahl der Diskussionen';
+$string['doc_creation_in_progress'] = 'Die KI analysiert Ihr Dokument und erstellt eine Kursstruktur. Bei grossen Dokumenten kann dies bis zu 2 Minuten dauern.';
+$string['draft_assign_prompt_edit'] = 'Kann ich helfen, die Anweisungen fuer diese(s) {$a} zu verbessern?';
+$string['draft_assign_prompt_new'] = 'Ich erstelle Anweisungen fuer diese(s) {$a}!';
+$string['draft_book_prompt_edit'] = 'Kann ich helfen, den Inhalt dieses {$a} zu verbessern?';
+$string['draft_book_prompt_new'] = 'Ich erstelle Kapitel fuer dieses {$a}!';
+$string['draft_forum_prompt_edit'] = 'Kann ich Diskussionsanregungen fuer dieses {$a} erstellen?';
+$string['draft_forum_prompt_new'] = 'Ich erstelle Diskussionsthemen fuer dieses {$a}!';
+$string['draft_glossary_prompt_edit'] = 'Kann ich weitere Eintraege zu diesem {$a} hinzufuegen?';
+$string['draft_glossary_prompt_new'] = 'Ich erstelle Eintraege fuer dieses {$a}!';
+$string['draft_lesson_prompt_edit'] = 'Kann ich helfen, den Inhalt dieser {$a} zu verbessern?';
+$string['draft_lesson_prompt_new'] = 'Ich erstelle Lektionsseiten fuer diese {$a}!';
+$string['draft_page_prompt_edit'] = 'Kann ich Ihnen helfen, diese(s) {$a} zu verbessern?';
+$string['draft_page_prompt_new'] = 'Ich erstelle einen Entwurf fuer diese(s) {$a}!';
+$string['draft_quiz_prompt_edit'] = 'Soll ich weitere Fragen zu diesem/dieser {$a} hinzufuegen?';
+$string['draft_quiz_prompt_new'] = 'Ich erstelle Fragen fuer diese(s) {$a}!';
+$string['draft_url_prompt_edit'] = 'Soll ich alternative Ressourcen fuer diese(s) {$a} vorschlagen?';
+$string['draft_url_prompt_new'] = 'Ich empfehle Ressourcen fuer diese(s) {$a}!';
+$string['dropoffsection'] = 'Absprungabschnitt: {$a}';
+$string['enrolled_as_teacher'] = 'Als Trainer/in eingeschrieben';
+$string['entry_count_label'] = 'Anzahl der Eintraege';
+$string['error_generating_content'] = 'Fehler bei der Inhaltserstellung. Bitte versuchen Sie es erneut.';
+$string['error_generating_questions'] = 'Fehler bei der Fragenerstellung. Bitte versuchen Sie es erneut.';
+$string['errorgetcoursedata'] = 'Fehler beim Abrufen der Kursdaten';
+$string['estimated_reading_time_label'] = 'Lesezeit';
+$string['estimated_time_label'] = 'Geschaetzte Zeit';
+$string['existing_items_count'] = '{$a} vorhandene(r) Eintrag/Eintraege';
+$string['file_too_large'] = 'Die Datei ist zu gross. Maximale Groesse: 10 MB.';
+$string['filter_by_year'] = 'Jahr';
+$string['forum_discussions_label'] = 'Diskussionsthemen';
+$string['forum_guidelines_label'] = 'Teilnahmerichtlinien';
+$string['forum_introduction_label'] = 'Foreneinleitung';
+$string['forum_preview_title'] = 'Vorschau der Foreninhalte';
+$string['forum_type_eachuser'] = 'Jeder schreibt einen Beitrag';
+$string['forum_type_general'] = 'Allgemeines Forum';
+$string['forum_type_label'] = 'Forentyp';
+$string['forum_type_qanda'] = 'Frage-Antwort-Forum';
+$string['forum_type_single'] = 'Einzeldiskussion';
+$string['forumactivity'] = 'Forenaktivitaet: {$a} Beitraege/Teilnehmer';
+$string['generate_book_content'] = 'Buchinhalte erstellen';
+$string['generate_draft'] = 'Entwurf erstellen';
+$string['generate_forum_content'] = 'Foreninhalte erstellen';
+$string['generate_glossary_entries'] = 'Glossareintraege erstellen';
+$string['generate_instructions'] = 'Anweisungen erstellen';
+$string['generate_lesson_content'] = 'Lektionsinhalte erstellen';
+$string['generate_questions'] = 'Fragen erstellen';
+$string['generate_url_recommendations'] = 'URL-Ressourcen finden';
+$string['generating_book'] = 'Buchinhalte werden erstellt...';
+$string['generating_content'] = 'Inhalt wird erstellt...';
+$string['generating_forum'] = 'Foreninhalte werden erstellt...';
+$string['generating_glossary'] = 'Glossareintraege werden erstellt...';
+$string['generating_lesson'] = 'Lektionsinhalte werden erstellt...';
+$string['generating_questions'] = 'Fragen werden erstellt...';
+$string['generating_url'] = 'URL-Ressourcen werden gesucht...';
+$string['getrecommendations'] = 'Empfehlungen abrufen';
+$string['getting_ai_recommendations'] = 'KI-Empfehlungen werden abgerufen...';
+$string['glossary_description_label'] = 'Glossarbeschreibung';
+$string['glossary_entries_label'] = 'Eintraege';
+$string['glossary_preview_title'] = 'Vorschau der Glossareintraege';
+$string['go_to_main_page_to_generate'] = 'Um die KI-Inhaltserstellung zu nutzen, gehen Sie bitte zur Hauptseite der Aktivitaet.';
+$string['go_to_settings_to_generate'] = 'Um die KI-Inhaltserstellung zu nutzen, oeffnen Sie bitte die Aktivitaetseinstellungen.';
+$string['insights_title'] = 'Erkenntnisse';
+$string['instructions_applied'] = 'Anweisungen erfolgreich angewendet!';
+$string['instructions_preview'] = 'Anweisungen';
 $string['invalid_api_key_format'] = 'Das API-Schluessel-Format ist ungueltig.';
-
-// Datenschutz.
-$string['privacy:metadata:preference:ai_policy_accepted'] = 'Ob der Benutzer die KI-Nutzungsrichtlinie akzeptiert hat.';
-$string['privacy:metadata:mastermind_dashboard'] = 'Kurs- und Aktivitaetsdaten werden zur KI-gestuetzten Inhaltserstellung und Analyse an die Mastermind-Dashboard-API gesendet.';
-$string['privacy:metadata:mastermind_dashboard:coursename'] = 'Der Name des Kurses.';
-$string['privacy:metadata:mastermind_dashboard:coursedata'] = 'Kursstrukturdaten einschliesslich Abschnittsnamen und Aktivitaetsnamen.';
-$string['privacy:metadata:mastermind_dashboard:activityname'] = 'Der Name der zu erstellenden Aktivitaet.';
-$string['privacy:ai_policy_accepted_yes'] = 'Der Benutzer hat die KI-Nutzungsrichtlinie akzeptiert.';
+$string['invalid_nonce'] = 'Ungueltige oder abgelaufene Verbindungsanfrage. Bitte versuchen Sie es erneut.';
+$string['key_concepts_label'] = 'Schluesselbegriffe';
+$string['key_requirements_label'] = 'Hauptanforderungen';
+$string['last_activity'] = 'Letzte Aktivitaet';
+$string['learnersatisfaction'] = 'Zufriedenheit der Lernenden: {$a}/5';
+$string['learning_objectives_label'] = 'Lernziele';
+$string['learning_outcomes_label'] = 'Lernziele';
+$string['length_brief'] = 'Kurz (200-400 Woerter)';
+$string['length_comprehensive'] = 'Umfassend (700-1000 Woerter)';
+$string['length_standard'] = 'Standard (400-700 Woerter)';
+$string['lesson_pages_label'] = 'Lektionsseiten';
+$string['lesson_preview_title'] = 'Vorschau der Lektionsinhalte';
+$string['level_advanced'] = 'Fortgeschritten';
+$string['level_graduate'] = 'Master/Promotion';
+$string['level_intermediate'] = 'Mittelstufe';
+$string['level_introductory'] = 'Einfuehrung';
+$string['mastermind_assistant:addinstance'] = 'Neuen Mastermind-Assistenten-Block hinzufuegen';
+$string['mastermind_assistant:applychanges'] = 'KI-generierte Aenderungen auf Kurse anwenden';
+$string['mastermind_assistant:myaddinstance'] = 'Neuen Mastermind-Assistenten-Block zur Mein-Moodle-Seite hinzufuegen';
+$string['mastermind_assistant:view'] = 'Mastermind-Assistenten-Block anzeigen';
+$string['metric_avg_final_grade'] = 'Durchschnittliche Endnote';
+$string['metric_completion_rate'] = 'Abschlussrate';
+$string['metric_dropoff_section'] = 'Abbruch-Abschnitt';
+$string['metric_forum_activity'] = 'Forumsaktivitaet';
+$string['metric_posts_per_learner'] = 'Beitraege/Lernende';
+$string['nav_browse_categories'] = 'Kategorien durchsuchen';
+$string['nav_manage_courses'] = 'Kurse und Kategorien verwalten';
+$string['nav_search_courses'] = 'Kurse suchen';
+$string['no_activity'] = 'Keine Aktivitaet';
+$string['no_feedback'] = 'Keine Feedback-Aktivitaet';
+$string['notapplicable'] = 'Kurserkenntnisse sind auf dieser Seite nicht verfuegbar.';
+$string['open_activity_main_page'] = 'Aktivitaetsseite oeffnen';
+$string['open_activity_settings'] = 'Aktivitaetseinstellungen oeffnen';
+$string['openai_connected'] = 'OpenAI-Verbindung erfolgreich';
+$string['openai_error_icon'] = "\u2717";
+$string['openai_failed'] = 'OpenAI-Verbindung fehlgeschlagen';
+$string['openai_success_icon'] = "\u2713";
+$string['openai_warning_icon'] = "\u26A0";
+$string['or_upload_document'] = 'oder aus einem Dokument erstellen';
+$string['page_count_label'] = 'Anzahl der Seiten';
+$string['page_preview_title'] = 'Vorschau des erstellten Inhalts';
+$string['pluginname'] = 'Mastermind-Assistent';
+$string['preview_title'] = 'Vorschau der erstellten Anweisungen';
 $string['privacy:ai_policy_accepted_no'] = 'Der Benutzer hat die KI-Nutzungsrichtlinie nicht akzeptiert.';
+$string['privacy:ai_policy_accepted_yes'] = 'Der Benutzer hat die KI-Nutzungsrichtlinie akzeptiert.';
+$string['privacy:metadata:mastermind_dashboard'] = 'Kurs- und Aktivitaetsdaten werden zur KI-gestuetzten Inhaltserstellung und Analyse an die Mastermind-Dashboard-API gesendet.';
+$string['privacy:metadata:mastermind_dashboard:activityname'] = 'Der Name der zu erstellenden Aktivitaet.';
+$string['privacy:metadata:mastermind_dashboard:coursedata'] = 'Kursstrukturdaten einschliesslich Abschnittsnamen und Aktivitaetsnamen.';
+$string['privacy:metadata:mastermind_dashboard:coursename'] = 'Der Name des Kurses.';
+$string['privacy:metadata:preference:ai_policy_accepted'] = 'Ob der Benutzer die KI-Nutzungsrichtlinie akzeptiert hat.';
+$string['processing'] = 'Verarbeitung...';
+$string['progress_analysis_complete'] = 'Analyse abgeschlossen!';
+$string['progress_analyzing'] = 'Kursstruktur wird analysiert und Empfehlungen werden generiert...';
+$string['progress_generating_structure'] = 'Aktualisierte Kursstruktur wird erstellt...';
+$string['question_count_label'] = 'Anzahl der Fragen';
+$string['questions_added'] = 'Fragen erfolgreich hinzugefuegt!';
+$string['questions_count'] = '{$a} Fragen bereit zum Hinzufuegen';
+$string['questions_generated'] = 'Fragen erfolgreich erstellt';
+$string['questions_selected_suffix'] = 'ausgewaehlt';
+$string['quiz_preview_title'] = 'Vorschau der erstellten Fragen';
+$string['quiz_source_doc_divider'] = 'oder aus einem Dokument generieren';
+$string['quiz_source_doc_hint'] = 'PDF, DOCX oder TXT (max. 10 MB)';
+$string['quiz_source_doc_prompt'] = 'Quelldokument hier ablegen';
+$string['regenerate'] = 'Neu erstellen';
+$string['resource_count_label'] = 'Anzahl der Empfehlungen';
+$string['resources'] = 'Ressourcen';
+$string['rubric_criteria_label'] = 'Bewertungskriterien';
+$string['run_analysis'] = 'KI-Analyse fuer veraltete Inhalte starten';
+$string['scope_length_label'] = 'Umfang / Laenge';
+$string['scope_length_placeholder'] = 'z.B. 1500-2000 Woerter, 10 Seiten, 15-minuetige Praesentation';
+$string['search_course_placeholder'] = 'Kursname eingeben...';
+$string['searching'] = 'Kurse werden gesucht...';
+$string['select_academic_level'] = 'Niveau auswaehlen (optional)...';
+$string['select_all'] = 'Alle auswaehlen';
+$string['select_assignment_type'] = 'Typ auswaehlen (optional)...';
+$string['select_content_type'] = 'Automatisch aus Titel erkennen';
+$string['settings_api_key'] = 'API-Schluessel';
+$string['settings_api_key_desc'] = 'Ihr Mastermind-API-Schluessel (beginnt mit ma_live_)';
+$string['settings_dashboard_url'] = 'Dashboard-URL';
+$string['settings_dashboard_url_desc'] = 'Die URL Ihrer Mastermind-Dashboard-Instanz (z.B. https://mastermindassistant.ai)';
+$string['settings_info_heading'] = 'Konto & Support';
+$string['settings_not_configured'] = 'Dashboard-URL und API-Schluessel muessen konfiguriert werden.';
+$string['settings_register_desc'] = 'Noch kein Konto? Registrieren Sie sich unter';
+$string['settings_save_api_key_first'] = 'Bitte geben Sie oben Ihren API-Schluessel ein und speichern Sie die Aenderungen zuerst.';
+$string['settings_support_desc'] = 'Brauchen Sie Hilfe? Kontaktieren Sie uns unter';
+$string['show_detailed_metrics'] = 'Detaillierte Metriken anzeigen';
+$string['success_book_applied'] = 'Buchinhalte erfolgreich angewendet!';
+$string['success_content_applied'] = 'Inhalt erfolgreich angewendet!';
+$string['success_forum_applied'] = 'Forumsinhalte erfolgreich angewendet!';
+$string['success_glossary_applied'] = 'Glossareintraege erfolgreich angewendet!';
+$string['success_instructions_applied'] = 'Anweisungen erfolgreich angewendet!';
+$string['success_lesson_applied'] = 'Lektionsinhalte erfolgreich angewendet!';
+$string['success_questions_added'] = 'Fragen erfolgreich hinzugefuegt!';
+$string['success_url_applied'] = 'URL erfolgreich angewendet!';
+$string['suggested_title'] = 'Vorgeschlagener Titel';
+$string['supported_formats'] = 'PDF, DOCX oder TXT (max. 10 MB)';
+$string['target_length_label'] = 'Inhaltslaenge';
+$string['test_connection'] = 'Verbindung testen';
+$string['test_connection_desc'] = 'Speichern Sie zuerst Ihre Einstellungen und klicken Sie dann auf Verbindung testen, um Ihren API-Schluessel zu ueberpruefen.';
+$string['testing_connection'] = 'Verbindung wird getestet...';
+$string['type_case_study'] = 'Fallstudie';
+$string['type_case_study_page'] = 'Fallstudie';
+$string['type_essay'] = 'Aufsatz';
+$string['type_group_project'] = 'Gruppenprojekt';
+$string['type_lab_report'] = 'Laborbericht';
+$string['type_lecture_notes'] = 'Vorlesungsnotizen';
+$string['type_overview'] = 'Themenuebersicht';
+$string['type_presentation'] = 'Praesentation';
+$string['type_reference'] = 'Referenzmaterial';
+$string['type_research_paper'] = 'Forschungsarbeit';
+$string['type_tutorial'] = 'Anleitung / How-To';
+$string['unknown'] = 'Unbekannt';
+$string['unsupported_file_type'] = 'Nicht unterstuetzter Dateityp. Bitte laden Sie eine PDF-, DOCX- oder TXT-Datei hoch.';
+$string['update_dates'] = 'Kursdaten aktualisieren';
+$string['upload_document_prompt'] = 'Lehrplan oder Curriculum-Dokument hier ablegen';
+$string['url_preview_title'] = 'Empfohlene URL-Ressourcen';
+$string['url_recommendations_label'] = 'Empfohlene Ressourcen';
+$string['url_topic_summary_label'] = 'Themenzusammenfassung';
+$string['view_course'] = 'Kurs anzeigen';

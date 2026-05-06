@@ -379,65 +379,66 @@ function($, Ajax, Notification, AiPolicy, Str) {
      * @param {number} courseId Course ID to audit
      */
     function fetchAuditFindings(courseId) {
+        var flags = null;
+        var stringRequests = [
+            {key: 'audit_past_due_date', component: 'block_mastermind_assistant'},
+            {key: 'audit_old_year_reference', component: 'block_mastermind_assistant'},
+            {key: 'audit_empty_section', component: 'block_mastermind_assistant'},
+            {key: 'audit_no_students', component: 'block_mastermind_assistant'},
+        ];
+
         Ajax.call([{
             methodname: 'block_mastermind_assistant_get_course_data',
             args: {courseid: courseId}
         }])[0].then(function(response) {
             if (!response.success) {
-                return;
+                return null;
             }
             var data = JSON.parse(response.data);
-            var flags = data.audit_flags || {};
+            flags = data.audit_flags || {};
+            return Str.get_strings(stringRequests);
+        }).then(function(strings) {
+            if (!strings || !flags) {
+                return null;
+            }
             var items = [];
 
-            // Preload audit strings.
-            var stringRequests = [
-                {key: 'audit_past_due_date', component: 'block_mastermind_assistant'},
-                {key: 'audit_old_year_reference', component: 'block_mastermind_assistant'},
-                {key: 'audit_empty_section', component: 'block_mastermind_assistant'},
-                {key: 'audit_no_students', component: 'block_mastermind_assistant'},
-            ];
-            Str.get_strings(stringRequests).then(function(strings) {
-                if (flags.past_due_dates && flags.past_due_dates.length) {
-                    flags.past_due_dates.forEach(function(d) {
-                        items.push({
-                            icon: '&#x1F4C5;',
-                            text: strings[0] + ': ' + escapeHtml(d.name) + ' (' + escapeHtml(d.duedate) + ')'
-                        });
+            if (flags.past_due_dates && flags.past_due_dates.length) {
+                flags.past_due_dates.forEach(function(d) {
+                    items.push({
+                        icon: '&#x1F4C5;',
+                        text: strings[0] + ': ' + escapeHtml(d.name) + ' (' + escapeHtml(d.duedate) + ')'
                     });
-                }
-                if (flags.old_year_references && flags.old_year_references.length) {
-                    flags.old_year_references.forEach(function(name) {
-                        items.push({icon: '&#x1F4C4;', text: strings[1] + ': ' + escapeHtml(name)});
-                    });
-                }
-                if (flags.empty_sections && flags.empty_sections.length) {
-                    flags.empty_sections.forEach(function(name) {
-                        items.push({icon: '&#x1F4AD;', text: strings[2] + ': ' + escapeHtml(name)});
-                    });
-                }
-                if (flags.missing_enrollments) {
-                    items.push({icon: '&#x1F465;', text: strings[3]});
-                }
+                });
+            }
+            if (flags.old_year_references && flags.old_year_references.length) {
+                flags.old_year_references.forEach(function(name) {
+                    items.push({icon: '&#x1F4C4;', text: strings[1] + ': ' + escapeHtml(name)});
+                });
+            }
+            if (flags.empty_sections && flags.empty_sections.length) {
+                flags.empty_sections.forEach(function(name) {
+                    items.push({icon: '&#x1F4AD;', text: strings[2] + ': ' + escapeHtml(name)});
+                });
+            }
+            if (flags.missing_enrollments) {
+                items.push({icon: '&#x1F465;', text: strings[3]});
+            }
 
-                if (items.length > 0) {
-                    var $list = $('#mastermind-audit-list');
-                    $list.empty();
-                    items.forEach(function(item) {
-                        $list.append(
-                            '<div class="mastermind-audit-item">' +
-                                '<span class="mastermind-audit-icon">' + item.icon + '</span>' +
-                                '<span>' + item.text + '</span>' +
-                            '</div>'
-                        );
-                    });
-                    $('#mastermind-audit-findings').show();
-                }
-            }).catch(function() {
-                // Silently fail — string loading is non-critical.
-            });
-
-            return response;
+            if (items.length > 0) {
+                var $list = $('#mastermind-audit-list');
+                $list.empty();
+                items.forEach(function(item) {
+                    $list.append(
+                        '<div class="mastermind-audit-item">' +
+                            '<span class="mastermind-audit-icon">' + item.icon + '</span>' +
+                            '<span>' + item.text + '</span>' +
+                        '</div>'
+                    );
+                });
+                $('#mastermind-audit-findings').show();
+            }
+            return null;
         }).catch(function() {
             // Silently fail — audit is supplementary.
         });

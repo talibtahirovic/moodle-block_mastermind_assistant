@@ -57,6 +57,9 @@ class apply_book_chapters extends external_api {
     /**
      * Execute the web service call.
      *
+     * @param int $courseid Course ID.
+     * @param int $cmid Course module ID.
+     * @param string $chapters JSON array of chapters [{title, content}].
      * @return array
      */
     public static function execute($courseid, $cmid, $chapters) {

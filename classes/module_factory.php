@@ -35,6 +35,9 @@ class module_factory {
 
     /**
      * Constructor.
+     *
+     * @param \stdClass $course Course record.
+     * @param \stdClass $section Section record to add modules to.
      */
     public function __construct(\stdClass $course, \stdClass $section) {
         $this->course  = $course;
@@ -85,6 +88,13 @@ class module_factory {
 
     /**
      * Build moduleinfo object with all required fields for each module type.
+     *
+     * @param string $modname Module name (e.g. page, quiz, forum).
+     * @param int $moduleid Modules table ID.
+     * @param string $name Activity name.
+     * @param string $intro Activity intro/description HTML.
+     * @param array $ai AI-supplied activity data.
+     * @return \stdClass|null Moduleinfo object, or null if the module type is unsupported.
      */
     private function build_moduleinfo(string $modname, int $moduleid, string $name, string $intro, array $ai): ?\stdClass {
         $info = new \stdClass();

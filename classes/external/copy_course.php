@@ -60,9 +60,11 @@ class copy_course extends external_api {
     }
 
     /**
-     * Copy an existing course using Moodle's backup/restore system
-     * @param int $courseid
-     * @param int $categoryid
+     * Copy an existing course using Moodle's backup/restore system.
+     *
+     * @param int $courseid Course ID to copy.
+     * @param int $categoryid Target category ID.
+     * @param string $newcoursename Custom name for the copied course.
      * @return array
      */
     public static function execute($courseid, $categoryid = 1, $newcoursename = '') {

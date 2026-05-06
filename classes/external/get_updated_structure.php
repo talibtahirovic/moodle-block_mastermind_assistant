@@ -55,6 +55,9 @@ class get_updated_structure extends external_api {
     /**
      * Execute the web service call.
      *
+     * @param int $courseid Course ID.
+     * @param string $coursedata JSON string of comprehensive course data.
+     * @param string $recommendations Analysis and recommendations from first request.
      * @return array
      */
     public static function execute($courseid, $coursedata, $recommendations) {

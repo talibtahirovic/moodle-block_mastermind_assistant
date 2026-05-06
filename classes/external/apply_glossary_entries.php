@@ -56,6 +56,9 @@ class apply_glossary_entries extends external_api {
     /**
      * Execute the web service call.
      *
+     * @param int $courseid Course ID.
+     * @param int $cmid Course module ID.
+     * @param string $entries JSON array of entries [{concept, definition}].
      * @return array
      */
     public static function execute($courseid, $cmid, $entries) {

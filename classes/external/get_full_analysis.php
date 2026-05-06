@@ -58,6 +58,8 @@ class get_full_analysis extends external_api {
     /**
      * Execute the web service call.
      *
+     * @param int $courseid Course ID.
+     * @param string $coursedata Course data JSON.
      * @return array
      */
     public static function execute($courseid, $coursedata) {
@@ -129,6 +131,9 @@ class get_full_analysis extends external_api {
 
     /**
      * Extract and normalize recommendations string from an API response.
+     *
+     * @param array $response API response payload.
+     * @return string Recommendations as a string.
      */
     private static function extract_recommendations(array $response): string {
         $rec = $response;
@@ -144,6 +149,9 @@ class get_full_analysis extends external_api {
 
     /**
      * Extract and normalize structure string from an API response.
+     *
+     * @param array $response API response payload.
+     * @return string Structure encoded as a JSON string.
      */
     private static function extract_structure(array $response): string {
         $structure = $response;

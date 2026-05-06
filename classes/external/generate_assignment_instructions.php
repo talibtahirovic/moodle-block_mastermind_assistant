@@ -61,6 +61,15 @@ class generate_assignment_instructions extends external_api {
     /**
      * Execute the web service call.
      *
+     * @param int $courseid Course ID.
+     * @param string $coursename Course name.
+     * @param string $assignmentname Assignment name.
+     * @param string $assignmentdescription Assignment description.
+     * @param string $assignmenttype Assignment type.
+     * @param string $academiclevel Academic level.
+     * @param string $scopelength Scope/length expectation.
+     * @param string $sectionname Section name for context.
+     * @param string $courseactivities JSON array of course activity names.
      * @return array
      */
     public static function execute(

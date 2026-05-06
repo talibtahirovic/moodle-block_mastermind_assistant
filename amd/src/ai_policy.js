@@ -67,58 +67,71 @@ function($, Ajax, Notification, ModalFactory, ModalEvents, Str) {
             {key: 'ai_policy_declined_msg', component: 'block_mastermind_assistant'},
         ];
 
+        var loaded = {};
+
         Str.get_strings(stringRequests).then(function(strings) {
-            var title = strings[0];
-            var body = strings[1];
-            var acceptBtn = strings[2];
-            var acceptedMsg = strings[3];
-            var declinedMsg = strings[4];
+            loaded.title = strings[0];
+            loaded.body = strings[1];
+            loaded.acceptBtn = strings[2];
+            loaded.acceptedMsg = strings[3];
+            loaded.declinedMsg = strings[4];
 
             return ModalFactory.create({
                 type: ModalFactory.types.SAVE_CANCEL,
-                title: title,
-                body: '<div style="padding: 20px;">' + body + '</div>',
+                title: loaded.title,
+                body: '<div style="padding: 20px;">' + loaded.body + '</div>',
                 large: true
-            }).then(function(modal) {
-                modal.setSaveButtonText(acceptBtn);
-
-                // Handle save (accept)
-                modal.getRoot().on(ModalEvents.save, function() {
-                    savePolicyAcceptance(true).then(function() {
-                        Notification.addNotification({
-                            message: acceptedMsg,
-                            type: 'success'
-                        });
-
-                        if (onAccept) {
-                            onAccept();
-                        }
-                    }).catch(function(error) {
-                        Notification.exception(error);
-                    });
-
-                    modal.hide();
-                });
-
-                // Handle cancel (decline)
-                modal.getRoot().on(ModalEvents.cancel, function() {
-                    Notification.addNotification({
-                        message: declinedMsg,
-                        type: 'warning'
-                    });
-
-                    if (onDecline) {
-                        onDecline();
-                    }
-
-                    modal.hide();
-                });
-
-                modal.show();
             });
-        }).catch(function(error) {
-            Notification.exception(error);
+        }).then(function(modal) {
+            attachModalHandlers(modal, loaded, onAccept, onDecline);
+            modal.show();
+            return modal;
+        }).catch(Notification.exception);
+    }
+
+    /**
+     * Attach save/cancel handlers to the policy modal.
+     * @param {Object} modal Modal instance.
+     * @param {Object} loaded Loaded language strings.
+     * @param {function} onAccept Callback when user accepts.
+     * @param {function} onDecline Callback when user declines.
+     */
+    function attachModalHandlers(modal, loaded, onAccept, onDecline) {
+        modal.setSaveButtonText(loaded.acceptBtn);
+
+        modal.getRoot().on(ModalEvents.save, function() {
+            handleAccept(loaded.acceptedMsg, onAccept);
+            modal.hide();
         });
+
+        modal.getRoot().on(ModalEvents.cancel, function() {
+            Notification.addNotification({
+                message: loaded.declinedMsg,
+                type: 'warning'
+            });
+            if (onDecline) {
+                onDecline();
+            }
+            modal.hide();
+        });
+    }
+
+    /**
+     * Persist acceptance and notify.
+     * @param {string} acceptedMsg Localised confirmation message.
+     * @param {function} onAccept Callback when persisted.
+     */
+    function handleAccept(acceptedMsg, onAccept) {
+        savePolicyAcceptance(true).then(function() {
+            Notification.addNotification({
+                message: acceptedMsg,
+                type: 'success'
+            });
+            if (onAccept) {
+                onAccept();
+            }
+            return null;
+        }).catch(Notification.exception);
     }
 
     /**
@@ -127,14 +140,15 @@ function($, Ajax, Notification, ModalFactory, ModalEvents, Str) {
      */
     function checkAndProceed(callback) {
         checkPolicyAcceptance().then(function(response) {
-            if (response.accepted) {
+            return response.accepted;
+        }).then(function(accepted) {
+            if (accepted) {
                 callback();
             } else {
                 showPolicyModal(callback, null);
             }
-        }).catch(function(error) {
-            Notification.exception(error);
-        });
+            return null;
+        }).catch(Notification.exception);
     }
 
     return {

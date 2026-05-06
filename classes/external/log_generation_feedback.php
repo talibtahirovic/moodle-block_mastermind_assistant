@@ -60,6 +60,11 @@ class log_generation_feedback extends external_api {
     /**
      * Execute the web service call.
      *
+     * @param int $courseid Course ID.
+     * @param string $action User action: generate, apply, regenerate, or discard.
+     * @param string $moduletype Module type: course, page, quiz, assign, forum, lesson, glossary, book, url.
+     * @param string $activityname Activity name.
+     * @param string $coursename Course name.
      * @return array
      */
     public static function execute($courseid, $action, $moduletype, $activityname = '', $coursename = '') {

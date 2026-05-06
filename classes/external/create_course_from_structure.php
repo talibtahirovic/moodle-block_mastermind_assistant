@@ -60,6 +60,8 @@ class create_course_from_structure extends external_api {
     /**
      * Execute the web service call.
      *
+     * @param string $structure JSON-encoded AI structure.
+     * @param int $categoryid Category ID.
      * @return array
      */
     public static function execute($structure, $categoryid = 1) {

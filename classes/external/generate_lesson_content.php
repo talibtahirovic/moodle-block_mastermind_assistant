@@ -60,6 +60,14 @@ class generate_lesson_content extends external_api {
     /**
      * Execute the web service call.
      *
+     * @param int $courseid Course ID.
+     * @param string $coursename Course name.
+     * @param string $lessonname Lesson name.
+     * @param string $lessondescription Lesson description.
+     * @param string $academiclevel Academic level.
+     * @param int $pagecount Number of pages to generate.
+     * @param string $sectionname Section name for context.
+     * @param string $courseactivities JSON array of course activity names.
      * @return array
      */
     public static function execute(

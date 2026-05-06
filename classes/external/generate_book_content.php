@@ -61,6 +61,15 @@ class generate_book_content extends external_api {
     /**
      * Execute the web service call.
      *
+     * @param int $courseid Course ID.
+     * @param string $coursename Course name.
+     * @param string $bookname Book name.
+     * @param string $bookdescription Book description.
+     * @param string $academiclevel Academic level.
+     * @param int $chaptercount Number of chapters to generate.
+     * @param string $targetlength Target length per chapter.
+     * @param string $sectionname Section name for context.
+     * @param string $courseactivities JSON array of course activity names.
      * @return array
      */
     public static function execute(

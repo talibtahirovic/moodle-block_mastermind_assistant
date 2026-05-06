@@ -127,14 +127,10 @@ define(['core/ajax', 'core/notification', 'core/str'], function(Ajax, Notificati
                         showFallback(connectUrl);
                     }
 
-                    Str.get_string('connect_waiting', 'block_mastermind_assistant').then(function(label) {
-                        btn.textContent = label;
-                        return null;
-                    }).catch(function() {
-                        btn.textContent = 'Waiting...';
-                    });
-
                     startPolling(btn, originalLabel);
+                    return Str.get_string('connect_waiting', 'block_mastermind_assistant');
+                }).then(function(label) {
+                    btn.textContent = label;
                     return null;
                 }).catch(function(err) {
                     btn.disabled = false;

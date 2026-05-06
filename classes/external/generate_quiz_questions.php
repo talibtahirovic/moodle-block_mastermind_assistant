@@ -69,6 +69,20 @@ class generate_quiz_questions extends external_api {
     /**
      * Execute the web service call.
      *
+     * @param int $courseid Course ID.
+     * @param int $quizid Quiz CM ID.
+     * @param string $quizname Quiz name.
+     * @param string $quizdescription Quiz description.
+     * @param string $difficultylevel Difficulty level.
+     * @param int $questioncount Number of questions to generate.
+     * @param string $academiclevel Academic level.
+     * @param string $sectionname Section name for context.
+     * @param string $courseactivities JSON array of course activity names.
+     * @param bool $previewonly If true, return questions without inserting.
+     * @param string $selectedquestions JSON array of selected questions to insert.
+     * @param string $filedata Base64-encoded source document.
+     * @param string $filetype MIME type of source document.
+     * @param string $filename Original file name.
      * @return array
      */
     public static function execute(
@@ -244,6 +258,9 @@ class generate_quiz_questions extends external_api {
 
     /**
      * Get existing quiz questions.
+     *
+     * @param object $quiz Quiz record.
+     * @return array List of existing question summaries.
      */
     protected static function get_existing_quiz_questions($quiz) {
         global $DB, $USER, $CFG;
@@ -285,6 +302,12 @@ class generate_quiz_questions extends external_api {
 
     /**
      * Create moodle questions.
+     *
+     * @param array $questions AI-generated questions.
+     * @param object $quiz Quiz record.
+     * @param object $cm Course module record.
+     * @param \context $context Module context.
+     * @return int Number of questions created.
      */
     protected static function create_moodle_questions($questions, $quiz, $cm, $context) {
         global $DB, $CFG;
@@ -346,6 +369,11 @@ class generate_quiz_questions extends external_api {
 
     /**
      * Create single question.
+     *
+     * @param array $qdata Question data from the AI.
+     * @param int $categoryid Question category ID.
+     * @param \context $modulecontext Module context.
+     * @return int|false Question ID on success, false on failure.
      */
     protected static function create_single_question($qdata, $categoryid, $modulecontext) {
         global $USER;

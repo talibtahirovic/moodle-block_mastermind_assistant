@@ -66,6 +66,11 @@ class create_course_from_document extends external_api {
     /**
      * Execute the web service call.
      *
+     * @param string $filedata Base64-encoded file content.
+     * @param string $filetype MIME type of the file.
+     * @param string $filename Original file name.
+     * @param int $categoryid Category ID.
+     * @param bool $previewonly Return structure preview without creating course.
      * @return array
      */
     public static function execute($filedata, $filetype, $filename, $categoryid = 1, $previewonly = false) {

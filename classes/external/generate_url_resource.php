@@ -60,6 +60,14 @@ class generate_url_resource extends external_api {
     /**
      * Execute the web service call.
      *
+     * @param int $courseid Course ID.
+     * @param string $coursename Course name.
+     * @param string $urlname URL resource name.
+     * @param string $urldescription URL resource description.
+     * @param string $academiclevel Academic level.
+     * @param int $resourcecount Number of URL recommendations.
+     * @param string $sectionname Section name for context.
+     * @param string $courseactivities JSON array of course activity names.
      * @return array
      */
     public static function execute(

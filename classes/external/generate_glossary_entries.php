@@ -60,6 +60,14 @@ class generate_glossary_entries extends external_api {
     /**
      * Execute the web service call.
      *
+     * @param int $courseid Course ID.
+     * @param string $coursename Course name.
+     * @param string $glossaryname Glossary name.
+     * @param string $glossarydescription Glossary description.
+     * @param string $academiclevel Academic level.
+     * @param int $entrycount Number of entries to generate.
+     * @param string $sectionname Section name for context.
+     * @param string $courseactivities JSON array of course activity names.
      * @return array
      */
     public static function execute(

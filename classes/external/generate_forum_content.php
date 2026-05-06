@@ -61,6 +61,15 @@ class generate_forum_content extends external_api {
     /**
      * Execute the web service call.
      *
+     * @param int $courseid Course ID.
+     * @param string $coursename Course name.
+     * @param string $forumname Forum name.
+     * @param string $forumdescription Forum description.
+     * @param string $forumtype Forum type (general, single, qanda, eachuser).
+     * @param string $academiclevel Academic level.
+     * @param int $discussioncount Number of discussions to generate.
+     * @param string $sectionname Section name for context.
+     * @param string $courseactivities JSON array of course activity names.
      * @return array
      */
     public static function execute(

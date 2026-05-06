@@ -28,30 +28,33 @@ define(['core/ajax', 'core/notification', 'core/str', 'core/templates'], functio
      * @param {HTMLElement} button
      * @param {HTMLElement} resultDiv
      */
+    function setButtonLabel(button, key, fallback) {
+        Str.get_string(key, 'block_mastermind_assistant').then(function(s) {
+            button.textContent = s;
+            return null;
+        }).catch(function() {
+            button.textContent = fallback;
+        });
+    }
+
     function testConnection(button, resultDiv) {
         button.disabled = true;
         Str.get_string('testing_connection', 'block_mastermind_assistant').then(function(s) {
             button.textContent = s;
             resultDiv.innerHTML = '<div class="alert alert-info">' + escapeHtml(s) + '</div>';
+            return null;
         }).catch(function() {
             button.textContent = '...';
         });
 
+        var savedResponse = null;
         Ajax.call([{
             methodname: 'block_mastermind_assistant_test_connection',
             args: {}
         }])[0].then(function(response) {
             button.disabled = false;
-            Str.get_strings([
-                {key: 'test_connection', component: 'block_mastermind_assistant'},
-                {key: 'connection_success', component: 'block_mastermind_assistant'},
-                {key: 'account_tier', component: 'block_mastermind_assistant'},
-                {key: 'account_status', component: 'block_mastermind_assistant'},
-            ]).then(function(strings) {
-                button.textContent = strings[0];
-            }).catch(function() {
-                // Fallback.
-            });
+            savedResponse = response;
+            setButtonLabel(button, 'test_connection', 'Test Connection');
 
             var context = {
                 success: response.success,
@@ -59,23 +62,20 @@ define(['core/ajax', 'core/notification', 'core/str', 'core/templates'], functio
                 status: response.status || '',
                 message: response.message || ''
             };
-            Templates.renderForPromise('block_mastermind_assistant/connection_result', context)
-                .then(function(result) {
-                    resultDiv.innerHTML = result.html;
-                }).catch(function() {
-                    resultDiv.innerHTML = '<div class="alert alert-danger">' +
-                        escapeHtml(response.message || '') + '</div>';
-                });
+            return Templates.renderForPromise('block_mastermind_assistant/connection_result', context);
+        }).then(function(result) {
+            if (result) {
+                resultDiv.innerHTML = result.html;
+            }
+            return null;
         }).catch(function(error) {
             button.disabled = false;
-            Str.get_string('test_connection', 'block_mastermind_assistant').then(function(s) {
-                button.textContent = s;
-            }).catch(function() {
-                // Fallback.
-            });
-            resultDiv.innerHTML = '<div class="alert alert-danger">' +
-                escapeHtml(error.message || '') + '</div>';
-            Notification.exception(error);
+            setButtonLabel(button, 'test_connection', 'Test Connection');
+            var msg = (savedResponse && savedResponse.message) || (error && error.message) || '';
+            resultDiv.innerHTML = '<div class="alert alert-danger">' + escapeHtml(msg) + '</div>';
+            if (!savedResponse) {
+                Notification.exception(error);
+            }
         });
     }
 
@@ -105,6 +105,7 @@ define(['core/ajax', 'core/notification', 'core/str', 'core/templates'], functio
                 if (apiKeyInput && !apiKeyInput.value.trim()) {
                     Str.get_string('settings_save_api_key_first', 'block_mastermind_assistant').then(function(s) {
                         resultDiv.innerHTML = '<div class="alert alert-warning">' + escapeHtml(s) + '</div>';
+                        return null;
                     }).catch(function() {
                         // Fallback.
                     });

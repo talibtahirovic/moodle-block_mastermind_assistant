@@ -66,6 +66,9 @@ class apply_lesson_pages extends external_api {
     /**
      * Execute the web service call.
      *
+     * @param int $courseid Course ID.
+     * @param int $cmid Course module ID.
+     * @param string $pages JSON array of pages.
      * @return array
      */
     public static function execute($courseid, $cmid, $pages) {
@@ -309,6 +312,9 @@ class apply_lesson_pages extends external_api {
 
     /**
      * Resolve a jump_to string from the AI response to a Moodle lesson jump constant.
+     *
+     * @param string $jumpto Jump target keyword from the AI response.
+     * @return int Moodle lesson jump constant.
      */
     private static function resolve_jump(string $jumpto): int {
         switch (strtolower($jumpto)) {
