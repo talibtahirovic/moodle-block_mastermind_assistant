@@ -28,6 +28,7 @@ defined('MOODLE_INTERNAL') || die();
 global $CFG;
 require_once($CFG->libdir . '/externallib.php');
 require_once($CFG->dirroot . '/course/lib.php');
+require_once($CFG->libdir . '/completionlib.php');
 
 use external_api;
 use external_function_parameters;
@@ -141,10 +142,11 @@ class get_course_data extends external_api {
             ],
             'sections' => [],
             'activities' => [],
-            'users' => [],
+            'enrolment' => [],
             'grades' => [],
-            'completions' => [],
-            'forum_posts' => [],
+            'completion_summary' => [],
+            'forums' => [],
+            'forum_activity' => [],
             'feedback' => [],
         ];
 
@@ -224,22 +226,40 @@ class get_course_data extends external_api {
             ];
         }
 
-        // Get enrolled users.
-        $users = get_enrolled_users(context_course::instance($courseid));
-        foreach ($users as $user) {
-            $data['users'][] = [
-                'id' => $user->id,
-                'username' => $user->username,
-                'firstname' => $user->firstname,
-                'lastname' => $user->lastname,
-                'email' => $user->email,
-                'lastaccess' => $user->lastaccess,
-                'firstaccess' => $user->firstaccess,
-                'timeenrolled' => $user->timeenrolled ?? 0,
-            ];
+        // Enrolment as counts only: total, active in the last 30 days and per
+        // role. No learner rows, names, usernames or email addresses leave
+        // the plugin (see outbound_sanitizer for the matching guarantee on
+        // the forwarding path).
+        $coursecontext = context_course::instance($courseid);
+        $enrolled = get_enrolled_users($coursecontext, '', 0, 'u.id, u.lastaccess');
+        $activecutoff = time() - (30 * DAYSECS);
+        $active = 0;
+        foreach ($enrolled as $enrolleduser) {
+            if ((int) $enrolleduser->lastaccess >= $activecutoff) {
+                $active++;
+            }
         }
+        $rolerows = $DB->get_records_sql(
+            "SELECT r.shortname, COUNT(DISTINCT ra.userid) AS cnt
+               FROM {role_assignments} ra
+               JOIN {role} r ON r.id = ra.roleid
+              WHERE ra.contextid = ?
+           GROUP BY r.shortname",
+            [$coursecontext->id]
+        );
+        $roles = [];
+        foreach ($rolerows as $rolerow) {
+            $roles[$rolerow->shortname] = (int) $rolerow->cnt;
+        }
+        ksort($roles);
+        $data['enrolment'] = [
+            'enrolled' => count($enrolled),
+            'active_30d' => $active,
+            'roles' => $roles,
+        ];
 
-        // Get grade data and encode as JSON for simplicity.
+        // Grade items with a per-item summary. Per-learner grade rows are
+        // reduced to counts and averages before anything is returned.
         $grades = [];
         $gradeitems = $DB->get_records('grade_items', ['courseid' => $courseid]);
 
@@ -248,14 +268,26 @@ class get_course_data extends external_api {
         if ($gradeitems) {
             $itemids = array_keys($gradeitems);
             [$insql, $inparams] = $DB->get_in_or_equal($itemids, SQL_PARAMS_NAMED);
-            $graderecords = $DB->get_records_select('grade_grades', "itemid $insql", $inparams);
+            $graderecords = $DB->get_records_select('grade_grades', "itemid $insql", $inparams, '',
+                'id, itemid, finalgrade');
             foreach ($graderecords as $grade) {
                 $allitemgrades[$grade->itemid][] = $grade;
             }
         }
 
         foreach ($gradeitems as $gradeitem) {
-            $gradedata = [
+            $finals = [];
+            foreach ($allitemgrades[$gradeitem->id] ?? [] as $grade) {
+                if ($grade->finalgrade !== null && $grade->finalgrade !== '') {
+                    $finals[] = (float) $grade->finalgrade;
+                }
+            }
+            $gradepass = (float) $gradeitem->gradepass;
+            $passed = null;
+            if ($gradepass > 0) {
+                $passed = count(array_filter($finals, fn(float $g): bool => $g >= $gradepass));
+            }
+            $grades[] = [
                 'item' => [
                     'id' => $gradeitem->id,
                     'itemname' => $gradeitem->itemname,
@@ -265,71 +297,103 @@ class get_course_data extends external_api {
                     'grademin' => $gradeitem->grademin,
                     'gradepass' => $gradeitem->gradepass,
                 ],
-                'grades' => [],
+                'summary' => [
+                    'graded' => count($finals),
+                    'avg_finalgrade' => $finals ? round(array_sum($finals) / count($finals), 2) : null,
+                    'min_finalgrade' => $finals ? min($finals) : null,
+                    'max_finalgrade' => $finals ? max($finals) : null,
+                    'passed' => $passed,
+                ],
             ];
-
-            $itemgrades = $allitemgrades[$gradeitem->id] ?? [];
-            foreach ($itemgrades as $grade) {
-                $gradedata['grades'][] = [
-                    'userid' => $grade->userid,
-                    'rawgrade' => $grade->rawgrade,
-                    'finalgrade' => $grade->finalgrade,
-                    'timecreated' => $grade->timecreated,
-                    'timemodified' => $grade->timemodified,
-                ];
-            }
-
-            $grades[] = $gradedata;
         }
         $data['grades'] = $grades;
 
-        // Get completion data.
-        $completions = [];
-        if (!empty($modinfo->get_cms())) {
-            $cmids = array_keys($modinfo->get_cms());
+        // Activity completion as counts: overall and per activity.
+        $completionsummary = ['records' => 0, 'completed' => 0, 'per_activity' => []];
+        $cms = $modinfo->get_cms();
+        if (!empty($cms)) {
+            $cmids = array_keys($cms);
             [$insql, $inparams] = $DB->get_in_or_equal($cmids, SQL_PARAMS_NAMED);
             $completionrecords = $DB->get_records_select(
                 'course_modules_completion',
                 "coursemoduleid $insql",
-                $inparams
+                $inparams,
+                '',
+                'id, coursemoduleid, completionstate'
             );
+            $peractivity = [];
             foreach ($completionrecords as $completion) {
-                $completions[] = [
-                    'coursemoduleid' => $completion->coursemoduleid,
-                    'userid' => $completion->userid,
-                    'completionstate' => $completion->completionstate,
-                    'viewed' => $completion->viewed,
-                    'timemodified' => $completion->timemodified,
+                $cmid = (int) $completion->coursemoduleid;
+                if (!isset($peractivity[$cmid])) {
+                    $peractivity[$cmid] = ['tracked' => 0, 'completed' => 0];
+                }
+                $peractivity[$cmid]['tracked']++;
+                $completionsummary['records']++;
+                if ((int) $completion->completionstate === COMPLETION_COMPLETE
+                        || (int) $completion->completionstate === COMPLETION_COMPLETE_PASS) {
+                    $peractivity[$cmid]['completed']++;
+                    $completionsummary['completed']++;
+                }
+            }
+            ksort($peractivity);
+            foreach ($peractivity as $cmid => $counts) {
+                $completionsummary['per_activity'][] = [
+                    'coursemoduleid' => $cmid,
+                    'name' => isset($cms[$cmid]) ? $cms[$cmid]->name : '',
+                    'module' => isset($cms[$cmid]) ? $cms[$cmid]->modname : '',
+                    'tracked' => $counts['tracked'],
+                    'completed' => $counts['completed'],
                 ];
             }
         }
-        $data['completions'] = $completions;
+        $data['completion_summary'] = $completionsummary;
 
-        // Get forum posts.
-        $forumposts = [];
-        $forumpostrecords = $DB->get_records_sql("
-            SELECT fp.*, fd.course
-            FROM {forum_posts} fp
-            JOIN {forum_discussions} fd ON fd.id = fp.discussion
-            WHERE fd.course = ?
-            ORDER BY fp.created DESC
-            LIMIT 100
+        // Forum activity as counts: per forum and posts per month over the
+        // last year. No post text, subjects or authors.
+        $forumrows = $DB->get_records_sql("
+            SELECT f.id, f.name,
+                   (SELECT COUNT(fd.id) FROM {forum_discussions} fd WHERE fd.forum = f.id) AS discussions,
+                   (SELECT COUNT(fp.id) FROM {forum_posts} fp
+                      JOIN {forum_discussions} fd2 ON fd2.id = fp.discussion
+                     WHERE fd2.forum = f.id) AS posts,
+                   (SELECT COUNT(fp2.id) FROM {forum_posts} fp2
+                      JOIN {forum_discussions} fd3 ON fd3.id = fp2.discussion
+                     WHERE fd3.forum = f.id AND fp2.parent > 0) AS replies
+              FROM {forum} f
+             WHERE f.course = ?
+          ORDER BY f.id
         ", [$courseid]);
-
-        foreach ($forumpostrecords as $post) {
-            $forumposts[] = [
-                'id' => $post->id,
-                'discussion' => $post->discussion,
-                'parent' => $post->parent,
-                'userid' => $post->userid,
-                'created' => $post->created,
-                'modified' => $post->modified,
-                'subject' => $post->subject,
-                'message' => strip_tags($post->message),
-                'totalscore' => $post->totalscore ?? 0,
+        $forums = [];
+        $poststotal = 0;
+        $discussionstotal = 0;
+        foreach ($forumrows as $forumrow) {
+            $forums[] = [
+                'name' => format_string($forumrow->name),
+                'discussions' => (int) $forumrow->discussions,
+                'posts' => (int) $forumrow->posts,
+                'replies' => (int) $forumrow->replies,
             ];
+            $poststotal += (int) $forumrow->posts;
+            $discussionstotal += (int) $forumrow->discussions;
         }
-        $data['forum_posts'] = $forumposts;
+        $data['forums'] = $forums;
+        $postsbymonth = [];
+        $postcreated = $DB->get_fieldset_sql("
+            SELECT fp.created
+              FROM {forum_posts} fp
+              JOIN {forum_discussions} fd ON fd.id = fp.discussion
+             WHERE fd.course = ? AND fp.created > ?
+        ", [$courseid, time() - (365 * DAYSECS)]);
+        foreach ($postcreated as $created) {
+            $month = date('Y-m', (int) $created);
+            $postsbymonth[$month] = ($postsbymonth[$month] ?? 0) + 1;
+        }
+        ksort($postsbymonth);
+        $data['forum_activity'] = [
+            'posts_total' => $poststotal,
+            'discussions_total' => $discussionstotal,
+            'posts_by_month' => $postsbymonth,
+        ];
 
         // Evaluation data: per-question aggregates and anonymized comments.
         // Raw per-user response rows are deliberately not sent to the AI.

@@ -40,6 +40,26 @@ Add the **Mastermind Assistant** block to any course page or the site dashboard.
 - AI content generation when editing activities
 - Course search, copy, and AI-assisted course creation from the dashboard
 
+## Privacy: what is sent to the service
+
+Course analysis sends course structure (section and activity names, summaries, dates)
+and aggregate figures only. Learner names, usernames, user IDs and email addresses are
+never sent. Enrolment, grades, completion and forum activity leave the site as counts
+and averages; evaluation (Feedback) answers are sent without user IDs, and the
+dashboard removes contact details and sign-offs inside a comment before it is stored
+or analysed, retaining only per-activity counts and themes rather than the text.
+The plugin's privacy provider (`classes/privacy/provider.php`) declares each field.
+
+## Compatibility and sunset
+
+Every request declares `X-Plugin-Version`. Plugin versions before 2026091700 (v4.1.0)
+sent per-learner rows; the dashboard keeps accepting those payloads until
+**2027-03-31**, removing the identity fields on arrival and logging a deprecation
+warning that names the plugin version. From 2027-03-31, and from any plugin that
+declares version 2026091700 or later, an identity-bearing payload is refused with
+HTTP 400 `LEARNER_IDENTITY`. The settings page shows a warning when the connected
+dashboard reports a newer required version than the one installed. See `CHANGELOG.md`.
+
 ## License
 
 This plugin is licensed under the [GNU GPL v3 or later](http://www.gnu.org/copyleft/gpl.html).

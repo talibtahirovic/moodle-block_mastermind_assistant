@@ -91,8 +91,17 @@ if ($ADMIN->fulltree) {
     $apikey = get_config('block_mastermind_assistant', 'api_key') ?: '';
     $isconnected = strpos($apikey, 'ma_live_') === 0 && strlen($apikey) >= 20;
 
+    // 0. Compatibility notice — shown when the dashboard has reported that
+    // this install is older than the version it requires.
+    $compatnotice = \block_mastermind_assistant\local\compatibility::notice();
+    $connecthtml = '';
+    if ($compatnotice !== '') {
+        $connecthtml .= '<div class="alert alert-warning" role="alert" id="mastermind-plugin-outdated">'
+            . s($compatnotice) . '</div>';
+    }
+
     // 1. Connect card — primary activation surface.
-    $connecthtml = block_mastermind_assistant_render_connect_card($isconnected, $apikey);
+    $connecthtml .= block_mastermind_assistant_render_connect_card($isconnected, $apikey);
     $settings->add(new admin_setting_heading(
         'block_mastermind_assistant/connect_heading',
         get_string('connect_card_title', 'block_mastermind_assistant'),

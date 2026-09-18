@@ -133,8 +133,8 @@ final class feedback_metrics_test extends \advanced_testcase {
     }
 
     /**
-     * Text answers become anonymized comments: newest first, tags stripped,
-     * truncated to 300 chars, non-numeric never breaks rated averages.
+     * Text answers become anonymized comment objects: newest first, tags
+     * stripped, truncated to 400 chars, non-numeric never breaks rated averages.
      */
     public function test_comments_and_text_handling(): void {
         $this->resetAfterTest();
@@ -145,7 +145,7 @@ final class feedback_metrics_test extends \advanced_testcase {
         $text = $this->add_item($feedback->id, 'textarea', 'What could we improve?', 2);
         $u1 = $gen->create_user();
         $u2 = $gen->create_user();
-        $long = str_repeat('a', 400);
+        $long = str_repeat('a', 500);
         $this->add_response($feedback->id, $u1->id,
             [$rated => '4', $text => '<p>First comment</p>']);
         $this->add_response($feedback->id, $u2->id,
@@ -154,10 +154,15 @@ final class feedback_metrics_test extends \advanced_testcase {
         $result = feedback_metrics::collect($course->id);
 
         $activity = $result['activities'][0];
-        // Newest (u2) first; truncated to 300; tags stripped from the older one.
+        // Newest (u2) first; truncated to 400; tags stripped from the older one.
+        // Each comment keeps its question so reflection items can be themed apart.
         $this->assertCount(2, $activity['comments']);
-        $this->assertSame(300, \core_text::strlen($activity['comments'][0]));
-        $this->assertSame('First comment', $activity['comments'][1]);
+        $this->assertSame(400, \core_text::strlen($activity['comments'][0]['text']));
+        $this->assertSame([
+            'questionName' => 'What could we improve?',
+            'questionType' => 'textarea',
+            'text' => 'First comment',
+        ], $activity['comments'][1]);
         // Rated question: 2 responses recorded, avg over the single numeric one.
         $q = $activity['questions'][0];
         $this->assertSame(2, $q['responses']);
@@ -167,9 +172,10 @@ final class feedback_metrics_test extends \advanced_testcase {
     }
 
     /**
-     * Comments cap at 50 per activity; presentation-only items are skipped.
+     * Every comment reaches the payload, read in pages; presentation-only
+     * items are skipped.
      */
-    public function test_comment_cap_and_skipped_types(): void {
+    public function test_all_comments_emitted_across_pages_and_skipped_types(): void {
         $this->resetAfterTest();
         $gen = $this->getDataGenerator();
         $course = $gen->create_course();
@@ -181,15 +187,20 @@ final class feedback_metrics_test extends \advanced_testcase {
             $this->add_response($feedback->id, $user->id, [$text => 'Comment number ' . $i]);
         }
 
-        $result = feedback_metrics::collect($course->id);
+        // A 20-row page forces three pages for the 55 values.
+        $result = feedback_metrics::collect($course->id, 20);
 
         $activity = $result['activities'][0];
-        $this->assertCount(50, $activity['comments']);
-        // Newest first: the last inserted submission leads.
-        $this->assertSame('Comment number 54', $activity['comments'][0]);
+        $this->assertCount(55, $activity['comments']);
+        // Newest first across page boundaries: the last inserted submission leads.
+        $texts = array_column($activity['comments'], 'text');
+        $this->assertSame('Comment number 54', $texts[0]);
+        $this->assertSame('Comment number 0', $texts[54]);
+        $this->assertSame(55, count(array_unique($texts)));
         // The label item was skipped: only the textarea question remains.
         $this->assertCount(1, $activity['questions']);
         $this->assertSame('Comments?', $activity['questions'][0]['question']);
+        $this->assertSame(55, $activity['questions'][0]['responses']);
     }
 
     /**
@@ -243,8 +254,10 @@ final class feedback_metrics_test extends \advanced_testcase {
         $result = feedback_metrics::collect($course->id);
 
         $comments = $result['activities'][0]['comments'];
-        $this->assertSame('C on Q2', $comments[0]);
-        $this->assertSame('B on Q1', $comments[1]);
-        $this->assertSame(['A on Q1', 'A on Q2'], array_slice($comments, 2));
+        $this->assertSame('C on Q2', $comments[0]['text']);
+        $this->assertSame('What could improve?', $comments[0]['questionName']);
+        $this->assertSame('B on Q1', $comments[1]['text']);
+        $this->assertSame('What worked well?', $comments[1]['questionName']);
+        $this->assertSame(['A on Q1', 'A on Q2'], array_column(array_slice($comments, 2), 'text'));
     }
 }

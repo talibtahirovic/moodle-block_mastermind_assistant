@@ -96,4 +96,39 @@ final class api_client_test extends \advanced_testcase {
         $client = new api_client();
         $this->assertInstanceOf(api_client::class, $client);
     }
+
+    public function test_plugin_version_is_the_installed_version(): void {
+        $this->resetAfterTest();
+        $installed = (int) get_config('block_mastermind_assistant', 'version');
+        $this->assertGreaterThan(2026000000, $installed);
+        $this->assertSame($installed, api_client::get_plugin_version());
+    }
+
+    public function test_request_headers_declare_the_plugin_version(): void {
+        $this->resetAfterTest();
+        set_config('api_key', 'ma_live_' . str_repeat('x', 24), 'block_mastermind_assistant');
+        $client = new api_client();
+
+        $headers = $client->build_headers();
+
+        $this->assertContains('X-Plugin-Version: ' . get_config('block_mastermind_assistant', 'version'), $headers);
+        $this->assertContains('X-LMS-Origin: ' . $GLOBALS['CFG']->wwwroot, $headers);
+        $this->assertContains('Authorization: Bearer ma_live_' . str_repeat('x', 24), $headers);
+    }
+
+    public function test_request_headers_declare_the_enterprise_plugin_version_when_installed(): void {
+        $this->resetAfterTest();
+        set_config('api_key', 'ma_live_' . str_repeat('x', 24), 'block_mastermind_assistant');
+        $client = new api_client();
+        $enterprise = (int) get_config('local_mastermind_enterprise', 'version');
+        $headers = $client->build_headers();
+
+        $declared = array_values(array_filter($headers,
+            static fn(string $h): bool => str_starts_with($h, 'X-Enterprise-Plugin-Version: ')));
+        if ($enterprise > 0) {
+            $this->assertSame(['X-Enterprise-Plugin-Version: ' . $enterprise], $declared);
+        } else {
+            $this->assertSame([], $declared);
+        }
+    }
 }

@@ -89,6 +89,9 @@ class get_full_analysis extends external_api {
                 throw new Exception('Invalid course data JSON');
             }
 
+            // Never forward learner identity, whatever the browser posted back.
+            $data = \block_mastermind_assistant\local\outbound_sanitizer::strip_identity($data);
+
             $client = new \block_mastermind_assistant\api_client();
 
             // Try single endpoint first (1 dashboard call).

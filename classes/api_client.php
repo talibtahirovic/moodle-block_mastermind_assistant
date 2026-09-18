@@ -67,6 +67,41 @@ class api_client {
     }
 
     /**
+     * The installed version of this plugin (Moodle version number, e.g. 2026091700).
+     *
+     * @return int Installed version, 0 when not yet installed.
+     */
+    public static function get_plugin_version(): int {
+        return (int) get_config('block_mastermind_assistant', 'version');
+    }
+
+    /**
+     * Request headers for every dashboard call.
+     *
+     * X-Plugin-Version lets the dashboard apply its learner-identity policy
+     * per plugin version (legacy versions are tolerated and warned about,
+     * identity-free versions are held to the strict contract). When the
+     * enterprise companion is installed its version is declared as well,
+     * since its collection task calls the dashboard through this client.
+     *
+     * @return string[] Header lines.
+     */
+    public function build_headers(): array {
+        global $CFG;
+        $headers = [
+            'Content-Type: application/json',
+            'Authorization: Bearer ' . $this->apikey,
+            'X-LMS-Origin: ' . ($CFG->wwwroot ?? ''),
+            'X-Plugin-Version: ' . self::get_plugin_version(),
+        ];
+        $enterprise = (int) get_config('local_mastermind_enterprise', 'version');
+        if ($enterprise > 0) {
+            $headers[] = 'X-Enterprise-Plugin-Version: ' . $enterprise;
+        }
+        return $headers;
+    }
+
+    /**
      * Make a request to the dashboard API.
      *
      * @param string $endpoint e.g. '/api/ma/analyze-course'
@@ -83,11 +118,7 @@ class api_client {
         $url = $this->baseurl . $endpoint;
 
         $curl = new \curl();
-        $curl->setHeader([
-            'Content-Type: application/json',
-            'Authorization: Bearer ' . $this->apikey,
-            'X-LMS-Origin: ' . ($CFG->wwwroot ?? ''),
-        ]);
+        $curl->setHeader($this->build_headers());
 
         $options = [
             'CURLOPT_TIMEOUT' => $timeout,

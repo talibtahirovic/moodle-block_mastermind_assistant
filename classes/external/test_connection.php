@@ -58,8 +58,10 @@ class test_connection extends external_api {
         try {
             $client = new \block_mastermind_assistant\api_client();
 
-            // Test basic connectivity.
-            $client->test_connection();
+            // Test basic connectivity; the response names the plugin version
+            // the dashboard requires (see local\compatibility).
+            $connection = $client->test_connection();
+            \block_mastermind_assistant\local\compatibility::record($connection);
 
             // Fetch account info (tier and status only).
             $accountresult = $client->get_account();

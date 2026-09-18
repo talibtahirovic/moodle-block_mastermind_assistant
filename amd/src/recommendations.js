@@ -521,7 +521,10 @@ function(Ajax, Notification, Str, AiPolicy) {
                 structure: refineState.structure
             },
             conversation: refineState.conversation,
-            feedback: feedback
+            feedback: feedback,
+            // Evaluation aggregates so a refinement still sees learner feedback.
+            // eslint-disable-next-line camelcase
+            evaluation_data: coursedata.feedback || null
         };
 
         clearModalError();
@@ -1389,9 +1392,13 @@ function(Ajax, Notification, Str, AiPolicy) {
                 if (fb.comments && fb.comments.length > 0) {
                     feedbackHTML += '<div class="metric-label" style="margin-top:8px;">What learners said</div>';
                     fb.comments.slice(0, 5).forEach(function(comment) {
+                        // Plugin ≥ v4.1 emits {questionName, questionType, text}; older builds a string.
+                        var text = typeof comment === 'string' ? comment : (comment.text || '');
+                        var question = typeof comment === 'string' ? '' : (comment.questionName || '');
                         feedbackHTML += '<div style="padding:4px 8px; margin-top:4px; ' +
                             'border-left:3px solid #8b5cf6; font-size:0.85em; word-break:break-word;">' +
-                            escapeHtml(comment) + '</div>';
+                            (question ? '<span style="color:#666;">[' + escapeHtml(question) + '] </span>' : '') +
+                            escapeHtml(text) + '</div>';
                     });
                 }
                 feedbackHTML += '</div>';

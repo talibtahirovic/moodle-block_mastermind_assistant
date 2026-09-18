@@ -23,8 +23,11 @@ defined('MOODLE_INTERNAL') || die();
  *
  * Produces per-activity, per-question statistics plus anonymized free-text
  * comments — no user ids ever leave this collector, so the result is safe to
- * ship to the AI dashboard as-is. Courses without feedback activities get the
- * empty shape, so callers never need a guard.
+ * ship to the AI dashboard as-is. Every free-text answer is emitted (values
+ * are read in pages to bound memory) as {questionName, questionType, text},
+ * so the dashboard can theme reflection questions apart from general
+ * comments and count against the true number of answers. Courses without
+ * feedback activities get the empty shape, so callers never need a guard.
  *
  * @package    block_mastermind_assistant
  * @copyright  2026 The Namers
@@ -32,11 +35,11 @@ defined('MOODLE_INTERNAL') || die();
  */
 class feedback_metrics {
 
-    /** @var int Maximum comments collected per feedback activity. */
-    const COMMENT_CAP = 50;
+    /** @var int Rows of feedback_value read per query (memory bound, not a cap). */
+    const VALUE_PAGE = 500;
 
-    /** @var int Maximum length of a single comment. */
-    const COMMENT_MAXLEN = 300;
+    /** @var int Maximum length of a single comment (matches the dashboard's clamp). */
+    const COMMENT_MAXLEN = 400;
 
     /** @var string[] Item types whose values are numeric ratings. */
     const RATED_TYPES = ['numeric', 'multichoicerated'];
@@ -51,9 +54,10 @@ class feedback_metrics {
      * Collect per-activity and per-question evaluation aggregates for a course.
      *
      * @param int $courseid Course id.
+     * @param int $pagesize Rows of feedback_value read per query.
      * @return array ['activities' => [...], 'satisfaction' => float|null]
      */
-    public static function collect(int $courseid): array {
+    public static function collect(int $courseid, int $pagesize = self::VALUE_PAGE): array {
         global $DB;
 
         $result = ['activities' => [], 'satisfaction' => null];
@@ -74,52 +78,66 @@ class feedback_metrics {
                 if (in_array($item->typ, self::SKIP_TYPES, true)) {
                     continue;
                 }
+                $questionname = format_string($item->name);
+                $israted = in_array($item->typ, self::RATED_TYPES, true);
+                $istext = in_array($item->typ, self::TEXT_TYPES, true);
+                $ratingmap = $item->typ === 'multichoicerated'
+                    ? self::rating_map($item->presentation) : null;
+                $numbers = [];
+                $responses = 0;
+
                 // Newest first: feedback_completed ids increase per submission.
-                $values = $DB->get_records('feedback_value', ['item' => $item->id],
-                    'completed DESC', 'id, value, completed');
-                $avg = null;
-                if (in_array($item->typ, self::RATED_TYPES, true)) {
-                    $ratingmap = $item->typ === 'multichoicerated'
-                        ? self::rating_map($item->presentation) : null;
-                    $numbers = [];
+                // Values are read in pages so a large survey never loads at once.
+                $page = 0;
+                do {
+                    $values = $DB->get_records('feedback_value', ['item' => $item->id],
+                        'completed DESC, id DESC', 'id, value, completed', $page * $pagesize, $pagesize);
+                    $page++;
                     foreach ($values as $value) {
+                        $responses++;
                         $raw = trim((string) $value->value);
-                        if ($ratingmap !== null) {
-                            if (isset($ratingmap[(int) $raw])) {
-                                $numbers[] = $ratingmap[(int) $raw];
+                        if ($israted) {
+                            if ($ratingmap !== null) {
+                                if (isset($ratingmap[(int) $raw])) {
+                                    $numbers[] = $ratingmap[(int) $raw];
+                                }
+                            } else if (is_numeric($raw)) {
+                                $numbers[] = (float) $raw;
                             }
-                        } else if (is_numeric($raw)) {
-                            $numbers[] = (float) $raw;
+                        } else if ($istext) {
+                            $text = trim(strip_tags($raw));
+                            if ($text === '') {
+                                continue;
+                            }
+                            $commentrows[] = [
+                                'completed' => (int) $value->completed,
+                                'comment' => [
+                                    'questionName' => $questionname,
+                                    'questionType' => $item->typ,
+                                    'text' => \core_text::substr($text, 0, self::COMMENT_MAXLEN),
+                                ],
+                            ];
                         }
                     }
-                    if ($numbers) {
-                        $avg = round(array_sum($numbers) / count($numbers), 1);
-                        $ratingsum += array_sum($numbers);
-                        $ratingcount += count($numbers);
-                    }
-                } else if (in_array($item->typ, self::TEXT_TYPES, true)) {
-                    foreach ($values as $value) {
-                        $text = trim(strip_tags((string) $value->value));
-                        if ($text === '') {
-                            continue;
-                        }
-                        $commentrows[] = [
-                            'completed' => (int) $value->completed,
-                            'text' => \core_text::substr($text, 0, self::COMMENT_MAXLEN),
-                        ];
-                    }
+                } while (count($values) === $pagesize);
+
+                $avg = null;
+                if ($numbers) {
+                    $avg = round(array_sum($numbers) / count($numbers), 1);
+                    $ratingsum += array_sum($numbers);
+                    $ratingcount += count($numbers);
                 }
                 $questions[] = [
-                    'question' => format_string($item->name),
+                    'question' => $questionname,
                     'type' => $item->typ,
-                    'responses' => count($values),
+                    'responses' => $responses,
                     'avg' => $avg,
                 ];
             }
 
             // Newest first across every text question in this activity.
             usort($commentrows, fn($a, $b) => $b['completed'] <=> $a['completed']);
-            $comments = array_column(array_slice($commentrows, 0, self::COMMENT_CAP), 'text');
+            $comments = array_column($commentrows, 'comment');
 
             $result['activities'][] = [
                 'name' => format_string($feedback->name),

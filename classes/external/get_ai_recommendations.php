@@ -86,6 +86,9 @@ class get_ai_recommendations extends external_api {
                 throw new Exception('Invalid course data JSON');
             }
 
+            // Never forward learner identity, whatever the browser posted back.
+            $data = \block_mastermind_assistant\local\outbound_sanitizer::strip_identity($data);
+
             // Call dashboard API instead of OpenAI directly.
             $client = new \block_mastermind_assistant\api_client();
             $airesponse = $client->analyze_course($data);
