@@ -37,6 +37,10 @@ Privacy release. Ship before any third-party review of the plugin.
 - Evaluation insights shown as a highlighted card ("What learners are saying") with the
   themes as a list.
 
+### Detailed metrics modal
+- The evaluation block shows each survey's response count and its own average, a
+  readable question table, and the five most recent answers with their question.
+
 ### Compatibility
 - Dashboards accept identity-bearing payloads from plugin versions before 2026091700
   until **2027-03-31**, stripping the identity on arrival and logging a deprecation

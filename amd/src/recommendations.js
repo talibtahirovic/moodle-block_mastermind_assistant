@@ -1403,31 +1403,49 @@ function(Ajax, Notification, Str, AiPolicy) {
         var feedbackHTML = '';
         if (metrics.feedback_summary && metrics.feedback_summary.length > 0) {
             metrics.feedback_summary.forEach(function(fb) {
-                feedbackHTML += '<div class="metric-item" style="grid-column: 1 / -1;">' +
-                    '<div class="metric-label">' + escapeHtml(fb.name) +
-                    ' &mdash; ' + fb.responses + ' responses</div>' +
-                    '<table style="width:100%; border-collapse:collapse; font-size:0.85em; margin-top:6px;">' +
-                    '<tr><th style="text-align:left; padding:4px;">Question</th>' +
-                    '<th style="text-align:right; padding:4px;">Responses</th>' +
-                    '<th style="text-align:right; padding:4px;">Avg</th></tr>';
-                fb.questions.forEach(function(q) {
-                    feedbackHTML += '<tr><td style="padding:4px; word-break:break-word;">' +
-                        escapeHtml(q.question) + '</td>' +
-                        '<td style="text-align:right; padding:4px;">' + q.responses + '</td>' +
-                        '<td style="text-align:right; padding:4px;">' +
-                        (q.avg !== null ? q.avg : '&mdash;') + '</td></tr>';
+                // The activity's own average: the mean of its rated questions.
+                var ratedavgs = fb.questions.filter(function(q) {
+                    return q.avg !== null && q.avg !== undefined;
+                }).map(function(q) {
+                    return q.avg;
                 });
-                feedbackHTML += '</table>';
+                var activityavg = ratedavgs.length > 0
+                    ? (ratedavgs.reduce(function(a, b) {
+                        return a + b;
+                    }, 0) / ratedavgs.length).toFixed(1)
+                    : null;
+                feedbackHTML += '<div class="metric-item feedback-activity">' +
+                    '<div class="feedback-activity-head">' +
+                    '<div class="feedback-activity-name">' + escapeHtml(fb.name) + '</div>' +
+                    '<div class="feedback-activity-stats">' +
+                    '<span class="feedback-stat"><strong>' + fb.responses + '</strong> responses</span>' +
+                    (activityavg !== null
+                        ? '<span class="feedback-stat"><strong>' + activityavg + '</strong> / 5 avg</span>'
+                        : '') +
+                    '</div></div>' +
+                    '<table class="feedback-questions">' +
+                    '<thead><tr><th>Question</th><th class="num">Responses</th><th class="num">Avg</th></tr></thead>' +
+                    '<tbody>';
+                fb.questions.forEach(function(q) {
+                    feedbackHTML += '<tr><td>' + escapeHtml(q.question) + '</td>' +
+                        '<td class="num">' + q.responses + '</td>' +
+                        '<td class="num">' + (q.avg !== null ? q.avg : '<span class="muted">&mdash;</span>') +
+                        '</td></tr>';
+                });
+                feedbackHTML += '</tbody></table>';
                 if (fb.comments && fb.comments.length > 0) {
-                    feedbackHTML += '<div class="metric-label" style="margin-top:8px;">What learners said</div>';
+                    feedbackHTML += '<div class="feedback-quotes-title">What learners said' +
+                        '<span class="feedback-quotes-note">' +
+                        (fb.comments.length > 5 ? '5 most recent of ' + fb.comments.length : fb.comments.length) +
+                        '</span></div>';
                     fb.comments.slice(0, 5).forEach(function(comment) {
                         // Plugin ≥ v4.1 emits {questionName, questionType, text}; older builds a string.
                         var text = typeof comment === 'string' ? comment : (comment.text || '');
                         var question = typeof comment === 'string' ? '' : (comment.questionName || '');
-                        feedbackHTML += '<div style="padding:4px 8px; margin-top:4px; ' +
-                            'border-left:3px solid #8b5cf6; font-size:0.85em; word-break:break-word;">' +
-                            (question ? '<span style="color:#666;">[' + escapeHtml(question) + '] </span>' : '') +
-                            escapeHtml(text) + '</div>';
+                        feedbackHTML += '<blockquote class="feedback-quote">' +
+                            (question ? '<span class="feedback-quote-question">' + escapeHtml(question) + '</span>' : '') +
+                            '<span class="feedback-quote-text">' + escapeHtml(text) + '</span>' +
+                            '</blockquote>';
                     });
                 }
                 feedbackHTML += '</div>';
