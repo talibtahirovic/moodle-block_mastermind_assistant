@@ -31,6 +31,12 @@ Privacy release. Ship before any third-party review of the plugin.
   analysis still sees learner feedback.
 - The detailed-metrics modal shows each quoted comment with its question.
 
+### Analysis modal
+- One scroll region for the whole result instead of two independently scrolling
+  columns, and the course page no longer scrolls behind an open modal.
+- Evaluation insights shown as a highlighted card ("What learners are saying") with the
+  themes as a list.
+
 ### Compatibility
 - Dashboards accept identity-bearing payloads from plugin versions before 2026091700
   until **2027-03-31**, stripping the identity on arrival and logging a deprecation

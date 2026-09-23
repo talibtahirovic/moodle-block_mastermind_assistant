@@ -331,6 +331,29 @@ function(Ajax, Notification, Str, AiPolicy) {
     }
 
     /**
+     * Lock page scrolling while a Mastermind modal is open. Both modals share
+     * the class, so the page unlocks only when the last one is gone.
+     */
+    function lockPageScroll() {
+        document.body.classList.add('mastermind-modal-open');
+    }
+
+    /**
+     * Remove a modal element and release the page scroll if no other
+     * Mastermind modal remains open.
+     *
+     * @param {HTMLElement|null} modal The modal element.
+     */
+    function closeModal(modal) {
+        if (modal) {
+            modal.remove();
+        }
+        if (!document.querySelector('.ai-results-modal, .detailed-metrics-modal')) {
+            document.body.classList.remove('mastermind-modal-open');
+        }
+    }
+
+    /**
      * Show a full-width modal with recommendations and updated structure.
      *
      * @param {string} recommendations Raw recommendations text
@@ -354,18 +377,24 @@ function(Ajax, Notification, Str, AiPolicy) {
 
         var insightsHTML = '';
         if (sections.evaluationInsights) {
-            insightsHTML = '<div class="ai-results-evaluation">' +
-                '<h3 class="ai-results-section-title">Evaluation insights</h3>' +
-                '<p>' + escapeHtml(sections.evaluationInsights.summary) + '</p>';
+            insightsHTML = '<section class="ai-results-evaluation" aria-labelledby="ai-results-evaluation-title">' +
+                '<div class="ai-results-evaluation-head">' +
+                '<span class="ai-results-evaluation-icon" aria-hidden="true">&#9733;</span>' +
+                '<h3 class="ai-results-section-title" id="ai-results-evaluation-title">' +
+                'What learners are saying</h3>' +
+                '<span class="ai-results-evaluation-badge">From course evaluations</span>' +
+                '</div>' +
+                '<p class="ai-results-evaluation-summary">' +
+                escapeHtml(sections.evaluationInsights.summary) + '</p>';
             if (Array.isArray(sections.evaluationInsights.themes) &&
                     sections.evaluationInsights.themes.length > 0) {
-                insightsHTML += '<ul>';
+                insightsHTML += '<ul class="ai-results-evaluation-themes">';
                 sections.evaluationInsights.themes.forEach(function(theme) {
                     insightsHTML += '<li>' + escapeHtml(theme) + '</li>';
                 });
                 insightsHTML += '</ul>';
             }
-            insightsHTML += '</div>';
+            insightsHTML += '</section>';
         }
 
         var modalHTML = '<div class="ai-results-modal" id="ai-results-modal">' +
@@ -376,6 +405,7 @@ function(Ajax, Notification, Str, AiPolicy) {
             '</div>' +
             '<div class="ai-results-body">' +
             insightsHTML +
+            '<div class="ai-results-columns">' +
             '<div class="ai-results-recommendations">' +
             '<h3 class="ai-results-section-title">Recommendations</h3>' +
             '<div class="ai-results-recommendations-content">' +
@@ -385,6 +415,7 @@ function(Ajax, Notification, Str, AiPolicy) {
             '<div class="ai-results-structure">' +
             '<h3 class="ai-results-section-title">Updated Course Structure</h3>' +
             '<div id="ai-results-structure-content"></div>' +
+            '</div>' +
             '</div>' +
             '</div>' +
             '<div class="ai-refine-bar">' +
@@ -409,29 +440,27 @@ function(Ajax, Notification, Str, AiPolicy) {
         }
 
         var modal = document.getElementById('ai-results-modal');
+        lockPageScroll();
 
         // Close button
         var closeBtn = document.getElementById('close-ai-results');
         if (closeBtn) {
             closeBtn.addEventListener('click', function() {
-                modal.remove();
+                closeModal(modal);
             });
         }
 
         // Close on background click
         modal.addEventListener('click', function(e) {
             if (e.target.id === 'ai-results-modal') {
-                modal.remove();
+                closeModal(modal);
             }
         });
 
         // Close on Escape key
         document.addEventListener('keydown', function escapeHandler(e) {
             if (e.key === 'Escape') {
-                var m = document.getElementById('ai-results-modal');
-                if (m) {
-                    m.remove();
-                }
+                closeModal(document.getElementById('ai-results-modal'));
                 document.removeEventListener('keydown', escapeHandler);
             }
         });
@@ -1508,29 +1537,27 @@ function(Ajax, Notification, Str, AiPolicy) {
         document.body.insertAdjacentHTML('beforeend', modalHTML);
 
         var modal = document.getElementById('detailed-metrics-modal');
+        lockPageScroll();
 
         // Close button
         var closeBtn = document.getElementById('close-detailed-metrics');
         if (closeBtn) {
             closeBtn.addEventListener('click', function() {
-                modal.remove();
+                closeModal(modal);
             });
         }
 
         // Close on background click
         modal.addEventListener('click', function(e) {
             if (e.target.id === 'detailed-metrics-modal') {
-                modal.remove();
+                closeModal(modal);
             }
         });
 
         // Close on Escape key
         document.addEventListener('keydown', function escapeHandler(e) {
             if (e.key === 'Escape') {
-                var m = document.getElementById('detailed-metrics-modal');
-                if (m) {
-                    m.remove();
-                }
+                closeModal(document.getElementById('detailed-metrics-modal'));
                 document.removeEventListener('keydown', escapeHandler);
             }
         });
