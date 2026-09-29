@@ -16,8 +16,6 @@
 
 namespace block_mastermind_assistant\local;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Dashboard-reported plugin compatibility.
  *
@@ -31,7 +29,6 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class compatibility {
-
     /** @var string Plugin component. */
     const COMPONENT = 'block_mastermind_assistant';
 

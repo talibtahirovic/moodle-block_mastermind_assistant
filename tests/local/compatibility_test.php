@@ -25,7 +25,6 @@ namespace block_mastermind_assistant\local;
  * @covers \block_mastermind_assistant\local\compatibility
  */
 final class compatibility_test extends \advanced_testcase {
-
     public function test_records_the_required_version_reported_by_the_dashboard(): void {
         $this->resetAfterTest();
 

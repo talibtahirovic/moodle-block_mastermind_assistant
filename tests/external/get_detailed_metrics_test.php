@@ -31,7 +31,6 @@ namespace block_mastermind_assistant\external;
  * @runTestsInSeparateProcesses
  */
 final class get_detailed_metrics_test extends \advanced_testcase {
-
     /**
      * feedback_summary carries the per-question aggregation.
      */

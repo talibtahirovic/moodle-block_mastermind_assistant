@@ -16,8 +16,6 @@
 
 namespace block_mastermind_assistant\local;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Aggregates SCORM tracking data for a course.
  *
@@ -34,7 +32,6 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class scorm_metrics {
-
     /** @var float A SCO score at or above this raw score counts as passed. */
     const PASS_SCORE = 70.0;
 
@@ -81,8 +78,8 @@ class scorm_metrics {
             return $empty;
         }
 
-        // package id => ['name', scoes => [scoid => ['title', scores => [], statuses => [uid => status]]],
-        //                users => [uid => [scoid => status]]].
+        // Shape: each package holds its name, its SCOs (title, scores, per-user statuses)
+        // and a per-user map of SCO statuses.
         $packages = [];
         foreach ($rows as $row) {
             if (!isset($packages[$row->scormid])) {

@@ -25,7 +25,6 @@ namespace block_mastermind_assistant\local;
  * @covers \block_mastermind_assistant\local\outbound_sanitizer
  */
 final class outbound_sanitizer_test extends \basic_testcase {
-
     /**
      * A legacy-shaped course payload (as an older browser build could still
      * post back) loses every per-learner array and identity key.

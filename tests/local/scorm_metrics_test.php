@@ -30,7 +30,6 @@ namespace block_mastermind_assistant\local;
  * @covers \block_mastermind_assistant\local\scorm_metrics
  */
 final class scorm_metrics_test extends \advanced_testcase {
-
     /**
      * Insert a launchable SCO row for a SCORM instance.
      *
@@ -64,8 +63,11 @@ final class scorm_metrics_test extends \advanced_testcase {
      */
     private function track(int $scormid, int $scoid, int $userid, string $element, string $value): void {
         global $DB;
-        $attemptid = $DB->get_field('scorm_attempt', 'id',
-            ['scormid' => $scormid, 'userid' => $userid, 'attempt' => 1]);
+        $attemptid = $DB->get_field(
+            'scorm_attempt',
+            'id',
+            ['scormid' => $scormid, 'userid' => $userid, 'attempt' => 1]
+        );
         if (!$attemptid) {
             $attemptid = $DB->insert_record('scorm_attempt', (object) [
                 'scormid' => $scormid, 'userid' => $userid, 'attempt' => 1,

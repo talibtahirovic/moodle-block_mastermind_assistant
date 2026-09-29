@@ -123,8 +123,10 @@ final class api_client_test extends \advanced_testcase {
         $enterprise = (int) get_config('local_mastermind_enterprise', 'version');
         $headers = $client->build_headers();
 
-        $declared = array_values(array_filter($headers,
-            static fn(string $h): bool => str_starts_with($h, 'X-Enterprise-Plugin-Version: ')));
+        $declared = array_values(array_filter(
+            $headers,
+            static fn(string $h): bool => str_starts_with($h, 'X-Enterprise-Plugin-Version: ')
+        ));
         if ($enterprise > 0) {
             $this->assertSame(['X-Enterprise-Plugin-Version: ' . $enterprise], $declared);
         } else {

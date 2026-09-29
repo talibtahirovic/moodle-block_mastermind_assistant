@@ -30,7 +30,6 @@ namespace block_mastermind_assistant\local;
  * @covers \block_mastermind_assistant\local\feedback_metrics
  */
 final class feedback_metrics_test extends \advanced_testcase {
-
     /**
      * Insert a feedback item row.
      *
@@ -146,10 +145,16 @@ final class feedback_metrics_test extends \advanced_testcase {
         $u1 = $gen->create_user();
         $u2 = $gen->create_user();
         $long = str_repeat('a', 500);
-        $this->add_response($feedback->id, $u1->id,
-            [$rated => '4', $text => '<p>First comment</p>']);
-        $this->add_response($feedback->id, $u2->id,
-            [$rated => 'not-a-number', $text => $long]);
+        $this->add_response(
+            $feedback->id,
+            $u1->id,
+            [$rated => '4', $text => '<p>First comment</p>']
+        );
+        $this->add_response(
+            $feedback->id,
+            $u2->id,
+            [$rated => 'not-a-number', $text => $long]
+        );
 
         $result = feedback_metrics::collect($course->id);
 

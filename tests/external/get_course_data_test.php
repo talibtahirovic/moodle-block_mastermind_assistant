@@ -36,7 +36,6 @@ require_once($CFG->libdir . '/gradelib.php');
  * @runTestsInSeparateProcesses
  */
 final class get_course_data_test extends \advanced_testcase {
-
     /** @var string Keys that identify a learner. Never allowed anywhere in the outbound payload. */
     const IDENTITY_KEY_RE = '/^(userid|user_id|username|email|firstname|lastname|idnumber|phone1|phone2)$/i';
 
@@ -112,8 +111,10 @@ final class get_course_data_test extends \advanced_testcase {
             $this->assertArrayNotHasKey($perlearnerkey, $data, "per-learner array '{$perlearnerkey}' must not be sent");
         }
         $this->assert_no_identity_keys($data);
-        foreach (['Zelda', 'Quintrell', 'zquintrell', 'zelda.quintrell', 'Yorick', 'Pemberton',
-            'ypemberton', 'yorick.pemberton'] as $needle) {
+        foreach (
+            ['Zelda', 'Quintrell', 'zquintrell', 'zelda.quintrell', 'Yorick', 'Pemberton',
+            'ypemberton', 'yorick.pemberton'] as $needle
+        ) {
             $this->assertStringNotContainsString($needle, $json, "learner identity '{$needle}' leaked");
         }
     }
@@ -254,8 +255,11 @@ final class get_course_data_test extends \advanced_testcase {
     private function assert_no_identity_keys(array $data, string $path = 'root'): void {
         foreach ($data as $key => $value) {
             if (is_string($key)) {
-                $this->assertDoesNotMatchRegularExpression(self::IDENTITY_KEY_RE, $key,
-                    "identity key at {$path}.{$key}");
+                $this->assertDoesNotMatchRegularExpression(
+                    self::IDENTITY_KEY_RE,
+                    $key,
+                    "identity key at {$path}.{$key}"
+                );
             }
             if (is_array($value)) {
                 $this->assert_no_identity_keys($value, $path . '.' . $key);

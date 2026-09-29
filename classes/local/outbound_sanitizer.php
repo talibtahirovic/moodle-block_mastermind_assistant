@@ -16,8 +16,6 @@
 
 namespace block_mastermind_assistant\local;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Last line of defence before a course payload leaves the plugin.
  *
@@ -33,7 +31,6 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class outbound_sanitizer {
-
     /** @var string[] Top-level arrays that only ever held per-learner rows. */
     const PER_LEARNER_ARRAYS = ['users', 'forum_posts', 'completions'];
 

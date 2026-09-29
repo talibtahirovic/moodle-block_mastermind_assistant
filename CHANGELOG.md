@@ -1,5 +1,15 @@
 # Changelog
 
+## v4.1.1 (2026092800) — 2026-09-28
+
+Maintenance release, no functional changes.
+
+### Fixed
+- Moodle coding style: resolved all codechecker errors and warnings (multi-line call
+  formatting, unneeded `MOODLE_INTERNAL` checks in namespaced classes).
+- Rebuilt `amd/build/recommendations.min.js` with Moodle grunt so the build matches
+  `amd/src`.
+
 ## v4.1.0 (2026091700) — 2026-09-17
 
 Privacy release. Ship before any third-party review of the plugin.

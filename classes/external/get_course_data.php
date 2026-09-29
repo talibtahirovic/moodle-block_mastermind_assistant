@@ -268,8 +268,13 @@ class get_course_data extends external_api {
         if ($gradeitems) {
             $itemids = array_keys($gradeitems);
             [$insql, $inparams] = $DB->get_in_or_equal($itemids, SQL_PARAMS_NAMED);
-            $graderecords = $DB->get_records_select('grade_grades', "itemid $insql", $inparams, '',
-                'id, itemid, finalgrade');
+            $graderecords = $DB->get_records_select(
+                'grade_grades',
+                "itemid $insql",
+                $inparams,
+                '',
+                'id, itemid, finalgrade'
+            );
             foreach ($graderecords as $grade) {
                 $allitemgrades[$grade->itemid][] = $grade;
             }
@@ -329,8 +334,10 @@ class get_course_data extends external_api {
                 }
                 $peractivity[$cmid]['tracked']++;
                 $completionsummary['records']++;
-                if ((int) $completion->completionstate === COMPLETION_COMPLETE
-                        || (int) $completion->completionstate === COMPLETION_COMPLETE_PASS) {
+                if (
+                    (int) $completion->completionstate === COMPLETION_COMPLETE
+                        || (int) $completion->completionstate === COMPLETION_COMPLETE_PASS
+                ) {
                     $peractivity[$cmid]['completed']++;
                     $completionsummary['completed']++;
                 }

@@ -16,8 +16,6 @@
 
 namespace block_mastermind_assistant\local;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Aggregates course evaluation (mod_feedback) responses for a course.
  *
@@ -34,7 +32,6 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class feedback_metrics {
-
     /** @var int Rows of feedback_value read per query (memory bound, not a cap). */
     const VALUE_PAGE = 500;
 
@@ -90,8 +87,14 @@ class feedback_metrics {
                 // Values are read in pages so a large survey never loads at once.
                 $page = 0;
                 do {
-                    $values = $DB->get_records('feedback_value', ['item' => $item->id],
-                        'completed DESC, id DESC', 'id, value, completed', $page * $pagesize, $pagesize);
+                    $values = $DB->get_records(
+                        'feedback_value',
+                        ['item' => $item->id],
+                        'completed DESC, id DESC',
+                        'id, value, completed',
+                        $page * $pagesize,
+                        $pagesize
+                    );
                     $page++;
                     foreach ($values as $value) {
                         $responses++;
