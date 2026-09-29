@@ -1,5 +1,19 @@
 # Changelog
 
+## v4.2.0 (2026092900) — 2026-09-29
+
+Marketplace release. Includes the v4.1.0 privacy release (no learner identity leaves the
+site) and the v4.1.1 maintenance fixes below.
+
+### Added
+- Evaluation data: every Feedback activity now carries its course-module id (`cmid`),
+  so the dashboard's Course Improvement Brief can link each finding to the activity's own
+  analysis page (`/mod/feedback/analysis.php?id=`). No learner data is added.
+
+### Compatibility
+- Dashboards before 2026-09-29 reject the new `cmid` key on the enterprise metrics
+  ingest. Update the dashboard first, then the plugin.
+
 ## v4.1.1 (2026092800) — 2026-09-28
 
 Maintenance release, no functional changes.

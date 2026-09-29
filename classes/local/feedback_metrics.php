@@ -24,8 +24,11 @@ namespace block_mastermind_assistant\local;
  * ship to the AI dashboard as-is. Every free-text answer is emitted (values
  * are read in pages to bound memory) as {questionName, questionType, text},
  * so the dashboard can theme reflection questions apart from general
- * comments and count against the true number of answers. Courses without
- * feedback activities get the empty shape, so callers never need a guard.
+ * comments and count against the true number of answers. Each activity
+ * carries its course-module id (cmid) so reports can link a finding to the
+ * activity's own analysis page (/mod/feedback/analysis.php?id=cmid). Courses
+ * without feedback activities get the empty shape, so callers never need a
+ * guard.
  *
  * @package    block_mastermind_assistant
  * @copyright  2026 The Namers
@@ -62,6 +65,8 @@ class feedback_metrics {
         if (!$feedbacks) {
             return $result;
         }
+        // Course modules by feedback instance id, for the per-activity cmid.
+        $cms = get_fast_modinfo($courseid)->get_instances_of('feedback');
 
         $ratingsum = 0.0;
         $ratingcount = 0;
@@ -142,7 +147,11 @@ class feedback_metrics {
             usort($commentrows, fn($a, $b) => $b['completed'] <=> $a['completed']);
             $comments = array_column($commentrows, 'comment');
 
-            $result['activities'][] = [
+            $activity = [];
+            if (isset($cms[$feedback->id])) {
+                $activity['cmid'] = (int) $cms[$feedback->id]->id;
+            }
+            $result['activities'][] = $activity + [
                 'name' => format_string($feedback->name),
                 'responses' => (int) $DB->count_records('feedback_completed', ['feedback' => $feedback->id]),
                 'questions' => $questions,

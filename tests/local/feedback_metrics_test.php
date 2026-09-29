@@ -120,6 +120,7 @@ final class feedback_metrics_test extends \advanced_testcase {
 
         $this->assertCount(1, $result['activities']);
         $activity = $result['activities'][0];
+        $this->assertSame((int) $feedback->cmid, $activity['cmid']);
         $this->assertSame('Course evaluation', $activity['name']);
         $this->assertSame(3, $activity['responses']);
         $this->assertCount(1, $activity['questions']);
@@ -264,5 +265,26 @@ final class feedback_metrics_test extends \advanced_testcase {
         $this->assertSame('B on Q1', $comments[1]['text']);
         $this->assertSame('What worked well?', $comments[1]['questionName']);
         $this->assertSame(['A on Q1', 'A on Q2'], array_column(array_slice($comments, 2), 'text'));
+    }
+
+    /**
+     * Each activity carries its own course-module id, so a finding links to the right analysis page.
+     */
+    public function test_each_activity_carries_its_own_cmid(): void {
+        $this->resetAfterTest();
+        $gen = $this->getDataGenerator();
+        $course = $gen->create_course();
+        $first = $gen->create_module('feedback', ['course' => $course->id, 'name' => 'Post-course evaluation']);
+        $second = $gen->create_module('feedback', ['course' => $course->id, 'name' => 'Module 4 check-in']);
+        $other = $gen->create_course();
+        $gen->create_module('feedback', ['course' => $other->id, 'name' => 'Elsewhere']);
+
+        $result = feedback_metrics::collect($course->id);
+
+        $bycmid = array_column($result['activities'], 'name', 'cmid');
+        $this->assertSame([
+            (int) $first->cmid => 'Post-course evaluation',
+            (int) $second->cmid => 'Module 4 check-in',
+        ], $bycmid);
     }
 }
