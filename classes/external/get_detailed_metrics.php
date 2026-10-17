@@ -78,6 +78,18 @@ class get_detailed_metrics extends external_api {
     }
 
     /**
+     * Display name of a course module, or '' when it no longer exists.
+     *
+     * @param int $courseid
+     * @param int $cmid
+     * @return string
+     */
+    private static function activity_name(int $courseid, int $cmid): string {
+        $cms = get_fast_modinfo($courseid)->get_cms();
+        return isset($cms[$cmid]) ? $cms[$cmid]->get_formatted_name() : '';
+    }
+
+    /**
      * Calculate detailed metrics for a course
      *
      * @param int $courseid
@@ -151,9 +163,9 @@ class get_detailed_metrics extends external_api {
             $metrics['avg_login_frequency'] = round($totalviews / $metrics['enrollment_count'], 1);
         }
 
-        // Dropout point — most common module type where users last interacted (last 90 days).
+        // Dropout point — the activity learners most often touched last (last 90 days).
         $ninetydaysago = time() - (90 * DAYSECS);
-        $sql = "SELECT m.name AS modname, COUNT(*) AS cnt
+        $sql = "SELECT cm.id AS cmid, COUNT(*) AS cnt
                 FROM {logstore_standard_log} l
                 JOIN (
                     SELECT userid, MAX(timecreated) AS lasttime
@@ -162,14 +174,12 @@ class get_detailed_metrics extends external_api {
                     GROUP BY userid
                 ) latest ON latest.userid = l.userid AND latest.lasttime = l.timecreated
                 JOIN {course_modules} cm ON cm.id = l.contextinstanceid
-                JOIN {modules} m ON m.id = cm.module
                 WHERE l.courseid = ? AND l.contextlevel = 70 AND l.timecreated > ?
-                GROUP BY m.name
-                ORDER BY cnt DESC
-                LIMIT 1";
-        $dropoutpoint = $DB->get_record_sql($sql, [$courseid, $ninetydaysago, $courseid, $ninetydaysago]);
-        if ($dropoutpoint) {
-            $metrics['dropout_point'] = $dropoutpoint->modname;
+                GROUP BY cm.id
+                ORDER BY cnt DESC, cm.id ASC";
+        $rows = $DB->get_records_sql($sql, [$courseid, $ninetydaysago, $courseid, $ninetydaysago], 0, 1);
+        if ($rows) {
+            $metrics['dropout_point'] = self::activity_name($courseid, (int) reset($rows)->cmid) ?: 'N/A';
         }
 
         // Category 2 metrics: Progress & Completion.
@@ -194,17 +204,9 @@ class get_detailed_metrics extends external_api {
             $metrics['time_to_completion'] = $days . ' days';
         }
 
-        // Most/least completed section. Sections with no visible modules are
-        // excluded — an empty section would otherwise always rank as least
-        // completed (0 completions) and skew the recommendations.
-        $sql = "SELECT cs.id, cs.section, cs.name, COUNT(DISTINCT cmc.userid) AS completions
-                FROM {course_sections} cs
-                JOIN {course_modules} cm ON cm.section = cs.id AND cm.visible = 1
-                LEFT JOIN {course_modules_completion} cmc ON cmc.coursemoduleid = cm.id AND cmc.completionstate > 0
-                WHERE cs.course = ?
-                GROUP BY cs.id, cs.section, cs.name
-                ORDER BY completions DESC";
-        $sections = $DB->get_records_sql($sql, [$courseid]);
+        // Most/least completed section (shared definition: sections without
+        // visible, completion-tracked activities are left out).
+        $sections = \block_mastermind_assistant\local\section_completion::ranked($courseid);
         if ($sections) {
             $first = reset($sections);
             $last = end($sections);
@@ -212,18 +214,16 @@ class get_detailed_metrics extends external_api {
             $metrics['least_completed_section'] = $last->name ?: 'Section ' . $last->section;
         }
 
-        // Most incomplete activity.
-        $sql = "SELECT cm.id, m.name AS modname, cm.instance
+        // Most incomplete activity: the completion-tracked activity the fewest learners completed.
+        $sql = "SELECT cm.id
                 FROM {course_modules} cm
-                JOIN {modules} m ON m.id = cm.module
                 LEFT JOIN {course_modules_completion} cmc ON cmc.coursemoduleid = cm.id AND cmc.completionstate > 0
-                WHERE cm.course = ? AND cm.completion > 0 AND cm.visible = 1
-                GROUP BY cm.id, m.name, cm.instance
-                ORDER BY COUNT(cmc.id) ASC
-                LIMIT 1";
-        $incomplete = $DB->get_record_sql($sql, [$courseid]);
-        if ($incomplete) {
-            $metrics['most_incomplete_activity'] = $incomplete->modname;
+                WHERE cm.course = ? AND cm.completion > 0 AND cm.visible = 1 AND cm.deletioninprogress = 0
+                GROUP BY cm.id
+                ORDER BY COUNT(cmc.id) ASC, cm.id ASC";
+        $rows = $DB->get_records_sql($sql, [$courseid], 0, 1);
+        if ($rows) {
+            $metrics['most_incomplete_activity'] = self::activity_name($courseid, (int) reset($rows)->id) ?: 'N/A';
         }
 
         // Category 3 metrics: Assessment & Learning Outcomes.

@@ -104,6 +104,23 @@ final class report_sql_validator_test extends \advanced_testcase {
                    JOIN {user} u ON u.id = sa.userid
                   WHERE s.course = :courseid',
             ],
+            'activity names of mixed types via one LEFT JOIN per type' => [
+                "SELECT cs.name AS section_name, m.name AS activity_type,
+                        COALESCE(q.name, a.name, p.name, fb.name, u.name, m.name) AS activity_name,
+                        COUNT(cmc.id) AS completed
+                   FROM {course_modules} cm
+                   JOIN {modules} m ON m.id = cm.module
+                   JOIN {course_sections} cs ON cs.id = cm.section
+                   LEFT JOIN {quiz} q ON m.name = 'quiz' AND q.id = cm.instance
+                   LEFT JOIN {assign} a ON m.name = 'assign' AND a.id = cm.instance
+                   LEFT JOIN {page} p ON m.name = 'page' AND p.id = cm.instance
+                   LEFT JOIN {feedback} fb ON m.name = 'feedback' AND fb.id = cm.instance
+                   LEFT JOIN {url} u ON m.name = 'url' AND u.id = cm.instance
+                   LEFT JOIN {course_modules_completion} cmc ON cmc.coursemoduleid = cm.id AND cmc.completionstate > 0
+                  WHERE cm.course = :courseid
+               GROUP BY cm.id, cs.section, cs.name, m.name, q.name, a.name, p.name, fb.name, u.name
+               ORDER BY cs.section, cm.id",
+            ],
         ];
     }
 
@@ -220,6 +237,37 @@ final class report_sql_validator_test extends \advanced_testcase {
             'plural tokens still rejected (conservative)' => [
                 "SELECT firstname AS tokens FROM {user} WHERE id = :courseid", 'token',
             ],
+            'page body is not selectable (name lookups only)' => [
+                'SELECT p.name, p.content FROM {page} p WHERE p.course = :courseid', 'content',
+            ],
+            'placeholder used as a column qualifier' => [
+                'SELECT {course}.fullname FROM {course} WHERE id = :courseid', 'alias',
+            ],
+            'sequence change via nextval' => [
+                "SELECT nextval('m_user_id_seq') FROM {course} c WHERE c.id = :courseid", 'not read-only',
+            ],
+            'setting change via set_config' => [
+                "SELECT set_config('x', 'y', false) FROM {course} c WHERE c.id = :courseid", 'not read-only',
+            ],
+            'table read by name via table_to_xml' => [
+                "SELECT table_to_xml('m_user', true, false, '') FROM {course} c WHERE c.id = :courseid", 'not read-only',
+            ],
+            'query run from a string via query_to_xml' => [
+                "SELECT query_to_xml(concat('SELECT * F', 'ROM m_user'), true, false, '') FROM {course} c WHERE c.id = :courseid",
+                'not read-only',
+            ],
+            'advisory lock' => [
+                "SELECT get_lock('x', 10) FROM {course} c WHERE c.id = :courseid", 'not read-only',
+            ],
+            'large object write' => [
+                "SELECT lo_import('/etc/passwd') FROM {course} c WHERE c.id = :courseid", 'not read-only',
+            ],
+            'locking read FOR SHARE' => [
+                'SELECT c.id FROM {course} c WHERE c.id = :courseid FOR SHARE', 'Locking',
+            ],
+            'locking read LOCK IN SHARE MODE' => [
+                'SELECT c.id FROM {course} c WHERE c.id = :courseid LOCK IN SHARE MODE', 'Locking',
+            ],
             'information_schema exploit' => [
                 'SELECT table_name FROM information_schema.tables WHERE :courseid > 0', 'information_schema',
             ],
@@ -321,7 +369,7 @@ final class report_sql_validator_test extends \advanced_testcase {
      * Every allow-listed token validates and nothing unexpected is listed.
      */
     public function test_all_allow_listed_tables_accepted(): void {
-        $this->assertCount(35, report_sql_validator::ALLOWED_TABLES);
+        $this->assertCount(50, report_sql_validator::ALLOWED_TABLES);
         foreach (report_sql_validator::ALLOWED_TABLES as $table) {
             if ($table === 'user') {
                 // The {user} table additionally requires a course-scoped join.

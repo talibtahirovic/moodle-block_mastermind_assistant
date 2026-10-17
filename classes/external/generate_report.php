@@ -41,9 +41,9 @@ use Exception;
  * Generate a custom course report from a natural-language request.
  *
  * The dashboard translates the request into candidate SQL; this function
- * validates that SQL through report_sql_validator (the real security gate),
- * executes it read-only with :courseid bound server-side from the validated
- * course context, and returns the result rows. A validation or execution
+ * validates that SQL through report_sql_validator, executes it through
+ * report_scope (every table confined to the validated course and its exposed
+ * columns), and returns the result rows. A validation or execution
  * failure triggers up to two automatic repair round-trips to the dashboard
  * before giving up.
  */
@@ -192,14 +192,11 @@ class generate_report extends external_api {
         }
 
         try {
-            // Execution-time only: strip any trailing LIMIT first (Moodle
-            // appends its own ` LIMIT 0, n` for the row cap, which would
-            // otherwise collide), then rewrite repeated :courseid occurrences
-            // into unique names (Moodle's DML forbids reusing a named param).
-            // The validator above and the $sql echoed back for export always
-            // see the original statement.
-            $execsql = report_sql_validator::strip_trailing_limit($sql);
-            [$execsql, $execparams] = report_sql_validator::prepare_courseid_bindings($execsql, $courseid);
+            // Execution-time only: every table is confined to this course and
+            // its exposed columns (report_scope), and :courseid is bound from
+            // the validated course. The validator above and the $sql echoed
+            // back for export always see the original statement.
+            [$execsql, $execparams] = \block_mastermind_assistant\local\report_scope::prepare($sql, $courseid);
             $records = $DB->get_records_sql($execsql, $execparams, 0, self::MAX_ROWS);
         } catch (\Throwable $e) {
             return [

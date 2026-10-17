@@ -28,8 +28,8 @@ namespace block_mastermind_assistant\local;
  *
  * The client may only replay SQL it was given by generate_report, but it is
  * never trusted: every export re-validates the statement through
- * report_sql_validator and re-executes it with :courseid bound server-side
- * from the validated course context.
+ * report_sql_validator and re-executes it through report_scope, so it only
+ * ever sees the validated course.
  */
 class report_exporter {
     /** @var int Hard cap on exported rows, matching generate_report. */
@@ -57,13 +57,10 @@ class report_exporter {
             throw new \invalid_parameter_exception('Report SQL rejected: ' . $verdict['reason']);
         }
 
-        // Execution-time only: strip any trailing LIMIT first (Moodle appends
-        // its own ` LIMIT 0, n` for the row cap, which would otherwise
-        // collide), then rewrite repeated :courseid occurrences into unique
-        // names (Moodle's DML forbids reusing a named param). The validator
-        // above always saw the original statement.
-        $execsql = report_sql_validator::strip_trailing_limit($sql);
-        [$execsql, $execparams] = report_sql_validator::prepare_courseid_bindings($execsql, $courseid);
+        // Execution-time only: every table is confined to this course and its
+        // exposed columns (report_scope), so replayed SQL cannot reach other
+        // courses whatever it says. The validator above saw the original.
+        [$execsql, $execparams] = report_scope::prepare($sql, $courseid);
         $records = $DB->get_records_sql($execsql, $execparams, 0, self::MAX_ROWS);
 
         $columns = [];

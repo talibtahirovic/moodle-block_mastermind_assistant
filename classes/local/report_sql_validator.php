@@ -77,6 +77,24 @@ class report_sql_validator {
         'scorm_attempt',
         'scorm_scoes_value',
         'scorm_element',
+        // Other activity types, for name lookups only: activity names live in
+        // each type's own table (joined via course_modules.instance). Their
+        // body columns stay out through DENIED_COLUMNS ('content').
+        'bigbluebuttonbn',
+        'book',
+        'choice',
+        'data',
+        'feedback',
+        'folder',
+        'h5pactivity',
+        'imscp',
+        'label',
+        'lti',
+        'page',
+        'resource',
+        'url',
+        'wiki',
+        'workshop',
     ];
 
     /**
@@ -162,6 +180,7 @@ class report_sql_validator {
         'secret',
         'sessdata',
         'token',
+        'content',
     ];
 
     /**
@@ -179,6 +198,8 @@ class report_sql_validator {
             self::check_raw_prefix($sql),
             self::check_denied_schemas($sql),
             self::check_from_join_placeholder($sql),
+            self::check_placeholder_qualifier($sql),
+            self::check_side_effects($sql),
             self::check_denied_columns($sql),
             self::check_courseid_param($sql),
             self::check_courseid_comparison($sql),
@@ -314,6 +335,47 @@ class report_sql_validator {
     public static function check_from_join_placeholder(string $sql): ?string {
         if (preg_match('/\b(?:from|join)\b(?!\s*\{)/i', $sql)) {
             return 'Every FROM/JOIN must reference an allow-listed {placeholder} table';
+        }
+        return null;
+    }
+
+    /**
+     * A report may only read. A lone SELECT can still change state or reach
+     * past the allow-list through a few functions and locking clauses, so
+     * those are rejected wherever they appear:
+     * - sequences, settings and locks: nextval/setval, set_config,
+     *   get_lock/release_lock;
+     * - large objects and remote links: lo_*, dblink*;
+     * - PostgreSQL's *_to_xml functions, which run a query or read a table
+     *   named in a string (table_to_xml('mdl_user', ...)) past the placeholders;
+     * - locking reads: FOR SHARE, LOCK IN SHARE MODE (FOR UPDATE is already
+     *   caught by the UPDATE keyword).
+     *
+     * @param string $sql Candidate SQL.
+     * @return string|null Rejection reason, or null when the check passes.
+     */
+    public static function check_side_effects(string $sql): ?string {
+        $functions = '/\b(nextval|setval|set_config|get_lock|release_lock|release_all_locks|dblink\w*|lo_\w+|\w*_to_xml\w*)\s*\(/i';
+        if (preg_match($functions, $sql, $m)) {
+            return 'Statement calls a function that is not read-only: ' . $m[1];
+        }
+        if (preg_match('/\bfor\s+share\b|\block\b/i', $sql)) {
+            return 'Locking reads are not allowed';
+        }
+        return null;
+    }
+
+    /**
+     * Columns must be qualified with a table alias, never with the placeholder
+     * itself ('{user}.id'): report_scope swaps each placeholder for a derived
+     * table, which can only be referenced through its alias.
+     *
+     * @param string $sql Candidate SQL.
+     * @return string|null Rejection reason, or null when the check passes.
+     */
+    public static function check_placeholder_qualifier(string $sql): ?string {
+        if (preg_match('/\}\s*\./', $sql)) {
+            return 'Give every table an alias and qualify columns with it, not with the {placeholder}';
         }
         return null;
     }

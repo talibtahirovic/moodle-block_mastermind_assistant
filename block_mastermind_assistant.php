@@ -515,40 +515,12 @@ class block_mastermind_assistant extends block_base {
             $metrics['forumactivity'] = round($forumposts / $totallearners, 1);
         }
 
-        // 4. Drop-off section (lowest average completion across activities).
-        $sections = $DB->get_records('course_sections', ['course' => $courseid], '', 'id,section');
-        $lowest = 101;
-        $lowestsectionnum = null;
-        foreach ($sections as $section) {
-            $cmids = $DB->get_fieldset_sql(
-                'SELECT id FROM {course_modules} WHERE course = ? AND section = ? AND visible = 1',
-                [$courseid, $section->id]
-            );
-            if (!$cmids) {
-                continue;
-            }
-
-            [$insql, $inparams] = $DB->get_in_or_equal($cmids, SQL_PARAMS_NAMED);
-            $completed = $DB->count_records_select(
-                'course_modules_completion',
-                "coursemoduleid $insql AND completionstate = 1",
-                $inparams
-            );
-            $possible = $DB->count_records_select(
-                'course_modules_completion',
-                "coursemoduleid $insql",
-                $inparams
-            );
-            if ($possible) {
-                $rate = $completed / $possible * 100;
-                if ($rate < $lowest) {
-                    $lowest = $rate;
-                    $lowestsectionnum = $section->section;
-                }
-            }
-        }
-        if ($lowestsectionnum !== null) {
-            $metrics['dropoffsection'] = get_section_name($courseid, $lowestsectionnum);
+        // 4. Drop-off section: the section the fewest learners completed
+        // anything in (the same definition as the detailed metrics and the
+        // enterprise reports).
+        $least = \block_mastermind_assistant\local\section_completion::least_completed($courseid);
+        if ($least !== null) {
+            $metrics['dropoffsection'] = get_section_name($courseid, $least->section);
         }
 
         // 5. Last Activity — how recently the most recent student was active.
