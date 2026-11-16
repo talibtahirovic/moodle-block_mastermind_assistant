@@ -63,14 +63,15 @@ final class feedback_metrics_test extends \advanced_testcase {
      * @param int $feedbackid Feedback instance id.
      * @param int $userid Responding user id.
      * @param array $itemvalues Map of itemid => value string.
+     * @param int $time Submission time (0 = now).
      * @return int The feedback_completed id.
      */
-    private function add_response(int $feedbackid, int $userid, array $itemvalues): int {
+    private function add_response(int $feedbackid, int $userid, array $itemvalues, int $time = 0): int {
         global $DB;
         $compid = $DB->insert_record('feedback_completed', (object) [
             'feedback' => $feedbackid,
             'userid' => $userid,
-            'timemodified' => 1720000000,
+            'timemodified' => $time ?: time(),
             'random_response' => 0,
             'anonymous_response' => 2,
             'courseid' => 0,
@@ -169,9 +170,9 @@ final class feedback_metrics_test extends \advanced_testcase {
             'questionType' => 'textarea',
             'text' => 'First comment',
         ], $activity['comments'][1]);
-        // Rated question: 2 responses recorded, avg over the single numeric one.
+        // Rated question: only the numeric answer is a response; the other isn't a rating.
         $q = $activity['questions'][0];
-        $this->assertSame(2, $q['responses']);
+        $this->assertSame(1, $q['responses']);
         $this->assertEqualsWithDelta(4.0, $q['avg'], 0.05);
         // The textarea question row exists with no average.
         $this->assertNull($activity['questions'][1]['avg']);
@@ -235,7 +236,8 @@ final class feedback_metrics_test extends \advanced_testcase {
         $q = $result['activities'][0]['questions'][0];
         $this->assertSame(2, $q['responses']);
         $this->assertEqualsWithDelta(20.0, $q['avg'], 0.05);
-        $this->assertEqualsWithDelta(20.0, $result['satisfaction'], 0.05);
+        // The item keeps its own 10-30 scale; the headline is on 1-5: 20 -> 3.
+        $this->assertEqualsWithDelta(3.0, $result['satisfaction'], 0.05);
     }
 
     /**
@@ -286,5 +288,329 @@ final class feedback_metrics_test extends \advanced_testcase {
             (int) $first->cmid => 'Post-course evaluation',
             (int) $second->cmid => 'Module 4 check-in',
         ], $bycmid);
+    }
+
+    /**
+     * Create a feedback with one numeric item and return [course, feedback, itemid].
+     *
+     * @param array $modrecord Extra module settings.
+     * @param string $presentation Numeric item presentation.
+     * @return array
+     */
+    private function numeric_fixture(array $modrecord = [], string $presentation = ''): array {
+        global $DB;
+        $gen = $this->getDataGenerator();
+        $course = $gen->create_course(['startdate' => 1730000000]);
+        $feedback = $gen->create_module('feedback', ['course' => $course->id] + $modrecord);
+        $itemid = $this->add_item($feedback->id, 'numeric', 'Rating');
+        if ($presentation !== '') {
+            $DB->set_field('feedback_item', 'presentation', $presentation, ['id' => $itemid]);
+        }
+        return [$course, $feedback, $itemid];
+    }
+
+    /**
+     * Hidden activities are skipped, and the manual selection applies.
+     */
+    public function test_hidden_feedback_skipped(): void {
+        $this->resetAfterTest();
+        [$course, $feedback] = $this->numeric_fixture();
+        $gen = $this->getDataGenerator();
+        $gen->create_module('feedback', ['course' => $course->id, 'visible' => 0, 'name' => 'Hidden']);
+        $names = array_column(feedback_metrics::collect($course->id)['activities'], 'cmid');
+        $this->assertSame([(int) $feedback->cmid], $names);
+
+        $none = feedback_metrics::collect($course->id, 500, [], [(int) $feedback->cmid]);
+        $this->assertSame([], $none['activities']);
+    }
+
+    /**
+     * Activities being deleted are skipped.
+     */
+    public function test_deletion_in_progress_skipped(): void {
+        global $DB;
+        $this->resetAfterTest();
+        [$course, $feedback] = $this->numeric_fixture();
+        $DB->set_field('course_modules', 'deletioninprogress', 1, ['id' => $feedback->cmid]);
+        \course_modinfo::clear_instance_cache($course->id);
+
+        $this->assertSame([], feedback_metrics::collect($course->id)['activities']);
+    }
+
+    /**
+     * Submissions before the course start do not count, and their values are not read.
+     */
+    public function test_answers_before_startdate_ignored(): void {
+        $this->resetAfterTest();
+        [$course, $feedback, $item] = $this->numeric_fixture();
+        $gen = $this->getDataGenerator();
+        $this->add_response($feedback->id, $gen->create_user()->id, [$item => '1'], 1720000000);
+        $this->add_response($feedback->id, $gen->create_user()->id, [$item => '5'], 1730000500);
+        $this->add_response($feedback->id, $gen->create_user()->id, [$item => '3'], 1730000000);
+
+        $result = feedback_metrics::collect($course->id);
+
+        $a = $result['activities'][0];
+        $this->assertSame(2, $a['responses']);
+        $this->assertSame(2, $a['questions'][0]['responses']);
+        $this->assertEqualsWithDelta(4.0, $a['questions'][0]['avg'], 0.05);
+        $this->assertEqualsWithDelta(4.0, $result['satisfaction'], 0.05);
+    }
+
+    /**
+     * A course without a start date counts everything.
+     */
+    public function test_no_startdate_counts_all(): void {
+        $this->resetAfterTest();
+        $gen = $this->getDataGenerator();
+        $course = $gen->create_course(['startdate' => 0]);
+        $feedback = $gen->create_module('feedback', ['course' => $course->id]);
+        $item = $this->add_item($feedback->id, 'numeric', 'Rating');
+        $this->add_response($feedback->id, $gen->create_user()->id, [$item => '2'], 1000000);
+
+        $this->assertSame(1, feedback_metrics::collect($course->id)['activities'][0]['responses']);
+    }
+
+    /**
+     * Blank answers are not counted in a question's responses.
+     */
+    public function test_blank_answers_not_counted(): void {
+        $this->resetAfterTest();
+        [$course, $feedback, $item] = $this->numeric_fixture();
+        $gen = $this->getDataGenerator();
+        $this->add_response($feedback->id, $gen->create_user()->id, [$item => '4']);
+        $this->add_response($feedback->id, $gen->create_user()->id, [$item => '']);
+        $this->add_response($feedback->id, $gen->create_user()->id, [$item => '  ']);
+
+        $result = feedback_metrics::collect($course->id);
+
+        $this->assertSame(3, $result['activities'][0]['responses']);
+        $this->assertSame(1, $result['activities'][0]['questions'][0]['responses']);
+    }
+
+    /**
+     * Multichoicerated scale comes from the min/max of the rating map.
+     */
+    public function test_scale_max_from_multichoicerated(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $gen = $this->getDataGenerator();
+        $course = $gen->create_course(['startdate' => 1730000000]);
+        $feedback = $gen->create_module('feedback', ['course' => $course->id]);
+        $itemid = $DB->insert_record('feedback_item', (object) [
+            'feedback' => $feedback->id, 'template' => 0, 'name' => 'Rate',
+            'label' => '', 'presentation' => 'r>>>>>1####Bad|2####Ok|3####Good|4####Great|5####Best<<<<<1',
+            'typ' => 'multichoicerated', 'hasvalue' => 1, 'position' => 1,
+            'required' => 0, 'dependitem' => 0, 'dependvalue' => '', 'options' => '',
+        ]);
+        $this->add_response($feedback->id, $gen->create_user()->id, [$itemid => '5']);
+
+        $result = feedback_metrics::collect($course->id);
+
+        $a = $result['activities'][0];
+        $this->assertSame('feedback', $a['module']);
+        $q = $a['questions'][0];
+        $this->assertSame('rated', $q['kind']);
+        $this->assertSame(1.0, (float) $q['scale_min']);
+        $this->assertSame(5.0, (float) $q['scale_max']);
+        $this->assertEqualsWithDelta(5.0, $result['satisfaction'], 0.05);
+    }
+
+    /**
+     * Numeric items take their scale from the "min|max" presentation, and
+     * the headline converts them to 1-5.
+     */
+    public function test_numeric_scale_and_headline_conversion(): void {
+        $this->resetAfterTest();
+        [$course, $feedback, $item] = $this->numeric_fixture([], '1|10');
+        $gen = $this->getDataGenerator();
+        $this->add_response($feedback->id, $gen->create_user()->id, [$item => '10']);
+        $this->add_response($feedback->id, $gen->create_user()->id, [$item => '10']);
+
+        $result = feedback_metrics::collect($course->id);
+
+        $q = $result['activities'][0]['questions'][0];
+        $this->assertSame(1.0, (float) $q['scale_min']);
+        $this->assertSame(10.0, (float) $q['scale_max']);
+        $this->assertEqualsWithDelta(10.0, $q['avg'], 0.05);
+        $this->assertEqualsWithDelta(5.0, $result['satisfaction'], 0.05);
+    }
+
+    /**
+     * Items without a known scale contribute raw values, as before; 1-5 items stay identical.
+     */
+    public function test_satisfaction_unchanged_for_one_to_five_items(): void {
+        $this->resetAfterTest();
+        [$course, $feedback, $item] = $this->numeric_fixture([], '1|5');
+        $unscaled = $this->add_item($feedback->id, 'numeric', 'Unscaled', 2);
+        $gen = $this->getDataGenerator();
+        $this->add_response($feedback->id, $gen->create_user()->id, [$item => '4', $unscaled => '2']);
+        $this->add_response($feedback->id, $gen->create_user()->id, [$item => '5', $unscaled => '3']);
+        $this->add_response($feedback->id, $gen->create_user()->id, [$item => '3']);
+
+        $result = feedback_metrics::collect($course->id);
+
+        // (4 + 5 + 3 + 2 + 3) / 5 = 3.4 with raw values for the unscaled item.
+        $this->assertEqualsWithDelta(3.4, $result['satisfaction'], 0.05);
+    }
+
+    /**
+     * Text questions are tagged with their kind.
+     */
+    public function test_text_kind(): void {
+        $this->resetAfterTest();
+        $gen = $this->getDataGenerator();
+        $course = $gen->create_course(['startdate' => 1730000000]);
+        $feedback = $gen->create_module('feedback', ['course' => $course->id]);
+        $text = $this->add_item($feedback->id, 'textarea', 'Comments?');
+        $this->add_response($feedback->id, $gen->create_user()->id, [$text => 'Nice']);
+
+        $q = feedback_metrics::collect($course->id)['activities'][0]['questions'][0];
+        $this->assertSame('text', $q['kind']);
+        $this->assertArrayNotHasKey('scale_min', $q);
+    }
+
+    /**
+     * A manager's submission is excluded; anonymous ones (userid 0) stay.
+     */
+    public function test_feedback_counts_only_participants(): void {
+        $this->resetAfterTest();
+        $gen = $this->getDataGenerator();
+        $course = $gen->create_course();
+        $student = $gen->create_user();
+        $manager = $gen->create_user();
+        $gen->enrol_user($student->id, $course->id, 'student');
+        $gen->enrol_user($manager->id, $course->id, 'manager');
+        $feedback = $gen->create_module('feedback', ['course' => $course->id, 'name' => 'Evaluation']);
+        $item = $this->add_item($feedback->id, 'numeric', 'Overall');
+        $text = $this->add_item($feedback->id, 'textarea', 'Comment', 2);
+        $this->add_response($feedback->id, $student->id, [$item => '4', $text => 'student']);
+        $this->add_response($feedback->id, $manager->id, [$item => '1', $text => 'manager']);
+        $this->add_response($feedback->id, 0, [$item => '2', $text => 'anon']);
+
+        $result = feedback_metrics::collect_with_ratings($course->id);
+
+        $activity = $result['activities'][0];
+        $this->assertSame(2, $activity['responses']);
+        $this->assertSame(2, $result['ratings']['n']);
+        $this->assertEqualsWithDelta(3.0, $result['satisfaction'], 0.05);
+        $this->assertEqualsCanonicalizing(['student', 'anon'], array_column($activity['comments'], 'text'));
+    }
+
+    /**
+     * Without any participant nothing is filtered.
+     */
+    public function test_no_participants_counts_everything(): void {
+        $this->resetAfterTest();
+        $gen = $this->getDataGenerator();
+        $course = $gen->create_course();
+        $manager = $gen->create_user();
+        $gen->enrol_user($manager->id, $course->id, 'manager');
+        $feedback = $gen->create_module('feedback', ['course' => $course->id, 'name' => 'Evaluation']);
+        $item = $this->add_item($feedback->id, 'numeric', 'Overall');
+        $this->add_response($feedback->id, $manager->id, [$item => '1']);
+        $this->add_response($feedback->id, 0, [$item => '5']);
+
+        $result = feedback_metrics::collect($course->id);
+
+        $this->assertSame(2, $result['activities'][0]['responses']);
+    }
+
+    /**
+     * The public result keeps the legacy shape: enterprise v1.3.x sends it
+     * unchanged to the dashboard's strict schema, so no extra key may appear.
+     */
+    public function test_collect_public_shape_is_legacy(): void {
+        $this->resetAfterTest();
+        [$course, $feedback, $item] = $this->numeric_fixture([], '1|5');
+        $this->add_response($feedback->id, $this->getDataGenerator()->create_user()->id, [$item => '4']);
+
+        $result = feedback_metrics::collect($course->id);
+
+        $this->assertSame(['activities', 'satisfaction'], array_keys($result));
+        $this->assertSame(['activities', 'satisfaction'], array_keys(feedback_metrics::collect($course->id + 1000)));
+        $this->assertSame(4.0, $result['satisfaction']);
+        // The rating totals exist only on the internal variant.
+        $internal = feedback_metrics::collect_with_ratings($course->id);
+        $this->assertSame(['activities', 'satisfaction', 'ratings'], array_keys($internal));
+        $this->assertSame(['sum5' => 4.0, 'n' => 1], $internal['ratings']);
+        $this->assertSame($result['activities'], $internal['activities']);
+    }
+
+    /**
+     * Multichoicerated stores "0" when nothing was chosen: that isn't an answer.
+     */
+    public function test_multichoicerated_zero_not_counted(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $gen = $this->getDataGenerator();
+        $course = $gen->create_course(['startdate' => 1730000000]);
+        $feedback = $gen->create_module('feedback', ['course' => $course->id]);
+        $itemid = $DB->insert_record('feedback_item', (object) [
+            'feedback' => $feedback->id, 'template' => 0, 'name' => 'Rate',
+            'label' => '', 'presentation' => 'r>>>>>1####Bad|2####Ok|3####Good|4####Great|5####Best',
+            'typ' => 'multichoicerated', 'hasvalue' => 1, 'position' => 1,
+            'required' => 0, 'dependitem' => 0, 'dependvalue' => '', 'options' => '',
+        ]);
+        $this->add_response($feedback->id, $gen->create_user()->id, [$itemid => '4']);
+        $this->add_response($feedback->id, $gen->create_user()->id, [$itemid => '0']);
+        $this->add_response($feedback->id, $gen->create_user()->id, [$itemid => '9']);
+
+        $internal = feedback_metrics::collect_with_ratings($course->id);
+
+        $q = $internal['activities'][0]['questions'][0];
+        $this->assertSame(1, $q['responses']);
+        $this->assertEqualsWithDelta(4.0, $q['avg'], 0.05);
+        $this->assertSame(1, $internal['ratings']['n']);
+        $this->assertSame(3, $internal['activities'][0]['responses'], 'Submissions still count.');
+    }
+
+    /**
+     * Multichoice items send their distribution: one count per option, in
+     * form order; multiple answers are "|"-separated; "0" is not an answer.
+     */
+    public function test_multichoice_sends_choices(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $gen = $this->getDataGenerator();
+        $course = $gen->create_course(['startdate' => 1730000000]);
+        $feedback = $gen->create_module('feedback', ['course' => $course->id]);
+        $itemid = $DB->insert_record('feedback_item', (object) [
+            'feedback' => $feedback->id, 'template' => 0, 'name' => 'How did you hear about us?',
+            'label' => '', 'presentation' => 'c>>>>>Colleague|<b>Website</b>|Newsletter &amp; mail<<<<<1',
+            'typ' => 'multichoice', 'hasvalue' => 1, 'position' => 1,
+            'required' => 0, 'dependitem' => 0, 'dependvalue' => '', 'options' => '',
+        ]);
+        $this->add_response($feedback->id, $gen->create_user()->id, [$itemid => '1']);
+        $this->add_response($feedback->id, $gen->create_user()->id, [$itemid => '1|2']);
+        $this->add_response($feedback->id, $gen->create_user()->id, [$itemid => '0']);
+
+        $q = feedback_metrics::collect($course->id)['activities'][0]['questions'][0];
+
+        $this->assertSame('choice', $q['kind']);
+        $this->assertSame(2, $q['responses']);
+        $this->assertNull($q['avg']);
+        $this->assertSame([
+            ['label' => 'Colleague', 'count' => 2],
+            ['label' => 'Website', 'count' => 1],
+            ['label' => 'Newsletter & mail', 'count' => 0],
+        ], $q['choices']);
+    }
+
+    /**
+     * A feedback instance without a course module (orphan) is not read.
+     */
+    public function test_orphan_feedback_skipped(): void {
+        global $DB;
+        $this->resetAfterTest();
+        [$course, $feedback, $item] = $this->numeric_fixture();
+        $this->add_response($feedback->id, $this->getDataGenerator()->create_user()->id, [$item => '5']);
+        $DB->delete_records('course_modules', ['id' => $feedback->cmid]);
+        rebuild_course_cache($course->id, true);
+
+        $result = feedback_metrics::collect($course->id);
+
+        $this->assertSame([], $result['activities']);
+        $this->assertNull($result['satisfaction']);
     }
 }

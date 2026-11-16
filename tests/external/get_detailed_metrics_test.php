@@ -48,7 +48,7 @@ final class get_detailed_metrics_test extends \advanced_testcase {
         ]);
         $user = $gen->create_user();
         $compid = $DB->insert_record('feedback_completed', (object) [
-            'feedback' => $feedback->id, 'userid' => $user->id, 'timemodified' => 1720000000,
+            'feedback' => $feedback->id, 'userid' => $user->id, 'timemodified' => time(),
             'random_response' => 0, 'anonymous_response' => 2, 'courseid' => 0,
         ]);
         $DB->insert_record('feedback_value', (object) [
@@ -116,5 +116,44 @@ final class get_detailed_metrics_test extends \advanced_testcase {
 
         $this->assertSame('No feedback activity', $metrics['satisfaction_score']);
         $this->assertSame([], $metrics['feedback_summary']);
+    }
+
+    /**
+     * A course without completion criteria reports no completion rate (null), not 0%.
+     */
+    public function test_detailed_metrics_completion_null_without_criteria(): void {
+        $this->resetAfterTest();
+        $this->setAdminUser();
+        set_config('enablecompletion', 1);
+        $gen = $this->getDataGenerator();
+        $course = $gen->create_course(['enablecompletion' => 1]);
+        $gen->enrol_user($gen->create_user()->id, $course->id, 'student');
+
+        $metrics = json_decode(get_detailed_metrics::execute($course->id)['metrics'], true);
+        $this->assertNull($metrics['completion_rate']);
+    }
+
+    /**
+     * With a completion criterion the rate is still computed.
+     */
+    public function test_detailed_metrics_completion_rate_with_criteria(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $this->setAdminUser();
+        set_config('enablecompletion', 1);
+        $gen = $this->getDataGenerator();
+        $course = $gen->create_course(['enablecompletion' => 1]);
+        $user = $gen->create_user();
+        $gen->enrol_user($user->id, $course->id, 'student');
+        $DB->insert_record('course_completion_criteria', (object) [
+            'course' => $course->id, 'criteriatype' => COMPLETION_CRITERIA_TYPE_SELF,
+        ]);
+        $DB->insert_record('course_completions', (object) [
+            'userid' => $user->id, 'course' => $course->id, 'timeenrolled' => 1, 'timestarted' => 1,
+            'timecompleted' => time(),
+        ]);
+
+        $metrics = json_decode(get_detailed_metrics::execute($course->id)['metrics'], true);
+        $this->assertEquals(100, $metrics['completion_rate']);
     }
 }

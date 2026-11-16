@@ -56,7 +56,7 @@ final class get_course_data_test extends \advanced_testcase {
         ]);
         $user = $gen->create_user();
         $compid = $DB->insert_record('feedback_completed', (object) [
-            'feedback' => $feedback->id, 'userid' => $user->id, 'timemodified' => 1720000000,
+            'feedback' => $feedback->id, 'userid' => $user->id, 'timemodified' => time(),
             'random_response' => 0, 'anonymous_response' => 2, 'courseid' => 0,
         ]);
         $DB->insert_record('feedback_value', (object) [

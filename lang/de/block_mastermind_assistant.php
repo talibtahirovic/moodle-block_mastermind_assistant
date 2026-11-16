@@ -70,6 +70,7 @@ $string['book_preview_title'] = 'Vorschau der Buchinhalte';
 $string['cancel'] = 'Abbrechen';
 $string['chapter_count_label'] = 'Anzahl der Kapitel';
 $string['choose_file'] = 'Datei auswaehlen';
+$string['completionnottracked'] = 'Nicht erfasst';
 $string['connect_admin_required'] = 'Bitten Sie Ihren Administrator, Mastermind-Assistent zu verbinden.';
 $string['connect_button'] = 'Mit Mastermind verbinden';
 $string['connect_card_subtitle'] = 'Ein Klick fuehrt Sie zu mastermindassistant.ai, erstellt Ihr Konto und uebertraegt den API-Schluessel automatisch zurueck.';

@@ -1404,33 +1404,50 @@ function(Ajax, Notification, Str, AiPolicy) {
         if (metrics.feedback_summary && metrics.feedback_summary.length > 0) {
             metrics.feedback_summary.forEach(function(fb) {
                 // The activity's own average: the mean of its rated questions.
-                var ratedavgs = fb.questions.filter(function(q) {
+                // Questionnaire items can use other scales (1-10): the head average is only
+                // shown when every rated item shares one scale, since mixed scales don't average.
+                var ratedqs = (fb.questions || []).filter(function(q) {
                     return q.avg !== null && q.avg !== undefined;
-                }).map(function(q) {
-                    return q.avg;
                 });
-                var activityavg = ratedavgs.length > 0
-                    ? (ratedavgs.reduce(function(a, b) {
-                        return a + b;
-                    }, 0) / ratedavgs.length).toFixed(1)
+                var scalemaxes = {};
+                ratedqs.forEach(function(q) {
+                    scalemaxes[q.scale_max !== undefined && q.scale_max !== null ? q.scale_max : 5] = true;
+                });
+                var scalekeys = Object.keys(scalemaxes);
+                var activityavg = ratedqs.length > 0 && scalekeys.length === 1
+                    ? (ratedqs.reduce(function(a, q) {
+                        return a + q.avg;
+                    }, 0) / ratedqs.length).toFixed(1)
                     : null;
+                var activityscale = scalekeys.length === 1 ? scalekeys[0] : '5';
                 feedbackHTML += '<div class="metric-item feedback-activity">' +
                     '<div class="feedback-activity-head">' +
                     '<div class="feedback-activity-name">' + escapeHtml(fb.name) + '</div>' +
                     '<div class="feedback-activity-stats">' +
                     '<span class="feedback-stat"><strong>' + fb.responses + '</strong> responses</span>' +
                     (activityavg !== null
-                        ? '<span class="feedback-stat"><strong>' + activityavg + '</strong> / 5 avg</span>'
+                        ? '<span class="feedback-stat"><strong>' + activityavg + '</strong> / ' + activityscale + ' avg</span>'
                         : '') +
                     '</div></div>' +
                     '<table class="feedback-questions">' +
                     '<thead><tr><th>Question</th><th class="num">Responses</th><th class="num">Avg</th></tr></thead>' +
                     '<tbody>';
-                fb.questions.forEach(function(q) {
+                (fb.questions || []).forEach(function(q) {
+                    var cell;
+                    if (q.choices && q.choices.length > 0) {
+                        // Choice item: the distribution of answers, in form order.
+                        cell = q.choices.map(function(c) {
+                            return escapeHtml(String(c.label)) + ' (' + (c.count || 0) + ')';
+                        }).join(', ');
+                    } else if (q.avg !== null && q.avg !== undefined) {
+                        cell = q.avg + (q.scale_max !== undefined && q.scale_max !== null
+                            ? ' / ' + q.scale_max : ' / 5');
+                    } else {
+                        cell = '<span class="muted">&mdash;</span>';
+                    }
                     feedbackHTML += '<tr><td>' + escapeHtml(q.question) + '</td>' +
-                        '<td class="num">' + q.responses + '</td>' +
-                        '<td class="num">' + (q.avg !== null ? q.avg : '<span class="muted">&mdash;</span>') +
-                        '</td></tr>';
+                        '<td class="num">' + (q.responses || 0) + '</td>' +
+                        '<td class="num">' + cell + '</td></tr>';
                 });
                 feedbackHTML += '</tbody></table>';
                 if (fb.comments && fb.comments.length > 0) {
@@ -1484,7 +1501,9 @@ function(Ajax, Notification, Str, AiPolicy) {
             '<h3 class="category-title">Progress & Completion</h3></div>' +
             '<div class="metrics-grid">' +
             '<div class="metric-item"><div class="metric-label">Completion Rate</div>' +
-            '<div class="metric-value">' + metrics.completion_rate + '%</div></div>' +
+            '<div class="metric-value">' +
+            (metrics.completion_rate === null || metrics.completion_rate === undefined
+                ? 'Not tracked' : metrics.completion_rate + '%') + '</div></div>' +
             '<div class="metric-item"><div class="metric-label">Avg Time to Completion</div>' +
             '<div class="metric-value text">' + escapeHtml(metrics.time_to_completion) + '</div></div>' +
             '<div class="metric-item"><div class="metric-label">Most Completed Section</div>' +
@@ -1595,7 +1614,7 @@ function(Ajax, Notification, Str, AiPolicy) {
             parts.push(m.enrollment_count + ' enrolled, ' + activePercent + '% active in last 30 days.');
         }
 
-        if (m.completion_rate > 0) {
+        if (m.completion_rate !== null && m.completion_rate > 0) {
             var descriptor = 'low';
             if (m.completion_rate >= 70) {
                 descriptor = 'strong';
@@ -1631,8 +1650,9 @@ function(Ajax, Notification, Str, AiPolicy) {
         if (m.feedback_summary && m.feedback_summary.length > 0) {
             var lowestrated = null;
             m.feedback_summary.forEach(function(fb) {
-                fb.questions.forEach(function(q) {
-                    if (q.avg !== null && (lowestrated === null || q.avg < lowestrated.avg)) {
+                (fb.questions || []).forEach(function(q) {
+                    if (q.avg !== null && q.avg !== undefined && (!q.scale_max || q.scale_max === 5) &&
+                        (lowestrated === null || q.avg < lowestrated.avg)) {
                         lowestrated = q;
                     }
                 });

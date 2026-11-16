@@ -23,7 +23,8 @@
     Data attributes required for JS: none
     Context variables required for this template:
     * courseid - The course ID
-    * completionrate - Course completion rate percentage
+    * completionrate - Course completion rate percentage (null when not tracked)
+    * completiondisplay - Completion tile text ("75%" or "Not tracked")
     * avggrade - Average final grade percentage
     * dropoffsection - Name of the drop-off section
     * forumactivity - Forum posts per learner
@@ -34,6 +35,7 @@
     {
         "courseid": 2,
         "completionrate": 75,
+        "completiondisplay": "75%",
         "avggrade": 82,
         "dropoffsection": "Section 3",
         "forumactivity": 4.2,
@@ -58,7 +60,7 @@
             </div>
             <div class="mastermind-metric-content">
                 <div class="mastermind-metric-label">{{#str}} metric_completion_rate, block_mastermind_assistant {{/str}}</div>
-                <div class="mastermind-metric-value">{{completionrate}}%</div>
+                <div class="mastermind-metric-value">{{completiondisplay}}</div>
             </div>
         </div>
 

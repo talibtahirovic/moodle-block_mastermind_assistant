@@ -33,7 +33,7 @@ use external_function_parameters;
 use external_value;
 use external_single_structure;
 use block_mastermind_assistant\local\scorm_metrics;
-use block_mastermind_assistant\local\feedback_metrics;
+use block_mastermind_assistant\local\evaluation_metrics;
 
 /**
  * External service class for getting detailed course metrics.
@@ -193,6 +193,10 @@ class get_detailed_metrics extends external_api {
         if ($metrics['enrollment_count'] > 0) {
             $metrics['completion_rate'] = round(($completed / $metrics['enrollment_count']) * 100, 1);
         }
+        // No completion criteria (or completion off): nobody can complete, so the rate is unknown, not 0.
+        if (!evaluation_metrics::completion_tracked($courseid)) {
+            $metrics['completion_rate'] = null;
+        }
 
         // Average time to completion.
         $sql = "SELECT AVG(timecompleted - timestarted) AS avgtime
@@ -315,7 +319,7 @@ class get_detailed_metrics extends external_api {
 
         // Category 4 metrics: Satisfaction & Feedback.
 
-        $feedbackdata = feedback_metrics::collect($courseid);
+        $feedbackdata = evaluation_metrics::collect($courseid);
         if ($feedbackdata['satisfaction'] !== null) {
             $metrics['satisfaction_score'] = number_format($feedbackdata['satisfaction'], 1) . '/5';
         }

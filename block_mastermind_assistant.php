@@ -181,6 +181,7 @@ class block_mastermind_assistant extends block_base {
         $data = (object) [
             'courseid' => $COURSE->id,
             'completionrate' => $metrics['completionrate'],
+            'completiondisplay' => $metrics['completiondisplay'],
             'avggrade' => $metrics['avggrade'],
             'dropoffsection' => $metrics['dropoffsection'],
             'forumactivity' => $metrics['forumactivity'],
@@ -469,6 +470,7 @@ class block_mastermind_assistant extends block_base {
 
         $metrics = [
             'completionrate'  => 0,
+            'completiondisplay' => '0%',
             'avggrade'        => 0,
             'dropoffsection'  => get_string('unknown', 'block_mastermind_assistant'),
             'forumactivity'   => 0,
@@ -491,6 +493,13 @@ class block_mastermind_assistant extends block_base {
                 [$courseid]
             );
             $metrics['completionrate'] = round($completed / $totallearners * 100);
+        }
+        if (\block_mastermind_assistant\local\evaluation_metrics::completion_tracked($courseid)) {
+            $metrics['completiondisplay'] = $metrics['completionrate'] . '%';
+        } else {
+            // No completion criteria (or completion off): say so instead of a misleading 0%.
+            $metrics['completionrate'] = null;
+            $metrics['completiondisplay'] = get_string('completionnottracked', 'block_mastermind_assistant');
         }
 
         // 2. Average final grade.

@@ -39,7 +39,7 @@ use context_course;
 use Exception;
 use moodle_exception;
 use block_mastermind_assistant\local\scorm_metrics;
-use block_mastermind_assistant\local\feedback_metrics;
+use block_mastermind_assistant\local\evaluation_metrics;
 
 /**
  * External API for get course data.
@@ -402,9 +402,9 @@ class get_course_data extends external_api {
             'posts_by_month' => $postsbymonth,
         ];
 
-        // Evaluation data: per-question aggregates and anonymized comments.
+        // Evaluation data: per-question aggregates and comment texts (participants only, no user ids).
         // Raw per-user response rows are deliberately not sent to the AI.
-        $data['feedback'] = feedback_metrics::collect($courseid);
+        $data['feedback'] = evaluation_metrics::collect($courseid);
 
         // Audit flags — help AI detect post-copy issues.
         $auditflags = [];
