@@ -1,5 +1,46 @@
 # Changelog
 
+## v4.3.0 (2026111200) — 2026-11-12
+
+### Added
+- Questionnaire evaluations (mod_questionnaire) are read alongside Feedback. Only
+  evaluations count: a visible questionnaire with a rating (rate) or slider question, or
+  one named as an evaluation. Sign-up, contact and other forms are never read.
+  - Rating rows keep their own scale; "not applicable" answers are counted apart and
+    never averaged. Rankings (rate with "no duplicate choices") are not ratings.
+  - Radio and dropdown questions are sent as answer counts per choice, never as an
+    average; text answers as comments.
+  - Without the Questionnaire plugin installed, nothing changes.
+- Feedback and Questionnaire results are merged into one evaluation result with one
+  satisfaction figure on a 1-5 scale, weighted by the number of ratings in each.
+- Activity selection: the include/exclude lists set per product in the Mastermind
+  dashboard are applied before anything is read (with the enterprise companion v1.4.0).
+
+### Changed
+- Only participants' answers count; staff answers are left out. Both modules store the
+  real user id even for anonymous activities: it is used only for this filter and never
+  leaves the site.
+- Only answers submitted on or after the course start date count, so answers from an
+  earlier run of a reused course no longer mix in.
+- Hidden, being-deleted and orphaned evaluation activities are skipped.
+- Each rated item keeps its own scale (a 1-10 overall question stays 1-10); the
+  satisfaction figure converts to 1-5.
+- Completion: a course without completion criteria (or with completion off) shows
+  "Not tracked" on the completion tile and reports no completion rate, instead of 0%.
+- Evaluation table in the block: averages show their own scale ("/ 10"), an activity
+  average appears only when all its rated items share one scale, and choice questions
+  list the answer count per option.
+
+### Privacy
+- The privacy metadata now covers Questionnaire evaluations and states that only
+  participants' answers are included.
+
+### Compatibility
+- The evaluation data keeps the exact shape the enterprise companion v1.3.x sends
+  (activities and satisfaction), so sites on that version keep working.
+- Needs the Mastermind dashboard of 2026-11-12 or later (live). Moodle 4.4 or later, as
+  before; runs on Moodle 4.5 (PHP 8.1) and Moodle 5.2 (PHP 8.3).
+
 ## v4.2.2 (2026101700) — 2026-10-17
 
 ### Security
