@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v4.5.0 (2026112101) — 2026-11-21
 
 ### Privacy
 - The privacy summary no longer says that identity a learner typed into an answer or
