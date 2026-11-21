@@ -92,6 +92,8 @@ class generate_report extends external_api {
             self::validate_context($context);
             require_capability('block/mastermind_assistant:view', $context);
             require_capability('moodle/site:viewreports', $context);
+            // Nothing is sent to the AI service until the user accepted the AI usage policy.
+            \block_mastermind_assistant\local\ai_policy::require_accepted();
 
             $requesttext = trim($params['request']);
             if ($requesttext === '') {

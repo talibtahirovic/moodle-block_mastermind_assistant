@@ -37,6 +37,7 @@ use external_value;
 use context_course;
 use context_module;
 use Exception;
+use block_mastermind_assistant\local\activity_access;
 
 /**
  * External API for generate quiz questions.
@@ -133,7 +134,8 @@ class generate_quiz_questions extends external_api {
             throw new Exception('Please save the quiz first before generating questions.');
         }
 
-        $cm = get_coursemodule_from_id('quiz', $params['quizid'], 0, false, IGNORE_MISSING);
+        // Only a quiz in this course, and only if the user may manage that quiz.
+        $cm = activity_access::require_manageable('quiz', $params['quizid'], $params['courseid'], IGNORE_MISSING);
         if (!$cm) {
             throw new Exception('Quiz not found. Please save the quiz first.');
         }
@@ -160,6 +162,8 @@ class generate_quiz_questions extends external_api {
             }
 
             // Phase 1: Generate questions via AI.
+            // Nothing is sent to the AI service until the user accepted the AI usage policy.
+            \block_mastermind_assistant\local\ai_policy::require_accepted();
             $existingquestions = self::get_existing_quiz_questions($quiz);
 
             $client = new \block_mastermind_assistant\api_client();

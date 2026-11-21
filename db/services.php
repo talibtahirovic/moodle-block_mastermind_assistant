@@ -248,14 +248,6 @@ $functions = [
         'ajax'        => true,
         'loginrequired' => true,
     ],
-    'block_mastermind_assistant_log_generation_feedback' => [
-        'classname'   => 'block_mastermind_assistant\external\log_generation_feedback',
-        'methodname'  => 'execute',
-        'description' => 'Log user feedback (apply/regenerate/discard) on AI-generated content',
-        'type'        => 'write',
-        'ajax'        => true,
-        'loginrequired' => true,
-    ],
     'block_mastermind_assistant_grading_assist' => [
         'classname'   => 'block_mastermind_assistant\external\grading_assist',
         'methodname'  => 'execute',

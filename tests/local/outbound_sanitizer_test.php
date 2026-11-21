@@ -85,4 +85,79 @@ final class outbound_sanitizer_test extends \basic_testcase {
 
         $this->assertSame($payload, outbound_sanitizer::strip_identity($payload));
     }
+
+    /**
+     * A current course payload, as get_course_data builds it.
+     *
+     * @return array
+     */
+    private function course_payload(): array {
+        return [
+            'course' => ['id' => 3, 'fullname' => 'Patient Safety', 'summary' => 'About safety'],
+            'sections' => [['id' => 1, 'section' => 1, 'name' => 'Intro', 'summary' => '', 'activities' => [
+                ['id' => 9, 'module' => 'quiz', 'name' => 'Check-in', 'section' => 1,
+                    'module_data' => ['intro' => 'Teacher notes', 'questions' => '1,2,0']],
+            ]]],
+            'activities' => [['id' => 9, 'module' => 'quiz', 'name' => 'Check-in', 'section' => 1,
+                'module_data' => ['intro' => 'Teacher notes', 'questions' => '1,2,0']]],
+            'enrolment' => ['enrolled' => 14, 'active_30d' => 9, 'roles' => ['student' => 12]],
+            'grades' => [['item' => ['itemname' => 'Check-in', 'itemmodule' => 'quiz', 'grademax' => 10],
+                'summary' => ['graded' => 2, 'avg_finalgrade' => 8.5, 'min_finalgrade' => 7.0, 'max_finalgrade' => 10.0,
+                    'passed' => 2]]],
+            'forums' => [['name' => 'News', 'discussions' => 1, 'posts' => 1, 'replies' => 0]],
+            'forum_activity' => ['posts_total' => 1, 'discussions_total' => 1, 'posts_by_month' => ['2026-10' => 1]],
+            'audit_flags' => ['past_due_dates' => [], 'old_year_references' => [], 'empty_sections' => [],
+                'missing_enrollments' => false],
+            'feedback' => ['activities' => [['cmid' => 4, 'name' => 'Evaluation', 'responses' => 3, 'questions' => [
+                ['question' => 'Overall', 'responses' => 3, 'avg' => 4.3],
+            ], 'comments' => []]], 'satisfaction' => 4.3],
+            'scorm_performance' => [['name' => 'Module', 'attempts' => 4, 'avg_score' => 55.0, 'completion_rate' => 50.0,
+                'scoes' => [['title' => 'Unit', 'attempts' => 4, 'avg_score' => 55.0, 'pass_rate' => 50.0]]]],
+            'scorm_summary' => ['avg_score' => 55.0, 'completion_rate' => 50.0, 'weakest_sco' => 'Unit (avg 55%)'],
+        ];
+    }
+
+    public function test_for_dashboard_holds_back_small_grade_and_scorm_figures(): void {
+        $clean = outbound_sanitizer::for_dashboard($this->course_payload());
+
+        $this->assertSame(['graded' => 2, 'avg_finalgrade' => null, 'passed' => 2], $clean['grades'][0]['summary']);
+        $this->assertNull($clean['scorm_performance'][0]['avg_score']);
+        $this->assertNull($clean['scorm_performance'][0]['scoes'][0]['pass_rate']);
+        // No unit has five learners, so there is no course summary to send.
+        $this->assertArrayNotHasKey('scorm_summary', $clean);
+        // Evaluation ratings keep their n and their average.
+        $this->assertSame(4.3, $clean['feedback']['activities'][0]['questions'][0]['avg']);
+        $this->assertSame(14, $clean['enrolment']['enrolled']);
+    }
+
+    public function test_for_dashboard_drops_fields_no_prompt_uses(): void {
+        $clean = outbound_sanitizer::for_dashboard($this->course_payload());
+
+        $this->assertArrayNotHasKey('forums', $clean);
+        $this->assertArrayNotHasKey('forum_activity', $clean);
+        $this->assertArrayNotHasKey('audit_flags', $clean);
+        $this->assertArrayNotHasKey('module_data', $clean['activities'][0]);
+        $this->assertArrayNotHasKey('module_data', $clean['sections'][0]['activities'][0]);
+        $this->assertSame('Check-in', $clean['activities'][0]['name']);
+        $this->assertSame('quiz', $clean['sections'][0]['activities'][0]['module']);
+    }
+
+    public function test_for_dashboard_strips_identity_as_well(): void {
+        $payload = $this->course_payload();
+        $payload['users'] = [['id' => 5, 'email' => 'z@example.com']];
+
+        $clean = outbound_sanitizer::for_dashboard($payload);
+
+        $this->assertArrayNotHasKey('users', $clean);
+    }
+
+    public function test_every_course_payload_sender_uses_for_dashboard(): void {
+        global $CFG;
+        $dir = $CFG->dirroot . '/blocks/mastermind_assistant/classes/external/';
+        foreach (['get_full_analysis', 'get_ai_recommendations', 'get_updated_structure', 'refine_analysis'] as $name) {
+            $source = file_get_contents($dir . $name . '.php');
+            $this->assertStringContainsString('outbound_sanitizer::for_dashboard(', $source, $name);
+            $this->assertStringNotContainsString('outbound_sanitizer::strip_identity(', $source, $name);
+        }
+    }
 }

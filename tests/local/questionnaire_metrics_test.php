@@ -1021,4 +1021,25 @@ final class questionnaire_metrics_test extends \advanced_testcase {
         $this->assertCount(3, $activity['comments']);
         $this->assertSame(3, $result['ratings']['n']);
     }
+
+    /**
+     * Contact details and signatures are removed in Moodle, before the answer leaves the site.
+     */
+    public function test_signed_text_answers_are_redacted_in_moodle(): void {
+        $this->require_questionnaire();
+        $this->resetAfterTest();
+        $course = $this->getDataGenerator()->create_course(['startdate' => time() - DAYSECS]);
+        $q = $this->create_questionnaire($course, 'Feedback');
+        [$improve] = $this->add_question($q, self::ESSAY, '', 'Verbesserungen');
+        $response = $this->add_response($q->id, time() - 10);
+        $this->add_text($response, $improve, 'Mehr Pausen bitte. Rufen Sie mich an: +41 79 123 45 67. Viele Grüsse -- Anna Muster');
+
+        $result = questionnaire_metrics::collect($course->id);
+
+        $comment = $result['activities'][0]['comments'][0]['text'];
+        $this->assertStringContainsString('Mehr Pausen bitte.', $comment);
+        $this->assertStringNotContainsString('Muster', $comment);
+        $this->assertStringNotContainsString('123 45 67', $comment);
+        $this->assertStringContainsString('[number removed]', $comment);
+    }
 }

@@ -56,6 +56,8 @@ final class create_course_context_test extends \advanced_testcase {
     public function test_execute_with_malformed_contextjson_still_returns_error_envelope(): void {
         $this->resetAfterTest();
         $this->setAdminUser();
+        // The user accepted the AI usage policy in the browser modal.
+        set_user_preference(\block_mastermind_assistant\local\ai_policy::PREFERENCE, 1);
 
         // Without a configured dashboard the API call fails either way; the
         // point is that malformed context is swallowed (best-effort) and the

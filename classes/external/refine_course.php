@@ -71,6 +71,8 @@ class refine_course extends external_api {
             $context = context_system::instance();
             self::validate_context($context);
             require_capability('moodle/course:create', $context);
+            // Nothing is sent to the AI service until the user accepted the AI usage policy.
+            \block_mastermind_assistant\local\ai_policy::require_accepted();
 
             $data = self::validate_payload($params['payload']);
 

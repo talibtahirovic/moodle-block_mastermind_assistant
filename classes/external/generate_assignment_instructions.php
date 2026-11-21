@@ -98,6 +98,8 @@ class generate_assignment_instructions extends external_api {
         $context = context_course::instance($params['courseid']);
         self::validate_context($context);
         require_capability('moodle/course:manageactivities', $context);
+        // Nothing is sent to the AI service until the user accepted the AI usage policy.
+        \block_mastermind_assistant\local\ai_policy::require_accepted();
 
         // AI generation can take time for complex content.
         \core_php_time_limit::raise(300);

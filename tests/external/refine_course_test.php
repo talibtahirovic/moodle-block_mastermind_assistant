@@ -176,6 +176,8 @@ final class refine_course_test extends \advanced_testcase {
     public function test_execute_returns_error_for_invalid_payload(): void {
         $this->resetAfterTest();
         $this->setAdminUser();
+        // The user accepted the AI usage policy in the browser modal.
+        set_user_preference(\block_mastermind_assistant\local\ai_policy::PREFERENCE, 1);
 
         $result = refine_course::execute('not-json{');
         $this->assertDebuggingCalled();
@@ -200,6 +202,8 @@ final class refine_course_test extends \advanced_testcase {
         global $DB;
         $this->resetAfterTest();
         $this->setAdminUser();
+        // The user accepted the AI usage policy in the browser modal.
+        set_user_preference(\block_mastermind_assistant\local\ai_policy::PREFERENCE, 1);
 
         $countbefore = $DB->count_records('course');
 

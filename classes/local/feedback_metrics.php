@@ -215,6 +215,11 @@ class feedback_metrics {
                             if ($text === '') {
                                 continue;
                             }
+                            // Contact details and signatures never leave Moodle (redact before the clamp).
+                            $text = comment_redactor::redact($text);
+                            if ($text === '') {
+                                continue;
+                            }
                             $commentrows[] = [
                                 'completed' => (int) $value->completed,
                                 'comment' => [

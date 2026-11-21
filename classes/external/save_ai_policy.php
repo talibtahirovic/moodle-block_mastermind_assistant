@@ -68,7 +68,7 @@ class save_ai_policy extends external_api {
 
         // Save user preference.
         $value = $params['accepted'] ? 1 : 0;
-        \set_user_preference('mastermind_ai_policy_accepted', $value, $USER);
+        \set_user_preference(\block_mastermind_assistant\local\ai_policy::PREFERENCE, $value, $USER);
 
         return [
             'success' => true,

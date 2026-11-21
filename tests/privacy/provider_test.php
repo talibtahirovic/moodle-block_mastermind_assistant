@@ -50,4 +50,48 @@ final class provider_test extends \advanced_testcase {
         $this->assertStringContainsString('Feedback', $text);
         $this->assertStringContainsString('Questionnaire', $text);
     }
+
+    /**
+     * The fields declared for the dashboard, keyed by name.
+     *
+     * @return string[]
+     */
+    private function dashboard_fields(): array {
+        $collection = provider::get_metadata(new collection('block_mastermind_assistant'));
+        foreach ($collection->get_collection() as $item) {
+            if ($item->get_name() === 'mastermind_dashboard') {
+                return $item->get_privacy_fields();
+            }
+        }
+        return [];
+    }
+
+    /**
+     * Everything the plugin sends to the dashboard is declared.
+     */
+    public function test_declares_everything_the_plugin_sends(): void {
+        $fields = $this->dashboard_fields();
+
+        foreach (
+            ['coursename', 'coursedata', 'activityname', 'submissioncontent', 'evaluationcomments',
+                'teachercontent', 'siteconnection'] as $field
+        ) {
+            $this->assertArrayHasKey($field, $fields, $field);
+        }
+        // Generation events are no longer sent, so they are no longer declared.
+        $this->assertArrayNotHasKey('usageevents', $fields);
+    }
+
+    /**
+     * The declarations say what is reduced in Moodle before anything is sent.
+     */
+    public function test_declarations_describe_what_moodle_removes_before_sending(): void {
+        $fields = $this->dashboard_fields();
+        $text = fn(string $field) => get_string($fields[$field], 'block_mastermind_assistant');
+
+        $this->assertStringContainsString('removed in Moodle', $text('evaluationcomments'));
+        $this->assertStringContainsString('five learners', $text('coursedata'));
+        $this->assertStringContainsString('removed in Moodle', $text('submissioncontent'));
+        $this->assertStringContainsString('PDF', $text('submissioncontent'));
+    }
 }

@@ -591,29 +591,6 @@ class api_client {
     }
 
     /**
-     * Log user feedback on AI-generated content.
-     *
-     * @param string $action
-     * @param string $moduletype
-     * @param string $activityname
-     * @param string $coursename
-     * @return array
-     */
-    public function log_generation_feedback(
-        string $action,
-        string $moduletype,
-        string $activityname = '',
-        string $coursename = ''
-    ): array {
-        return $this->request('/api/ma/generation-feedback', [
-            'action' => $action,
-            'module_type' => $moduletype,
-            'activity_name' => $activityname,
-            'course_name' => $coursename,
-        ], 'POST', 15);
-    }
-
-    /**
      * Test connection to the dashboard.
      *
      * @return array

@@ -111,6 +111,8 @@ final class generate_report_test extends \advanced_testcase {
         $this->resetAfterTest();
         [$course] = $this->create_environment();
         $this->setAdminUser();
+        // The user accepted the AI usage policy in the browser modal.
+        set_user_preference(\block_mastermind_assistant\local\ai_policy::PREFERENCE, 1);
 
         $result = generate_report::execute($course->id, "   \n  ");
         $this->assertDebuggingCalled();

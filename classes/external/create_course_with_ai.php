@@ -89,6 +89,8 @@ class create_course_with_ai extends external_api {
             $context = context_system::instance();
             self::validate_context($context);
             require_capability('moodle/course:create', $context);
+            // Nothing is sent to the AI service until the user accepted the AI usage policy.
+            \block_mastermind_assistant\local\ai_policy::require_accepted();
 
             // Optional instructor-provided context — best-effort, never fatal.
             $creationcontext = \block_mastermind_assistant\local\course_context::from_json($params['contextjson']);

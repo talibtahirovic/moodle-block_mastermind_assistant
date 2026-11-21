@@ -42,7 +42,7 @@ $string['ai_policy_body'] = '<h4>Willkommen bei den KI-gestuetzten Funktionen!</
 <h5>Genauigkeit von KI-generierten Inhalten</h5>
 <p>KI kann nuetzliche Vorschlaege und Informationen liefern, aber ihre Genauigkeit kann variieren. Sie sollten die bereitgestellten Informationen immer ueberpruefen, um sicherzustellen, dass sie korrekt, vollstaendig und fuer Ihre spezifische Situation geeignet sind.</p>
 <h5>Wie Ihre Daten verarbeitet werden</h5>
-<p>Diese KI-Funktion verwendet externe grosse Sprachmodelle (LLM). Wenn Sie diese Funktion nutzen, werden alle Informationen oder persoenlichen Daten, die Sie teilen, gemaess der Datenschutzrichtlinie dieser LLMs behandelt. Wir empfehlen Ihnen, deren Datenschutzrichtlinie zu lesen, um zu verstehen, wie sie mit Ihren Daten umgehen. Zusaetzlich kann eine Aufzeichnung Ihrer Interaktionen mit den KI-Funktionen auf dieser Website gespeichert werden.</p>
+<p>Diese KI-Funktion verwendet externe grosse Sprachmodelle (LLM). Wenn Sie diese Funktion nutzen, werden alle Informationen oder persoenlichen Daten, die Sie teilen, gemaess der Datenschutzrichtlinie dieser LLMs behandelt. Wir empfehlen Ihnen, deren Datenschutzrichtlinie zu lesen, um zu verstehen, wie sie mit Ihren Daten umgehen. Diese Website speichert keine Aufzeichnung Ihrer Interaktionen mit den KI-Funktionen, und der Mastermind-Dienst erfasst fuer die Abrechnung Nutzungszahlen, nicht den Inhalt Ihrer Anfragen.</p>
 <p>Wenn Sie den Bewertungsassistenten nutzen, werden von Lernenden verfasste Abgabe- oder Antworttexte zur Analyse an den KI-Dienst gesendet. Es wird dabei keine Identitaet der Lernenden (Name, Nutzer-ID oder E-Mail) uebermittelt.</p>
 <p>Wenn Sie Fragen zur Verarbeitung Ihrer Daten haben, wenden Sie sich bitte an Ihre Lehrenden oder Bildungseinrichtung.</p>
 <p><strong>Durch Fortfahren bestaetigen Sie, dass Sie diese Richtlinie verstehen und ihr zustimmen.</strong></p>';
@@ -50,6 +50,7 @@ $string['ai_policy_declined_msg'] = 'Sie muessen die KI-Nutzungsrichtlinie akzep
 $string['ai_policy_title'] = 'KI-Nutzungsrichtlinie';
 $string['ai_working'] = 'Die KI erstellt Ihre Kursstruktur. Dies kann einen Moment dauern...';
 $string['all_categories'] = 'Alle Kategorien';
+$string['analysis_based_on'] = 'Grundlage';
 $string['analyzing_context'] = 'Kurskontext wird analysiert und Inhalt erstellt...';
 $string['analyzing_quiz_context'] = 'Testthema wird analysiert und Fragen erstellt...';
 $string['apply_content'] = 'Im Editor anwenden';
@@ -102,6 +103,9 @@ $string['content_generated'] = 'Inhalt erfolgreich erstellt';
 $string['content_preview'] = 'Seiteninhalt';
 $string['content_summary_label'] = 'Zusammenfassung';
 $string['content_type_label'] = 'Inhaltstyp';
+$string['copy_confirm_body'] = 'Aus "{$a}" wird ein neuer Kurs mit Inhalten und Einstellungen erstellt, aber ohne Teilnehmende, Bewertungen und Protokolle. Sie werden darin als Trainer/in eingeschrieben.';
+$string['copy_confirm_button'] = 'Kurs kopieren';
+$string['copy_confirm_title'] = 'Diesen Kurs kopieren?';
 $string['copy_failed'] = 'Kurs konnte nicht kopiert werden. Bitte versuchen Sie es erneut.';
 $string['copy_in_progress'] = 'Bitte warten Sie, waehrend der Kurs kopiert wird. Bei grossen Kursen kann dies einen Moment dauern.';
 $string['copy_success'] = 'Kurs erfolgreich kopiert!';
@@ -302,11 +306,14 @@ $string['pluginname'] = 'Mastermind-Assistent';
 $string['preview_title'] = 'Vorschau der erstellten Anweisungen';
 $string['privacy:ai_policy_accepted_no'] = 'Der Benutzer hat die KI-Nutzungsrichtlinie nicht akzeptiert.';
 $string['privacy:ai_policy_accepted_yes'] = 'Der Benutzer hat die KI-Nutzungsrichtlinie akzeptiert.';
-$string['privacy:metadata:mastermind_dashboard'] = 'Kurs- und Aktivitaetsdaten werden zur KI-gestuetzten Inhaltserstellung und Analyse an die Mastermind-Dashboard-API gesendet.';
+$string['privacy:metadata:mastermind_dashboard'] = 'Kurs- und Aktivitaetsdaten werden zur KI-gestuetzten Inhaltserstellung und Analyse an die Mastermind-Dashboard-API gesendet. Namen, Nutzer-IDs und E-Mail-Adressen von Lernenden werden nie gesendet; Angaben zur Person, die Lernende in eine Antwort oder Abgabe geschrieben haben, werden in Moodle entfernt, bevor etwas gesendet wird.';
 $string['privacy:metadata:mastermind_dashboard:activityname'] = 'Der Name der zu erstellenden Aktivitaet.';
-$string['privacy:metadata:mastermind_dashboard:coursedata'] = 'Kursstrukturdaten einschliesslich Abschnittsnamen und Aktivitaetsnamen.';
+$string['privacy:metadata:mastermind_dashboard:coursedata'] = 'Kursstruktur (Namen und Beschreibungen von Abschnitten und Aktivitaeten, Daten) und in Moodle berechnete Kennzahlen: Einschreibungen pro Rolle, aktive Lernende, Abschlusszahlen pro Aktivitaet, Anzahl bestandener Bewertungen und SCORM-Versuche. Notendurchschnitte sowie SCORM-Ergebnisse und -Quoten werden nur gesendet, wenn mindestens fuenf Lernende dahinterstehen. Keine Zeilen pro Person, keine Namen, Benutzernamen, Nutzer-IDs oder E-Mail-Adressen.';
 $string['privacy:metadata:mastermind_dashboard:coursename'] = 'Der Name des Kurses.';
-$string['privacy:metadata:mastermind_dashboard:submissioncontent'] = 'Wenn Lehrende Bewertungsunterstuetzung anfordern, werden der von Lernenden verfasste Abgabetext, Essay-Antworttext oder eingereichte Dateiinhalte zur Analyse an das verbundene Mastermind-Assistant-Dashboard (das die Anthropic-API nutzt) gesendet. Es wird keine Identitaet der Lernenden (Name, Nutzer-ID oder E-Mail) uebermittelt.';
+$string['privacy:metadata:mastermind_dashboard:evaluationcomments'] = 'Freitextantworten und Antwortzahlen aus Kursevaluationen (Feedback sowie als Evaluation erkannte Questionnaire-Aktivitaeten), ohne Nutzer-IDs. Nur Antworten von Teilnehmenden zaehlen, Antworten des Personals nicht. Links, E-Mail-Adressen, Telefonnummern und Unterschriften in einer Antwort werden in Moodle entfernt, bevor sie gesendet wird, und das Dashboard entfernt sie noch einmal. Das Dashboard speichert Zahlen und Themen pro Aktivitaet, aber keinen Antworttext, ausser kurze Zitate wurden fuer die Website eingeschaltet.';
+$string['privacy:metadata:mastermind_dashboard:submissioncontent'] = 'Wenn Lehrende fuer eine Abgabe Bewertungsunterstuetzung anfordern: der Abgabetext, die Essay-Antwort oder die eingereichte Datei. Name, E-Mail-Adresse, Benutzername und ID-Nummer der lernenden Person werden in Moodle entfernt, bevor gesendet wird, und eine Datei wird unter einem neutralen Namen gesendet. Namen in PDF- und Word-Dateien koennen in Moodle nicht entfernt werden; reine Textdateien werden wie getippter Text bereinigt.';
+$string['privacy:metadata:mastermind_dashboard:siteconnection'] = 'Die Adresse der Website, bei jeder Anfrage. Wenn eine Administratorin oder ein Administrator die Website verbindet, werden Name und E-Mail-Adresse dieser Person sowie der Name der Website an das Dashboard uebergeben, um das Konto einzurichten.';
+$string['privacy:metadata:mastermind_dashboard:teachercontent'] = 'Texte und Dateien, die Lehrende den KI-Funktionen geben: Namen und Beschreibungen von Kurs, Abschnitten und Aktivitaeten, hochgeladene Dokumente fuer die Kurs- oder Quizerstellung, Ueberarbeitungswuensche und Berichtsanfragen (mit dem erzeugten SQL und, bei einer automatischen Korrektur, der Fehlermeldung der Datenbank).';
 $string['privacy:metadata:preference:ai_policy_accepted'] = 'Ob der Benutzer die KI-Nutzungsrichtlinie akzeptiert hat.';
 $string['processing'] = 'Verarbeitung...';
 $string['progress_analysis_complete'] = 'Analyse abgeschlossen!';

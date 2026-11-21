@@ -35,6 +35,7 @@ use external_single_structure;
 use external_value;
 use context_module;
 use Exception;
+use block_mastermind_assistant\local\learner_identity_redactor;
 
 /**
  * Grading assistant: list items awaiting manual grading and analyze one item.
@@ -119,6 +120,8 @@ class grading_assist extends external_api {
             }
 
             if ($params['action'] === 'analyze') {
+                // Nothing is sent to the AI service until the user accepted the AI usage policy.
+                \block_mastermind_assistant\local\ai_policy::require_accepted();
                 $payload = ($params['modtype'] === 'assign')
                     ? self::build_assign_payload($params['cmid'], (int) $params['itemid'])
                     : self::build_quiz_payload($params['cmid'], $params['itemid']);
@@ -289,7 +292,13 @@ class grading_assist extends external_api {
             ['submission' => $submission->id]
         );
         $text = trim(self::clean_html((string) $onlinetext));
+        $learners = self::submission_learners($submission);
         if ($text !== '') {
+            // The student's own name, email, username and id number never leave Moodle.
+            $text = learner_identity_redactor::redact($text, $learners);
+            if ($text === '') {
+                throw new Exception(get_string('grading_error_nothing_to_analyze', 'block_mastermind_assistant'));
+            }
             $payload['submission_text'] = $text;
             return $payload;
         }
@@ -297,9 +306,18 @@ class grading_assist extends external_api {
         // 2. File submission: first supported file (PDF/DOCX/TXT, <= 10MB).
         $file = self::find_supported_file($context, (int) $submission->id);
         if ($file !== null) {
-            $payload['file_data'] = base64_encode($file->get_content());
+            $content = $file->get_content();
+            if ($file->get_mimetype() === 'text/plain') {
+                // Plain text can be redacted here; PDF and DOCX content cannot be read in Moodle.
+                $content = learner_identity_redactor::redact($content, $learners);
+                if ($content === '') {
+                    throw new Exception(get_string('grading_error_unsupported_file', 'block_mastermind_assistant'));
+                }
+            }
+            $payload['file_data'] = base64_encode($content);
             $payload['file_type'] = $file->get_mimetype();
-            $payload['file_name'] = $file->get_filename();
+            // The original file name often carries the student's name.
+            $payload['file_name'] = self::neutral_filename($file->get_mimetype());
             return $payload;
         }
 
@@ -357,6 +375,11 @@ class grading_assist extends external_api {
         $question = $qa->get_question(false);
 
         $response = trim((string) $qa->get_response_summary());
+        if ($response !== '') {
+            // The student's own name, email, username and id number never leave Moodle.
+            $student = $DB->get_record('user', ['id' => $attempt->userid]);
+            $response = learner_identity_redactor::redact($response, $student ? [$student] : []);
+        }
         if ($response === '') {
             throw new Exception(get_string('grading_error_nothing_to_analyze', 'block_mastermind_assistant'));
         }
@@ -376,6 +399,39 @@ class grading_assist extends external_api {
             ],
             'submission_text' => $response,
         ];
+    }
+
+    /**
+     * The learners behind a submission: its user, or every member of its group for a team submission.
+     *
+     * @param \stdClass $submission assign_submission record.
+     * @return \stdClass[] User records.
+     */
+    private static function submission_learners(\stdClass $submission): array {
+        global $DB;
+        if (!empty($submission->userid)) {
+            $user = $DB->get_record('user', ['id' => $submission->userid]);
+            return $user ? [$user] : [];
+        }
+        if (!empty($submission->groupid)) {
+            return array_values(groups_get_members((int) $submission->groupid, 'u.*'));
+        }
+        return [];
+    }
+
+    /**
+     * A file name that says only what kind of file it is.
+     *
+     * @param string $mimetype The file's MIME type.
+     * @return string
+     */
+    public static function neutral_filename(string $mimetype): string {
+        $extensions = [
+            'application/pdf' => 'pdf',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => 'docx',
+            'text/plain' => 'txt',
+        ];
+        return isset($extensions[$mimetype]) ? 'submission.' . $extensions[$mimetype] : 'submission';
     }
 
     /**

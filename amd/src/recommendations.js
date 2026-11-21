@@ -127,20 +127,6 @@ function(Ajax, Notification, Str, AiPolicy) {
             refineState.coursedata = null;
         }
 
-        // Log action consumption at generation time (action is consumed even if result is not applied).
-        Ajax.call([{
-            methodname: 'block_mastermind_assistant_log_generation_feedback',
-            args: {
-                courseid: courseid,
-                action: 'generate',
-                moduletype: 'course',
-                activityname: '',
-                coursename: ''
-            }
-        }])[0].catch(function() {
-            // Silent — feedback logging is non-critical.
-        });
-
         Ajax.call([{
             methodname: 'block_mastermind_assistant_get_full_analysis',
             args: {
@@ -373,7 +359,8 @@ function(Ajax, Notification, Str, AiPolicy) {
         refineState.structure = structure;
 
         var sections = parseAIResponse(recommendations);
-        var formattedRecommendations = formatRecommendationsAsChecklist(sections.mainRecommendations);
+        var formattedRecommendations = formatRecommendationsAsChecklist(sections.mainRecommendations) +
+            formatImprovements(sections.improvementItems);
 
         var insightsHTML = '';
         if (sections.evaluationInsights) {
@@ -429,6 +416,7 @@ function(Ajax, Notification, Str, AiPolicy) {
 
         document.body.insertAdjacentHTML('beforeend', modalHTML);
 
+        localiseImprovementLabels(document.querySelector('#ai-results-modal .ai-results-recommendations-content'));
         initRefineBar();
 
         // Render the structure tree into the modal's container
@@ -524,20 +512,6 @@ function(Ajax, Notification, Str, AiPolicy) {
         });
 
         var courseid = getCourseId();
-
-        // Log action consumption (refinement is billed like a regenerate).
-        Ajax.call([{
-            methodname: 'block_mastermind_assistant_log_generation_feedback',
-            args: {
-                courseid: courseid,
-                action: 'regenerate',
-                moduletype: 'course',
-                activityname: '',
-                coursename: ''
-            }
-        }])[0].catch(function() {
-            // Silent — feedback logging is non-critical.
-        });
 
         var coursedata = refineState.coursedata || {};
         var payload = {
@@ -681,7 +655,9 @@ function(Ajax, Notification, Str, AiPolicy) {
         var recContainer = modal.querySelector('.ai-results-recommendations-content');
         if (recContainer) {
             var sections = parseAIResponse(recommendations);
-            recContainer.innerHTML = formatRecommendationsAsChecklist(sections.mainRecommendations);
+            recContainer.innerHTML = formatRecommendationsAsChecklist(sections.mainRecommendations) +
+                formatImprovements(sections.improvementItems);
+            localiseImprovementLabels(recContainer);
         }
 
         // Re-rendering the structure also recreates the Apply button so it
@@ -707,6 +683,102 @@ function(Ajax, Notification, Str, AiPolicy) {
     }
 
     /**
+     * The analysis improvements with the course elements and figures each
+     * one rests on. Dashboards since November 2026 send improvement_refs
+     * alongside course_structure_improvements (same order); older ones do
+     * not, and the improvements then show without references.
+     *
+     * @param {Object} jsonData Parsed analysis result
+     * @return {Array} Items of {text: string, refs: Array}
+     */
+    function improvementItems(jsonData) {
+        var refs = Array.isArray(jsonData.improvement_refs) ? jsonData.improvement_refs : [];
+        var items = [];
+        jsonData.course_structure_improvements.forEach(function(text, i) {
+            if (typeof text !== 'string' || text.trim() === '') {
+                return;
+            }
+            items.push({text: text, refs: Array.isArray(refs[i]) ? refs[i] : []});
+        });
+        return items;
+    }
+
+    /**
+     * Link for a reference: the activity page for an activity or one of its
+     * figures, the course section otherwise. Empty when neither is known.
+     *
+     * @param {Object} ref Reference {key, label, cmid?, module?, section?}
+     * @param {number|null} courseid Current course id
+     * @return {string} URL or ''
+     */
+    function referenceUrl(ref, courseid) {
+        var root = (window.M && M.cfg && M.cfg.wwwroot) ? M.cfg.wwwroot : '';
+        var module = typeof ref.module === 'string' ? ref.module : '';
+        if (Number.isInteger(ref.cmid) && ref.cmid > 0 && /^[a-z][a-z0-9_]*$/.test(module) && module !== 'activity') {
+            return root + '/mod/' + module + '/view.php?id=' + ref.cmid;
+        }
+        if (Number.isInteger(ref.section) && ref.section >= 0 && courseid) {
+            return root + '/course/view.php?id=' + courseid + '#section-' + ref.section;
+        }
+        return '';
+    }
+
+    /**
+     * Render the improvements as a numbered list, each followed by the
+     * sections, activities and figures it rests on (links open a new tab so
+     * the analysis stays open).
+     *
+     * @param {Array} items Items from improvementItems()
+     * @return {string} HTML, or '' when there are no items
+     */
+    function formatImprovements(items) {
+        if (!items || items.length === 0) {
+            return '';
+        }
+        var courseid = getCourseId();
+        var html = '<ol class="ai-improvements">';
+        items.forEach(function(item) {
+            html += '<li class="ai-improvement"><span class="ai-improvement-text">' + escapeHtml(item.text) + '</span>';
+            var chips = [];
+            item.refs.forEach(function(ref) {
+                if (!ref || typeof ref.label !== 'string' || ref.label === '') {
+                    return;
+                }
+                var url = referenceUrl(ref, courseid);
+                chips.push(url ?
+                    '<a class="ai-improvement-ref" href="' + escapeHtml(url) + '" target="_blank" rel="noopener">' +
+                        escapeHtml(ref.label) + '</a>' :
+                    '<span class="ai-improvement-ref">' + escapeHtml(ref.label) + '</span>');
+            });
+            if (chips.length > 0) {
+                html += '<div class="ai-improvement-refs">' +
+                    '<span class="ai-improvement-refs-label">Based on</span>' + chips.join('') + '</div>';
+            }
+            html += '</li>';
+        });
+        return html + '</ol>';
+    }
+
+    /**
+     * Localise the "Based on" labels inside a container.
+     *
+     * @param {HTMLElement|null} container Element holding rendered improvements
+     */
+    function localiseImprovementLabels(container) {
+        if (!container || !container.querySelector('.ai-improvement-refs-label')) {
+            return;
+        }
+        Str.get_string('analysis_based_on', 'block_mastermind_assistant').then(function(s) {
+            container.querySelectorAll('.ai-improvement-refs-label').forEach(function(el) {
+                el.textContent = s;
+            });
+            return s;
+        }).catch(function() {
+            // Keep the English label.
+        });
+    }
+
+    /**
      * Parse AI response into different sections
      * @param {string} response The full AI response
      * @return {Object} Object with different sections
@@ -715,6 +787,7 @@ function(Ajax, Notification, Str, AiPolicy) {
         var result = {
             mainRecommendations: response,
             improvements: '',
+            improvementItems: [],
             updatedStructure: '',
             evaluationInsights: null
         };
@@ -728,6 +801,7 @@ function(Ajax, Notification, Str, AiPolicy) {
                     result.improvements = jsonData.course_structure_improvements.map(function(item) {
                         return '• ' + item;
                     }).join('\n');
+                    result.improvementItems = improvementItems(jsonData);
                 } else {
                     result.improvements = jsonData.course_structure_improvements;
                 }

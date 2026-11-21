@@ -87,6 +87,8 @@ class refine_analysis extends external_api {
             $context = context_course::instance($params['courseid']);
             self::validate_context($context);
             require_capability('block/mastermind_assistant:view', $context);
+            // Nothing is sent to the AI service until the user accepted the AI usage policy.
+            \block_mastermind_assistant\local\ai_policy::require_accepted();
 
             $data = self::validate_payload($params['payload']);
 
@@ -129,19 +131,24 @@ class refine_analysis extends external_api {
             throw new Exception('Refinement payload requires a previous_result object');
         }
 
-        $payload = [
+        // The course structure goes through the same outbound reduction as a full analysis.
+        $structure = \block_mastermind_assistant\local\outbound_sanitizer::for_dashboard([
             'course' => is_array($data['course'] ?? null) ? $data['course'] : [],
             'sections' => is_array($data['sections'] ?? null) ? $data['sections'] : [],
             'activities' => is_array($data['activities'] ?? null) ? $data['activities'] : [],
+        ]);
+        $payload = [
+            'course' => $structure['course'],
+            'sections' => $structure['sections'],
+            'activities' => $structure['activities'],
             'previous_result' => $data['previous_result'],
             'conversation' => self::normalize_conversation($data['conversation'] ?? []),
             'feedback' => $feedback,
         ];
         // Evaluation aggregates (the get_course_data 'feedback' block) so the
-        // refinement still sees learner feedback. Identity-stripped like the
-        // rest of the payload.
+        // refinement still sees learner feedback, reduced like the rest of the payload.
         if (is_array($data['evaluation_data'] ?? null)) {
-            $payload['evaluation_data'] = \block_mastermind_assistant\local\outbound_sanitizer::strip_identity(
+            $payload['evaluation_data'] = \block_mastermind_assistant\local\outbound_sanitizer::for_dashboard(
                 $data['evaluation_data']
             );
         }

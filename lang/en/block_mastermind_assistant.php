@@ -42,7 +42,7 @@ $string['ai_policy_body'] = '<h4>Welcome to the AI-powered features!</h4>
 <h5>Accuracy of AI-generated content</h5>
 <p>AI can give useful suggestions and information, but its accuracy may vary. You should always double-check the information provided to make sure it\'s accurate, complete, and suitable for your specific situation.</p>
 <h5>How your data is processed</h5>
-<p>This AI feature uses external Large Language Models (LLM). If you use this feature, any information or personal data you share will be handled according to the privacy policy of those LLMs. We recommend that you read their privacy policy to understand how they will handle your data. Additionally, a record of your interactions with the AI features may be saved in this site.</p>
+<p>This AI feature uses external Large Language Models (LLM). If you use this feature, any information or personal data you share will be handled according to the privacy policy of those LLMs. We recommend that you read their privacy policy to understand how they will handle your data. This site keeps no record of your interactions with the AI features, and the Mastermind service records usage figures for accounting, not the content of your requests.</p>
 <p>When you use the grading assistant, learner-authored submission or answer text is sent to the AI service for analysis. No learner identity (name, user ID or email) is transmitted with it.</p>
 <p>If you have questions about how your data is processed, please check with your teachers or learning organisation.</p>
 <p><strong>By continuing, you acknowledge that you understand and agree to this policy.</strong></p>';
@@ -50,6 +50,7 @@ $string['ai_policy_declined_msg'] = 'You must accept the AI usage policy to use 
 $string['ai_policy_title'] = 'AI usage policy';
 $string['ai_working'] = 'AI is generating your course structure. This may take a minute...';
 $string['all_categories'] = 'All categories';
+$string['analysis_based_on'] = 'Based on';
 $string['analyzing_context'] = 'Analyzing course context and generating content...';
 $string['analyzing_quiz_context'] = 'Analyzing quiz topic and generating questions...';
 $string['apply_content'] = 'Apply to Editor';
@@ -102,6 +103,9 @@ $string['content_generated'] = 'Content Generated Successfully';
 $string['content_preview'] = 'Page Content';
 $string['content_summary_label'] = 'Summary';
 $string['content_type_label'] = 'Content Type';
+$string['copy_confirm_body'] = 'A new course will be created from "{$a}" with its content and settings, but without participants, grades or logs. You will be enrolled in it as a teacher.';
+$string['copy_confirm_button'] = 'Copy course';
+$string['copy_confirm_title'] = 'Copy this course?';
 $string['copy_failed'] = 'Failed to copy course. Please try again.';
 $string['copy_in_progress'] = 'Please wait while the course is being copied. This may take a moment for large courses.';
 $string['copy_success'] = 'Course copied successfully!';
@@ -302,12 +306,14 @@ $string['pluginname'] = 'Mastermind Assistant';
 $string['preview_title'] = 'Preview Generated Instructions';
 $string['privacy:ai_policy_accepted_no'] = 'The user has not accepted the AI usage policy.';
 $string['privacy:ai_policy_accepted_yes'] = 'The user has accepted the AI usage policy.';
-$string['privacy:metadata:mastermind_dashboard'] = 'Course and activity data is sent to the Mastermind Dashboard API for AI-powered content generation and analysis. Learner names, user IDs and email addresses are never sent: enrolment, grade, completion and forum data leave the site as counts and averages only.';
+$string['privacy:metadata:mastermind_dashboard'] = 'Course and activity data is sent to the Mastermind Dashboard API for AI-powered content generation and analysis. Learner names, user IDs and email addresses are never sent, and identity a learner typed into an answer or submission is removed in Moodle before anything is sent.';
 $string['privacy:metadata:mastermind_dashboard:activityname'] = 'The name of the activity being generated.';
-$string['privacy:metadata:mastermind_dashboard:coursedata'] = 'Course structure data (section and activity names, summaries, dates) together with aggregate figures only: enrolment counts per role, active-learner counts, per-item grade averages and pass counts, per-activity completion counts, forum post counts per forum and per month, and SCORM score averages. No per-learner rows, names, usernames, user IDs or email addresses are included.';
-$string['privacy:metadata:mastermind_dashboard:evaluationcomments'] = 'Free-text answers and aggregate answer counts from course evaluation activities (Feedback, and Questionnaire activities identified as evaluations), without user IDs. Only participants\' answers are included; staff answers are left out. Contact details and sign-offs inside a comment are removed by the dashboard before storage or analysis, and the dashboard retains only per-activity counts and themes, never the comment text.';
+$string['privacy:metadata:mastermind_dashboard:coursedata'] = 'Course structure (section and activity names, summaries, dates) and figures computed in Moodle: enrolment counts per role, active-learner counts, per-activity completion counts, grade pass counts and SCORM attempt counts. Grade averages and SCORM scores and rates are sent only when at least five learners are behind them. No per-learner rows, names, usernames, user IDs or email addresses are included.';
+$string['privacy:metadata:mastermind_dashboard:evaluationcomments'] = 'Free-text answers and answer counts from course evaluation activities (Feedback, and Questionnaire activities identified as evaluations), without user IDs. Only participants\' answers are included; staff answers are left out. Links, email addresses, phone numbers and signatures inside an answer are removed in Moodle before it is sent, and the dashboard removes them again. The dashboard keeps per-activity counts and themes; it keeps no answer text unless short excerpts were switched on for the site.';
 $string['privacy:metadata:mastermind_dashboard:coursename'] = 'The name of the course.';
-$string['privacy:metadata:mastermind_dashboard:submissioncontent'] = 'When a teacher requests grading assistance, the learner-authored submission text, essay answer text or submitted file content is sent to the connected Mastermind Assistant dashboard (which uses the Anthropic API) for analysis. No learner identity (name, user ID or email) is transmitted.';
+$string['privacy:metadata:mastermind_dashboard:submissioncontent'] = 'When a teacher asks for grading help on one submission: the submission text, essay answer or submitted file. The student\'s own name, email address, username and ID number are removed in Moodle before sending, and a file is sent under a neutral name. Names inside PDF and Word files cannot be removed in Moodle; plain-text files are redacted like typed text.';
+$string['privacy:metadata:mastermind_dashboard:siteconnection'] = 'The site address, with every request. When an administrator connects the site, their name and email address and the site name are passed to the dashboard to set up the account.';
+$string['privacy:metadata:mastermind_dashboard:teachercontent'] = 'Text and files a teacher gives the AI features: course, section and activity names and descriptions, documents uploaded for course or quiz creation, refinement requests, and report requests (with the generated SQL and, during an automatic repair, the database error message).';
 $string['privacy:metadata:preference:ai_policy_accepted'] = 'Whether the user has accepted the AI usage policy.';
 $string['processing'] = 'Processing...';
 $string['progress_analysis_complete'] = 'Analysis complete!';

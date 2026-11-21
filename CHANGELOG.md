@@ -1,5 +1,66 @@
 # Changelog
 
+## v4.4.0 (2026112100) — 2026-11-21
+
+### Security
+- Applying book chapters, lesson pages or selected quiz questions now writes only into an
+  activity of the course passed in, and checks "Manage activities" on the activity itself.
+  Before, a teacher of one course could write into another course's book, lesson or quiz
+  by pairing their own course id with a foreign course-module id, and a prohibition set
+  on the activity was not applied.
+- The AI usage policy is now enforced on the server. Every web service that sends course
+  or learner data to the Mastermind dashboard refuses until the user has accepted the
+  policy; before, only the browser asked, so a direct web-service call skipped it.
+  Listing grading items, applying a generated draft and other calls that send nothing
+  to the AI service are unchanged.
+
+### Privacy
+- Evaluation answers (Feedback and Questionnaire) are redacted in Moodle before they are
+  sent: links, email addresses, phone and id numbers, and signatures ("Regards, Jane
+  Okonkwo", "-- Jane", "Prof. Lindqvist", "My name is …") become "[… removed]"
+  placeholders. Same rules as the dashboard's own redaction, which still runs as a second
+  pass. Applies to the course analysis and, through the shared collectors, to the
+  enterprise companion's daily collection.
+- Grading assist removes the student's own name, email address, username and id number
+  from the submission text and essay answer before sending (every member's, for a group
+  submission). A file is sent as "submission.pdf/.docx/.txt" instead of its original name,
+  and a plain-text file is redacted like typed text. Names inside PDF and Word files can't
+  be removed in Moodle.
+- Grade averages and SCORM scores and rates behind fewer than five learners are no longer
+  sent (sent as null); grade minimum and maximum are not sent at all. Counts are sent as
+  before, and evaluation ratings keep going out with their n. The block's own screens in
+  Moodle still show every figure.
+- The course analysis no longer sends fields no prompt uses: forum statistics, audit flags
+  and activity intros. The refinement path now gets the same treatment as a full analysis.
+- The privacy declaration now lists everything sent to the dashboard: teacher-provided
+  text and files, and the site address and administrator details sent when a site is
+  connected.
+- Generation events are no longer sent. Each time a draft or the analysis was generated,
+  applied, regenerated or discarded, the block sent the action with the course and
+  activity name to the dashboard, which stored nothing. The web service
+  `block_mastermind_assistant_log_generation_feedback` is removed. The AI usage policy now
+  says that the Mastermind service records usage figures for accounting, not the content
+  of requests.
+
+### Added
+- The course analysis lists its recommendations under the summary, and each one names
+  the sections, activities and figures it rests on ("Based on: Quiz 1: 3 of 12 learners
+  completed"), linked to the activity or the course section. Links open in a new tab.
+  With a dashboard older than this release the recommendations show without references.
+
+### Changed
+- Copying a course from the search results asks for confirmation first. Before, one
+  click on "Copy" created the new course straight away.
+
+### Release notes
+- Needs a dashboard from 21 November 2026 or later (deployed). Older dashboards print a
+  held-back SCORM figure as "null%" in the course-analysis prompt, and send no evidence
+  references.
+- Enterprise companion v1.5.0 requires this version (it uses `local\small_numbers`).
+  Upgrade the block first.
+- The upgrade removes the `log_generation_feedback` web service. The dashboard keeps
+  answering its route until no site runs an older block.
+
 ## v4.3.0 (2026111200) — 2026-11-12
 
 ### Added

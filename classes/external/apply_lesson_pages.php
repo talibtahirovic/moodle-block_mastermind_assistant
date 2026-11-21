@@ -42,6 +42,7 @@ use external_value;
 use context_course;
 use context_module;
 use Exception;
+use block_mastermind_assistant\local\activity_access;
 
 /**
  * Apply AI-generated lesson pages by creating them via Moodle's lesson API.
@@ -90,7 +91,8 @@ class apply_lesson_pages extends external_api {
         }
 
         // Get lesson instance.
-        $cm = get_coursemodule_from_id('lesson', $params['cmid'], 0, false, MUST_EXIST);
+        // Only a lesson in this course, and only if the user may manage that lesson.
+        $cm = activity_access::require_manageable('lesson', $params['cmid'], $params['courseid']);
         $lesson = new \lesson($DB->get_record('lesson', ['id' => $cm->instance], '*', MUST_EXIST));
         $modcontext = context_module::instance($cm->id);
 

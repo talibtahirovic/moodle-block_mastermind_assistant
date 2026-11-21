@@ -370,6 +370,8 @@ final class grading_assist_test extends \advanced_testcase {
         global $DB;
         $this->resetAfterTest();
         $this->setAdminUser();
+        // The user accepted the AI usage policy in the browser modal.
+        set_user_preference(\block_mastermind_assistant\local\ai_policy::PREFERENCE, 1);
         [, $assign, $cm, $student] = $this->create_assign_environment();
 
         // Submitted item whose online text ends up empty and that has no files.
@@ -403,5 +405,84 @@ final class grading_assist_test extends \advanced_testcase {
 
         $this->assertFalse($result['success']);
         $this->assertStringContainsString('Unsupported module type', $result['error']);
+    }
+
+    /**
+     * The student's own name and email are removed from online text before it is sent.
+     */
+    public function test_assign_payload_removes_the_students_own_identity(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $this->setAdminUser();
+        [, $assign, $cm, $student] = $this->create_assign_environment();
+        $this->create_onlinetext_submission(
+            $cm,
+            $student,
+            '<p>' . self::STUDENT_FIRSTNAME . ' ' . self::STUDENT_LASTNAME . ' (' . self::STUDENT_EMAIL . ')</p>'
+                . '<p>Carbon pricing works.</p>'
+        );
+        $submission = $DB->get_record(
+            'assign_submission',
+            ['assignment' => $assign->id, 'userid' => $student->id, 'latest' => 1],
+            '*',
+            MUST_EXIST
+        );
+
+        $payload = grading_assist::build_assign_payload($cm->id, (int) $submission->id);
+
+        $this->assert_anonymized($payload);
+        $this->assertStringContainsString('Carbon pricing works.', $payload['submission_text']);
+        $this->assertStringContainsString('[name removed]', $payload['submission_text']);
+    }
+
+    /**
+     * A file is sent under a neutral name; a plain-text file also has the student's identity removed.
+     */
+    public function test_file_submission_is_sent_under_a_neutral_name(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $this->setAdminUser();
+        [, $assign, $cm, $student] = $this->create_assign_environment();
+        $this->create_onlinetext_submission($cm, $student, '<p>placeholder</p>');
+        $submission = $DB->get_record(
+            'assign_submission',
+            ['assignment' => $assign->id, 'userid' => $student->id, 'latest' => 1],
+            '*',
+            MUST_EXIST
+        );
+        $DB->set_field('assignsubmission_onlinetext', 'onlinetext', '', ['submission' => $submission->id]);
+        get_file_storage()->create_file_from_string([
+            'contextid' => \context_module::instance($cm->id)->id,
+            'component' => 'assignsubmission_file',
+            'filearea' => 'submission_files',
+            'itemid' => $submission->id,
+            'filepath' => '/',
+            'filename' => self::STUDENT_LASTNAME . ' essay.txt',
+        ], 'Essay by ' . self::STUDENT_FIRSTNAME . ' ' . self::STUDENT_LASTNAME . '. Carbon pricing works.');
+
+        $payload = grading_assist::build_assign_payload($cm->id, (int) $submission->id);
+
+        $this->assertSame('submission.txt', $payload['file_name']);
+        $this->assertSame('text/plain', $payload['file_type']);
+        $content = base64_decode($payload['file_data']);
+        $this->assertStringNotContainsString(self::STUDENT_LASTNAME, $content);
+        $this->assertStringContainsString('Carbon pricing works.', $content);
+        $this->assert_anonymized($payload);
+    }
+
+    /**
+     * The student's own name is removed from an essay answer before it is sent.
+     */
+    public function test_quiz_essay_payload_removes_the_students_own_identity(): void {
+        $this->resetAfterTest();
+        $this->setAdminUser();
+        [$cm, $attempt] = $this->create_essay_attempt_environment(
+            'I am ' . self::STUDENT_FIRSTNAME . ' ' . self::STUDENT_LASTNAME . ' and I think frogs matter.'
+        );
+
+        $payload = grading_assist::build_quiz_payload($cm->id, $attempt->id . '-1');
+
+        $this->assert_anonymized($payload);
+        $this->assertStringContainsString('frogs matter', $payload['submission_text']);
     }
 }

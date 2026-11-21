@@ -48,34 +48,6 @@ function(Ajax, Notification, AiPolicy, Str, Templates) {
     // ─── Shared helpers ──────────────────────────────────────────────────
 
     /**
-     * Log user feedback (apply/regenerate/discard) for training data.
-     * Non-blocking — errors are silently ignored to avoid disrupting the UI.
-     * @param {string} action 'apply' | 'regenerate' | 'discard'
-     * @param {string} moduletype e.g. 'page', 'quiz', 'assign', 'forum', 'lesson', 'glossary', 'book', 'url'
-     */
-    function logFeedback(action, moduletype) {
-        var btn = document.getElementById('generate-draft-btn') || document.getElementById('generate-questions-btn');
-        var coursename = btn ? (btn.getAttribute('data-coursename') || '') : '';
-        var activityname = '';
-        var nameField = document.getElementById('id_name');
-        if (nameField) {
-            activityname = nameField.value || '';
-        }
-        Ajax.call([{
-            methodname: 'block_mastermind_assistant_log_generation_feedback',
-            args: {
-                courseid: courseid,
-                action: action,
-                moduletype: moduletype,
-                activityname: activityname,
-                coursename: coursename
-            }
-        }])[0].catch(function() {
-            // Silent — feedback logging is non-critical.
-        });
-    }
-
-    /**
      *
      */
     function showProgress() {
@@ -432,7 +404,6 @@ function(Ajax, Notification, AiPolicy, Str, Templates) {
             courseactivities: '[]'
         };
 
-        logFeedback('generate', 'page');
         Ajax.call([{
             methodname: 'block_mastermind_assistant_generate_page_content',
             args: args
@@ -633,7 +604,6 @@ function(Ajax, Notification, AiPolicy, Str, Templates) {
             courseactivities: '[]'
         };
 
-        logFeedback('generate', 'assign');
         Ajax.call([{
             methodname: 'block_mastermind_assistant_generate_assignment_instructions',
             args: args
@@ -940,7 +910,6 @@ function(Ajax, Notification, AiPolicy, Str, Templates) {
         } else {
             argsPromise = Promise.resolve(baseArgs);
         }
-        logFeedback('generate', 'quiz');
         argsPromise
             .then(function(args) {
                 return Ajax.call([{
@@ -1287,7 +1256,6 @@ function(Ajax, Notification, AiPolicy, Str, Templates) {
         var countSelect = document.getElementById('forum-count-select');
         var sectionSelect = document.getElementById('id_section');
 
-        logFeedback('generate', 'forum');
         Ajax.call([{
             methodname: 'block_mastermind_assistant_generate_forum_content',
             args: {
@@ -1482,7 +1450,6 @@ function(Ajax, Notification, AiPolicy, Str, Templates) {
         var countSelect = document.getElementById('lesson-count-select');
         var sectionSelect = document.getElementById('id_section');
 
-        logFeedback('generate', 'lesson');
         Ajax.call([{
             methodname: 'block_mastermind_assistant_generate_lesson_content',
             args: {
@@ -1710,7 +1677,6 @@ function(Ajax, Notification, AiPolicy, Str, Templates) {
         var countSelect = document.getElementById('glossary-count-select');
         var sectionSelect = document.getElementById('id_section');
 
-        logFeedback('generate', 'glossary');
         Ajax.call([{
             methodname: 'block_mastermind_assistant_generate_glossary_entries',
             args: {
@@ -1888,7 +1854,6 @@ function(Ajax, Notification, AiPolicy, Str, Templates) {
         var lengthSelect = document.getElementById('book-length-select');
         var sectionSelect = document.getElementById('id_section');
 
-        logFeedback('generate', 'book');
         Ajax.call([{
             methodname: 'block_mastermind_assistant_generate_book_content',
             args: {
@@ -2099,7 +2064,6 @@ function(Ajax, Notification, AiPolicy, Str, Templates) {
         var countSelect = document.getElementById('url-count-select');
         var sectionSelect = document.getElementById('id_section');
 
-        logFeedback('generate', 'url');
         Ajax.call([{
             methodname: 'block_mastermind_assistant_generate_url_resource',
             args: {
@@ -2277,7 +2241,6 @@ function(Ajax, Notification, AiPolicy, Str, Templates) {
         var applyBtn = document.getElementById(prefix + '-preview-apply-btn');
         if (applyBtn) {
             applyBtn.addEventListener('click', function() {
-                logFeedback('apply', prefix);
                 applyFn();
             });
         }
@@ -2285,7 +2248,6 @@ function(Ajax, Notification, AiPolicy, Str, Templates) {
         var cancelBtn = document.getElementById(prefix + '-preview-cancel-btn');
         if (cancelBtn) {
             cancelBtn.addEventListener('click', function() {
-                logFeedback('discard', prefix);
                 closeFn(); resetFn();
             });
         }
@@ -2293,7 +2255,6 @@ function(Ajax, Notification, AiPolicy, Str, Templates) {
         var closeBtn = document.getElementById(prefix + '-preview-close-btn');
         if (closeBtn) {
             closeBtn.addEventListener('click', function() {
-                logFeedback('discard', prefix);
                 closeFn(); resetFn();
             });
         }
@@ -2301,7 +2262,6 @@ function(Ajax, Notification, AiPolicy, Str, Templates) {
         var regenBtn = document.getElementById(prefix + '-preview-regenerate-btn');
         if (regenBtn) {
             regenBtn.addEventListener('click', function() {
-                logFeedback('regenerate', prefix);
                 closeFn(); regenFn();
             });
         }
@@ -2310,7 +2270,6 @@ function(Ajax, Notification, AiPolicy, Str, Templates) {
         if (modal) {
             modal.addEventListener('click', function(e) {
                 if (e.target === modal) {
-                    logFeedback('discard', prefix);
                     closeFn(); resetFn();
                 }
             });
@@ -2447,7 +2406,6 @@ function(Ajax, Notification, AiPolicy, Str, Templates) {
         var applyBtn = document.getElementById('preview-apply-btn');
         if (applyBtn) {
             applyBtn.addEventListener('click', function() {
-                logFeedback('apply', 'assign');
                 applyAssignmentContent();
             });
         }
@@ -2455,7 +2413,6 @@ function(Ajax, Notification, AiPolicy, Str, Templates) {
         var cancelBtn = document.getElementById('preview-cancel-btn');
         if (cancelBtn) {
             cancelBtn.addEventListener('click', function() {
-                logFeedback('discard', 'assign');
                 closeAssignPreviewModal();
                 resetAssignmentUI();
             });
@@ -2464,7 +2421,6 @@ function(Ajax, Notification, AiPolicy, Str, Templates) {
         var closeBtn = document.getElementById('preview-close-btn');
         if (closeBtn) {
             closeBtn.addEventListener('click', function() {
-                logFeedback('discard', 'assign');
                 closeAssignPreviewModal();
                 resetAssignmentUI();
             });
@@ -2473,7 +2429,6 @@ function(Ajax, Notification, AiPolicy, Str, Templates) {
         var regenBtn = document.getElementById('preview-regenerate-btn');
         if (regenBtn) {
             regenBtn.addEventListener('click', function() {
-                logFeedback('regenerate', 'assign');
                 closeAssignPreviewModal();
                 var btn = document.getElementById('generate-draft-btn');
                 if (btn) {
@@ -2488,7 +2443,6 @@ function(Ajax, Notification, AiPolicy, Str, Templates) {
         if (assignModal) {
             assignModal.addEventListener('click', function(e) {
                 if (e.target === assignModal) {
-                    logFeedback('discard', 'assign');
                     closeAssignPreviewModal();
                     resetAssignmentUI();
                 }
@@ -2499,7 +2453,6 @@ function(Ajax, Notification, AiPolicy, Str, Templates) {
         var pageApplyBtn = document.getElementById('page-preview-apply-btn');
         if (pageApplyBtn) {
             pageApplyBtn.addEventListener('click', function() {
-                logFeedback('apply', 'page');
                 applyPageContent();
             });
         }
@@ -2507,7 +2460,6 @@ function(Ajax, Notification, AiPolicy, Str, Templates) {
         var pageCancelBtn = document.getElementById('page-preview-cancel-btn');
         if (pageCancelBtn) {
             pageCancelBtn.addEventListener('click', function() {
-                logFeedback('discard', 'page');
                 closePagePreviewModal();
                 resetPageUI();
             });
@@ -2516,7 +2468,6 @@ function(Ajax, Notification, AiPolicy, Str, Templates) {
         var pageCloseBtn = document.getElementById('page-preview-close-btn');
         if (pageCloseBtn) {
             pageCloseBtn.addEventListener('click', function() {
-                logFeedback('discard', 'page');
                 closePagePreviewModal();
                 resetPageUI();
             });
@@ -2525,7 +2476,6 @@ function(Ajax, Notification, AiPolicy, Str, Templates) {
         var pageRegenBtn = document.getElementById('page-preview-regenerate-btn');
         if (pageRegenBtn) {
             pageRegenBtn.addEventListener('click', function() {
-                logFeedback('regenerate', 'page');
                 closePagePreviewModal();
                 var btn = document.getElementById('generate-draft-btn');
                 if (btn) {
@@ -2540,7 +2490,6 @@ function(Ajax, Notification, AiPolicy, Str, Templates) {
         if (pageModal) {
             pageModal.addEventListener('click', function(e) {
                 if (e.target === pageModal) {
-                    logFeedback('discard', 'page');
                     closePagePreviewModal();
                     resetPageUI();
                 }
@@ -2551,7 +2500,6 @@ function(Ajax, Notification, AiPolicy, Str, Templates) {
         var quizAddBtn = document.getElementById('quiz-preview-add-btn');
         if (quizAddBtn) {
             quizAddBtn.addEventListener('click', function() {
-                logFeedback('apply', 'quiz');
                 addSelectedQuestions();
             });
         }
@@ -2559,7 +2507,6 @@ function(Ajax, Notification, AiPolicy, Str, Templates) {
         var quizCancelBtn = document.getElementById('quiz-preview-cancel-btn');
         if (quizCancelBtn) {
             quizCancelBtn.addEventListener('click', function() {
-                logFeedback('discard', 'quiz');
                 closeQuizPreviewModal();
                 resetQuizUI();
             });
@@ -2568,7 +2515,6 @@ function(Ajax, Notification, AiPolicy, Str, Templates) {
         var quizCloseBtn = document.getElementById('quiz-preview-close-btn');
         if (quizCloseBtn) {
             quizCloseBtn.addEventListener('click', function() {
-                logFeedback('discard', 'quiz');
                 closeQuizPreviewModal();
                 resetQuizUI();
             });
@@ -2577,7 +2523,6 @@ function(Ajax, Notification, AiPolicy, Str, Templates) {
         var quizRegenBtn = document.getElementById('quiz-preview-regenerate-btn');
         if (quizRegenBtn) {
             quizRegenBtn.addEventListener('click', function() {
-                logFeedback('regenerate', 'quiz');
                 closeQuizPreviewModal();
                 generateQuizDraft();
             });
@@ -2587,7 +2532,6 @@ function(Ajax, Notification, AiPolicy, Str, Templates) {
         if (quizModal) {
             quizModal.addEventListener('click', function(e) {
                 if (e.target === quizModal) {
-                    logFeedback('discard', 'quiz');
                     closeQuizPreviewModal();
                     resetQuizUI();
                 }

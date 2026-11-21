@@ -311,11 +311,12 @@ function($, Ajax, Notification, AiPolicy, Str, ContextForm) {
                     '</div>'
                 );
 
-                // Bind copy handler.
+                // Bind copy handler: a copy creates a new course, so ask first.
                 $item.find('.mastermind-copy-btn').on('click', function(e) {
                     e.preventDefault();
                     var cid = $(this).data('courseid');
-                    copyCourse(cid);
+                    var cname = String($(this).data('coursename') || '');
+                    confirmCopy(cid, cname);
                 });
 
                 $list.append($item);
@@ -358,8 +359,25 @@ function($, Ajax, Notification, AiPolicy, Str, ContextForm) {
     }
 
     /**
-     * Copy an existing course
+     * Ask before copying: a copy creates a new course straight away.
      * @param {number} courseId Source course ID
+     * @param {string} courseName Source course name, as shown in the results
+     */
+    function confirmCopy(courseId, courseName) {
+        Str.get_strings([
+            {key: 'copy_confirm_title', component: 'block_mastermind_assistant'},
+            {key: 'copy_confirm_body', component: 'block_mastermind_assistant', param: escapeHtml(courseName)},
+            {key: 'copy_confirm_button', component: 'block_mastermind_assistant'}
+        ]).then(function(strings) {
+            return Notification.saveCancel(strings[0], strings[1], strings[2], function() {
+                copyCourse(courseId);
+            });
+        }).catch(Notification.exception);
+    }
+
+    /**
+     * Copy a course into the current category (after the user confirmed).
+     * @param {number} courseId Course to copy
      */
     function copyCourse(courseId) {
         var categoryId = getCategoryIdFromPage();

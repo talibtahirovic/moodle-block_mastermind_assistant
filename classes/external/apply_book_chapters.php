@@ -36,6 +36,7 @@ use external_value;
 use context_course;
 use context_module;
 use Exception;
+use block_mastermind_assistant\local\activity_access;
 
 /**
  * Apply AI-generated book chapters by inserting them directly into the database.
@@ -81,7 +82,8 @@ class apply_book_chapters extends external_api {
         }
 
         // Get book instance from course module.
-        $cm = get_coursemodule_from_id('book', $params['cmid'], 0, false, MUST_EXIST);
+        // Only a book in this course, and only if the user may manage that book.
+        $cm = activity_access::require_manageable('book', $params['cmid'], $params['courseid']);
         $book = $DB->get_record('book', ['id' => $cm->instance], '*', MUST_EXIST);
         $modcontext = context_module::instance($cm->id);
 

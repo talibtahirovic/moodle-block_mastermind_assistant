@@ -613,4 +613,29 @@ final class feedback_metrics_test extends \advanced_testcase {
         $this->assertSame([], $result['activities']);
         $this->assertNull($result['satisfaction']);
     }
+
+    /**
+     * Contact details and signatures are removed in Moodle, before the answer leaves the site.
+     */
+    public function test_signed_comments_are_redacted_in_moodle(): void {
+        $this->resetAfterTest();
+        $gen = $this->getDataGenerator();
+        $course = $gen->create_course();
+        $feedback = $gen->create_module('feedback', ['course' => $course->id]);
+        $text = $this->add_item($feedback->id, 'textarea', 'What could we improve?', 1);
+        $learner = $gen->create_user();
+        $this->add_response(
+            $feedback->id,
+            $learner->id,
+            [$text => '<p>The pacing was too fast. Mail me at jane.okonkwo@example.org. Regards, Jane Okonkwo</p>']
+        );
+
+        $result = feedback_metrics::collect($course->id);
+
+        $comment = $result['activities'][0]['comments'][0]['text'];
+        $this->assertStringContainsString('The pacing was too fast.', $comment);
+        $this->assertStringNotContainsString('Okonkwo', $comment);
+        $this->assertStringNotContainsString('jane.okonkwo@example.org', $comment);
+        $this->assertStringContainsString('[name removed]', $comment);
+    }
 }

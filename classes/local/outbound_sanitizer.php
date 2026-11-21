@@ -58,6 +58,75 @@ class outbound_sanitizer {
         return self::strip_identity_keys($payload);
     }
 
+    /** @var string[] Top-level fields of the course payload that no dashboard prompt reads. */
+    const UNUSED_TOP_LEVEL = ['forums', 'forum_activity', 'audit_flags'];
+
+    /**
+     * A course payload as it may leave Moodle: no learner identity, grade and
+     * SCORM figures held back below five learners (small_numbers), and none of
+     * the fields the dashboard never reads.
+     *
+     * The browser keeps the full get_course_data result for the block's own
+     * screens (the post-copy guide reads audit_flags); only the copy that is
+     * sent is reduced.
+     *
+     * @param array $payload Decoded course payload.
+     * @return array
+     */
+    public static function for_dashboard(array $payload): array {
+        $payload = self::strip_identity($payload);
+
+        if (isset($payload['grades']) && is_array($payload['grades'])) {
+            $payload['grades'] = small_numbers::grade_items($payload['grades']);
+        }
+        if (isset($payload['scorm_performance']) && is_array($payload['scorm_performance'])) {
+            $payload['scorm_performance'] = small_numbers::scorm_packages($payload['scorm_performance']);
+            $learners = array_sum(array_map(fn($p) => (int) ($p['attempts'] ?? 0), $payload['scorm_performance']));
+            $weakest = small_numbers::weakest_sco($payload['scorm_performance']);
+            if ($weakest === null) {
+                // As get_course_data does when no unit has an average.
+                unset($payload['scorm_summary']);
+            } else if (isset($payload['scorm_summary']) && is_array($payload['scorm_summary'])) {
+                $payload['scorm_summary'] = [
+                    'avg_score' => small_numbers::figure($payload['scorm_summary']['avg_score'] ?? null, $learners),
+                    'completion_rate' => small_numbers::figure($payload['scorm_summary']['completion_rate'] ?? null, $learners),
+                    'weakest_sco' => $weakest,
+                ];
+            }
+        }
+
+        foreach (self::UNUSED_TOP_LEVEL as $key) {
+            unset($payload[$key]);
+        }
+        // Activity intros and quiz layout: teacher text no prompt reads.
+        if (isset($payload['activities']) && is_array($payload['activities'])) {
+            $payload['activities'] = self::without_module_data($payload['activities']);
+        }
+        if (isset($payload['sections']) && is_array($payload['sections'])) {
+            foreach ($payload['sections'] as $i => $section) {
+                if (is_array($section) && isset($section['activities']) && is_array($section['activities'])) {
+                    $payload['sections'][$i]['activities'] = self::without_module_data($section['activities']);
+                }
+            }
+        }
+        return $payload;
+    }
+
+    /**
+     * Activities without their module_data.
+     *
+     * @param array $activities Activity entries.
+     * @return array
+     */
+    private static function without_module_data(array $activities): array {
+        foreach ($activities as $i => $activity) {
+            if (is_array($activity)) {
+                unset($activities[$i]['module_data']);
+            }
+        }
+        return $activities;
+    }
+
     /**
      * Recursively drop identity-shaped keys.
      *

@@ -33,11 +33,12 @@ use core_privacy\local\request\user_preference_provider;
  *
  * This plugin stores a user preference for AI policy acceptance and sends
  * course data to an external API (Mastermind Dashboard) for AI processing.
- * Since v4.1.0 that course data carries no learner identity: enrolment,
- * grades, completion and forum activity are aggregated to counts and
- * averages before leaving the site (see external\get_course_data and
- * local\outbound_sanitizer), and evaluation comments are sent without
- * user ids.
+ * That data carries no learner identity: enrolment, grades and completion are
+ * aggregated in Moodle, grade and SCORM figures behind fewer than five learners
+ * are held back (local\small_numbers, local\outbound_sanitizer), evaluation
+ * answers are redacted before they are sent (local\comment_redactor), and a
+ * submission sent for grading help loses its author's identity
+ * (local\learner_identity_redactor).
  */
 class provider implements
     \core_privacy\local\metadata\provider,
@@ -62,6 +63,8 @@ class provider implements
             'activityname' => 'privacy:metadata:mastermind_dashboard:activityname',
             'submissioncontent' => 'privacy:metadata:mastermind_dashboard:submissioncontent',
             'evaluationcomments' => 'privacy:metadata:mastermind_dashboard:evaluationcomments',
+            'teachercontent' => 'privacy:metadata:mastermind_dashboard:teachercontent',
+            'siteconnection' => 'privacy:metadata:mastermind_dashboard:siteconnection',
         ], 'privacy:metadata:mastermind_dashboard');
 
         return $collection;

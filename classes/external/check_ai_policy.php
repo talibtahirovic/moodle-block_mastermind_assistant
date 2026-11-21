@@ -59,7 +59,7 @@ class check_ai_policy extends external_api {
         require_capability('block/mastermind_assistant:view', $context);
 
         // Check user preference.
-        $accepted = \get_user_preferences('mastermind_ai_policy_accepted', 0, $USER);
+        $accepted = \get_user_preferences(\block_mastermind_assistant\local\ai_policy::PREFERENCE, 0, $USER);
 
         return [
             'accepted' => (bool)$accepted,

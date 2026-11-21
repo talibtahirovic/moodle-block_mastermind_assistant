@@ -122,6 +122,8 @@ final class refine_analysis_test extends \advanced_testcase {
     public function test_execute_returns_error_for_invalid_payload(): void {
         $this->resetAfterTest();
         $this->setAdminUser();
+        // The user accepted the AI usage policy in the browser modal.
+        set_user_preference(\block_mastermind_assistant\local\ai_policy::PREFERENCE, 1);
         $course = $this->getDataGenerator()->create_course();
 
         $result = refine_analysis::execute($course->id, 'not-json{');
@@ -205,6 +207,8 @@ final class refine_analysis_test extends \advanced_testcase {
         $user = $this->getDataGenerator()->create_user();
         $this->getDataGenerator()->enrol_user($user->id, $course->id, 'editingteacher');
         $this->setUser($user);
+        // The user accepted the AI usage policy in the browser modal.
+        set_user_preference(\block_mastermind_assistant\local\ai_policy::PREFERENCE, 1);
 
         // Payload validation passes; the api_client constructor then fails
         // because no API key is configured — proving the capability gate

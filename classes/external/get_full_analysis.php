@@ -83,14 +83,17 @@ class get_full_analysis extends external_api {
             $context = context_course::instance($params['courseid']);
             self::validate_context($context);
             require_capability('block/mastermind_assistant:view', $context);
+            // Nothing is sent to the AI service until the user accepted the AI usage policy.
+            \block_mastermind_assistant\local\ai_policy::require_accepted();
 
             $data = json_decode($params['coursedata'], true);
             if (!$data) {
                 throw new Exception('Invalid course data JSON');
             }
 
-            // Never forward learner identity, whatever the browser posted back.
-            $data = \block_mastermind_assistant\local\outbound_sanitizer::strip_identity($data);
+            // Whatever the browser posted back: no learner identity, no grade or SCORM
+            // figure behind fewer than five learners, no fields the dashboard never reads.
+            $data = \block_mastermind_assistant\local\outbound_sanitizer::for_dashboard($data);
 
             $client = new \block_mastermind_assistant\api_client();
 

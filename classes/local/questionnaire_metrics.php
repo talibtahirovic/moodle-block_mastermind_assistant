@@ -328,6 +328,11 @@ class questionnaire_metrics {
                         if ($answertext === '') {
                             continue;
                         }
+                        // Contact details and signatures never leave Moodle (redact before the clamp).
+                        $answertext = comment_redactor::redact($answertext);
+                        if ($answertext === '') {
+                            continue;
+                        }
                         $count++;
                         $commentrows[] = [
                             'submitted' => (int) $answer->submitted,
