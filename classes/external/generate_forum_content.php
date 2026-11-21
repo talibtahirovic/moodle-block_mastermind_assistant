@@ -105,15 +105,10 @@ class generate_forum_content extends external_api {
         \core_php_time_limit::raise(300);
 
         try {
-            $activities = json_decode($params['courseactivities'], true) ?: [];
-            if (empty($activities)) {
-                $modinfo = get_fast_modinfo($params['courseid']);
-                foreach ($modinfo->get_cms() as $cminfo) {
-                    if ($cminfo->visible && $cminfo->has_view()) {
-                        $activities[] = $cminfo->name . ' (' . $cminfo->modname . ')';
-                    }
-                }
-            }
+            $activities = \block_mastermind_assistant\local\prompt_activities::names(
+                (int) $params['courseid'],
+                $params['courseactivities']
+            );
 
             $client = new \block_mastermind_assistant\api_client();
             $response = $client->generate_forum(

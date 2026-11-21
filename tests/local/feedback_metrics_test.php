@@ -450,7 +450,7 @@ final class feedback_metrics_test extends \advanced_testcase {
 
         $result = feedback_metrics::collect($course->id);
 
-        // (4 + 5 + 3 + 2 + 3) / 5 = 3.4 with raw values for the unscaled item.
+        // Raw values for the unscaled item: (4 + 5 + 3 + 2 + 3) / 5 = 3.4.
         $this->assertEqualsWithDelta(3.4, $result['satisfaction'], 0.05);
     }
 

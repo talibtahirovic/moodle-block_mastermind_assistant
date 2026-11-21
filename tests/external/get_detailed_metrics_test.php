@@ -24,6 +24,10 @@
 
 namespace block_mastermind_assistant\external;
 
+defined('MOODLE_INTERNAL') || die();
+
+require_once(__DIR__ . '/../fixtures/rated_feedback_course.php');
+
 /**
  * Tests for the detailed metrics external function.
  *
@@ -38,23 +42,7 @@ final class get_detailed_metrics_test extends \advanced_testcase {
         global $DB;
         $this->resetAfterTest();
         $this->setAdminUser();
-        $gen = $this->getDataGenerator();
-        $course = $gen->create_course();
-        $feedback = $gen->create_module('feedback', ['course' => $course->id, 'name' => 'Course evaluation']);
-        $itemid = $DB->insert_record('feedback_item', (object) [
-            'feedback' => $feedback->id, 'template' => 0, 'name' => 'Overall satisfaction',
-            'label' => '', 'presentation' => '', 'typ' => 'numeric', 'hasvalue' => 1,
-            'position' => 1, 'required' => 0, 'dependitem' => 0, 'dependvalue' => '', 'options' => '',
-        ]);
-        $user = $gen->create_user();
-        $compid = $DB->insert_record('feedback_completed', (object) [
-            'feedback' => $feedback->id, 'userid' => $user->id, 'timemodified' => time(),
-            'random_response' => 0, 'anonymous_response' => 2, 'courseid' => 0,
-        ]);
-        $DB->insert_record('feedback_value', (object) [
-            'course_id' => 0, 'item' => $itemid, 'completed' => $compid,
-            'tmp_completed' => 0, 'value' => '4',
-        ]);
+        $course = block_mastermind_assistant_create_rated_feedback_course($this->getDataGenerator());
 
         $result = get_detailed_metrics::execute($course->id);
         $metrics = json_decode($result['metrics'], true);

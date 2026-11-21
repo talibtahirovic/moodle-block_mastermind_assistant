@@ -28,6 +28,7 @@ defined('MOODLE_INTERNAL') || die();
 
 global $CFG;
 require_once($CFG->libdir . '/gradelib.php');
+require_once(__DIR__ . '/../fixtures/rated_feedback_course.php');
 
 /**
  * Tests for the course data payload that leaves the plugin for the dashboard.
@@ -46,23 +47,7 @@ final class get_course_data_test extends \advanced_testcase {
         global $DB;
         $this->resetAfterTest();
         $this->setAdminUser();
-        $gen = $this->getDataGenerator();
-        $course = $gen->create_course();
-        $feedback = $gen->create_module('feedback', ['course' => $course->id, 'name' => 'Course evaluation']);
-        $itemid = $DB->insert_record('feedback_item', (object) [
-            'feedback' => $feedback->id, 'template' => 0, 'name' => 'Overall satisfaction',
-            'label' => '', 'presentation' => '', 'typ' => 'numeric', 'hasvalue' => 1,
-            'position' => 1, 'required' => 0, 'dependitem' => 0, 'dependvalue' => '', 'options' => '',
-        ]);
-        $user = $gen->create_user();
-        $compid = $DB->insert_record('feedback_completed', (object) [
-            'feedback' => $feedback->id, 'userid' => $user->id, 'timemodified' => time(),
-            'random_response' => 0, 'anonymous_response' => 2, 'courseid' => 0,
-        ]);
-        $DB->insert_record('feedback_value', (object) [
-            'course_id' => 0, 'item' => $itemid, 'completed' => $compid,
-            'tmp_completed' => 0, 'value' => '4',
-        ]);
+        $course = block_mastermind_assistant_create_rated_feedback_course($this->getDataGenerator());
 
         $result = get_course_data::execute($course->id);
         $this->assertTrue($result['success'], $result['data']);

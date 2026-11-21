@@ -133,7 +133,7 @@ final class evaluation_metrics_test extends \advanced_testcase {
 
         $result = evaluation_metrics::collect($course->id);
 
-        // (5 + 1 + 1) / 3 = 2.33, not (5 + 1) / 2 = 3.
+        // Three answers: (5 + 1 + 1) / 3 = 2.33, not (5 + 1) / 2 = 3.
         $this->assertSame(2.3, $result['satisfaction']);
     }
 

@@ -204,16 +204,10 @@ class generate_quiz_questions extends external_api {
                     $params['academiclevel']
                 );
             } else {
-                // Gather course activities for context if not provided.
-                $activities = json_decode($params['courseactivities'], true) ?: [];
-                if (empty($activities)) {
-                    $modinfo = get_fast_modinfo($params['courseid']);
-                    foreach ($modinfo->get_cms() as $cminfo) {
-                        if ($cminfo->visible && $cminfo->has_view()) {
-                            $activities[] = $cminfo->name . ' (' . $cminfo->modname . ')';
-                        }
-                    }
-                }
+                $activities = \block_mastermind_assistant\local\prompt_activities::names(
+                    (int) $params['courseid'],
+                    $params['courseactivities']
+                );
 
                 $response = $client->generate_quiz(
                     $params['quizname'],

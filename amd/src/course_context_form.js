@@ -225,40 +225,45 @@ define(['jquery', 'core/str'], function($, Str) {
         if (audience === 'other') {
             var other = $.trim($overlay.find('#mastermind-ctx-audience-other').val() || '');
             if (other) {
-                context['target_audience'] = other.substring(0, FREE_TEXT_MAX);
+                // eslint-disable-next-line camelcase
+                context.target_audience = other.substring(0, FREE_TEXT_MAX);
             }
         } else if (audience) {
-            context['target_audience'] = audience;
+            // eslint-disable-next-line camelcase
+            context.target_audience = audience;
         }
 
         var difficulty = selectedToken($overlay, 'difficulty');
         if (difficulty) {
-            context['difficulty'] = difficulty;
+            context.difficulty = difficulty;
         }
 
         var language = $overlay.find('#mastermind-ctx-language').val();
         if (language) {
-            context['language'] = language;
+            context.language = language;
         }
 
         var outcomes = $.trim($overlay.find('#mastermind-ctx-outcomes').val() || '');
         if (outcomes) {
-            context['learning_outcomes'] = outcomes.substring(0, FREE_TEXT_MAX);
+            // eslint-disable-next-line camelcase
+            context.learning_outcomes = outcomes.substring(0, FREE_TEXT_MAX);
         }
 
         var size = selectedToken($overlay, 'size');
         if (size) {
-            context['course_size'] = size;
+            // eslint-disable-next-line camelcase
+            context.course_size = size;
         }
 
         var emphasis = selectedToken($overlay, 'emphasis');
         if (emphasis) {
-            context['activity_emphasis'] = emphasis;
+            // eslint-disable-next-line camelcase
+            context.activity_emphasis = emphasis;
         }
 
         var tone = selectedToken($overlay, 'tone');
         if (tone) {
-            context['tone'] = tone;
+            context.tone = tone;
         }
 
         return context;

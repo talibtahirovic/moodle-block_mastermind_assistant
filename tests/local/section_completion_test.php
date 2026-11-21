@@ -35,8 +35,11 @@ final class section_completion_test extends \advanced_testcase {
         $course = $gen->create_course(['enablecompletion' => 1, 'numsections' => 5]);
         $cms = [];
         foreach ([1, 2, 3, 4] as $section) {
-            $page = $gen->create_module('page', ['course' => $course->id, 'section' => $section],
-                ['completion' => COMPLETION_TRACKING_MANUAL]);
+            $page = $gen->create_module(
+                'page',
+                ['course' => $course->id, 'section' => $section],
+                ['completion' => COMPLETION_TRACKING_MANUAL]
+            );
             $cms[$section] = $page->cmid;
         }
         $gen->create_module('page', ['course' => $course->id, 'section' => 5], ['completion' => COMPLETION_TRACKING_NONE]);
@@ -74,8 +77,10 @@ final class section_completion_test extends \advanced_testcase {
 
         $this->assertSame(4, (int) $least->section);
         $this->assertSame(2, (int) $least->completions);
-        $this->assertSame([1, 2, 3, 4], array_map(fn($row) => (int) $row->section,
-            section_completion::ranked($course->id)));
+        $this->assertSame([1, 2, 3, 4], array_map(
+            fn($row) => (int) $row->section,
+            section_completion::ranked($course->id)
+        ));
     }
 
     public function test_untracked_and_empty_sections_are_left_out(): void {

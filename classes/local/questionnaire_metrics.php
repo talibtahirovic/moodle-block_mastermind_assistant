@@ -133,7 +133,14 @@ class questionnaire_metrics {
             if (!evaluation_rules::selection_allows((int) $cm->id, $auto, $include, $exclude)) {
                 continue;
             }
-            $result['activities'][] = self::activity($instance, (int) $cm->id, $questions, $startdate, $courseid, $result['ratings']);
+            $result['activities'][] = self::activity(
+                $instance,
+                (int) $cm->id,
+                $questions,
+                $startdate,
+                $courseid,
+                $result['ratings']
+            );
         }
         return $result;
     }
