@@ -1,5 +1,19 @@
 # Changelog
 
+## v4.5.1 (2026112102) — 2026-11-21
+
+### Changed
+- Code-quality release: nothing changes for teachers or administrators. The eight content
+  generators share one helper for the list of course activities sent with a request; a
+  malformed list from the browser now falls back to the course's visible activities, as an
+  empty list already did. Language strings are in alphabetical order (same texts), the
+  course-context form passes the JavaScript lint, and the tests share one fixture for
+  courses with rated Feedback activities.
+
+### Release notes
+- Same behaviour, privacy declarations and texts as v4.5.0, and no database changes. Sites
+  can upgrade at any time; the dashboard needs nothing new.
+
 ## v4.5.0 (2026112101) — 2026-11-21
 
 ### Privacy
