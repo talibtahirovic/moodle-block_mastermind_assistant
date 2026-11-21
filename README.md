@@ -43,11 +43,17 @@ Add the **Mastermind Assistant** block to any course page or the site dashboard.
 ## Privacy: what is sent to the service
 
 Course analysis sends course structure (section and activity names, summaries, dates)
-and aggregate figures only. Learner names, usernames, user IDs and email addresses are
-never sent. Enrolment, grades, completion and forum activity leave the site as counts
-and averages; evaluation (Feedback) answers are sent without user IDs, and the
-dashboard removes contact details and sign-offs inside a comment before it is stored
-or analysed, retaining only per-activity counts and themes rather than the text.
+and figures computed in Moodle. No learner's name, username, user ID or email address is
+sent as a field of its own. Enrolment, grades, completion and SCORM results leave the site
+as counts and averages; grade averages and SCORM scores behind fewer than five learners
+are not sent. Evaluation answers (Feedback and Questionnaire) are sent without user IDs,
+after Moodle removes links, contact details and sign-offs; the dashboard removes them
+again and keeps per-activity counts and themes rather than the text. Learners' free text
+is cleaned, but not completely: a name inside a sentence can still reach the dashboard.
+For grading assistance, one submission is sent with the student's own name, email address,
+username and ID number removed; names inside PDF and Word files remain. Every request a
+logged-in user makes carries a pseudonym of that user (a keyed hash of the user ID that
+only this site can resolve), which the dashboard keeps with AI requests.
 The plugin's privacy provider (`classes/privacy/provider.php`) declares each field.
 
 ## Compatibility and sunset

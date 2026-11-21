@@ -74,7 +74,7 @@ final class provider_test extends \advanced_testcase {
 
         foreach (
             ['coursename', 'coursedata', 'activityname', 'submissioncontent', 'evaluationcomments',
-                'teachercontent', 'siteconnection'] as $field
+                'teachercontent', 'siteconnection', 'actor'] as $field
         ) {
             $this->assertArrayHasKey($field, $fields, $field);
         }
@@ -93,5 +93,34 @@ final class provider_test extends \advanced_testcase {
         $this->assertStringContainsString('five learners', $text('coursedata'));
         $this->assertStringContainsString('removed in Moodle', $text('submissioncontent'));
         $this->assertStringContainsString('PDF', $text('submissioncontent'));
+    }
+
+    /**
+     * The summary promises no more than Moodle removes: learners' free text can still carry a name.
+     *
+     * Until v4.4.0 it said that identity a learner typed "is removed in Moodle before anything is
+     * sent", which the heuristic redaction cannot guarantee (names in running text, other people's
+     * names, anything inside PDF or Word files).
+     */
+    public function test_summary_states_the_limits_of_text_redaction(): void {
+        $summary = get_string('privacy:metadata:mastermind_dashboard', 'block_mastermind_assistant');
+        $this->assertStringNotContainsString('removed in Moodle before anything is sent', $summary);
+        $this->assertStringContainsString('not completely', $summary);
+        $this->assertStringContainsString('PDF', $summary);
+
+        $fields = $this->dashboard_fields();
+        $evaluation = get_string($fields['evaluationcomments'], 'block_mastermind_assistant');
+        $this->assertStringContainsString('average ratings', $evaluation);
+    }
+
+    /**
+     * The pseudonym goes with every request a logged-in user makes (build_headers() adds it to all of
+     * them), and the dashboard keeps it only with AI requests: the declaration says both.
+     */
+    public function test_actor_declaration_says_when_it_is_sent_and_kept(): void {
+        $fields = $this->dashboard_fields();
+        $actor = get_string($fields['actor'], 'block_mastermind_assistant');
+        $this->assertStringContainsString('every request', $actor);
+        $this->assertStringContainsString('only with requests to AI features', $actor);
     }
 }

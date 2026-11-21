@@ -65,6 +65,7 @@ class provider implements
             'evaluationcomments' => 'privacy:metadata:mastermind_dashboard:evaluationcomments',
             'teachercontent' => 'privacy:metadata:mastermind_dashboard:teachercontent',
             'siteconnection' => 'privacy:metadata:mastermind_dashboard:siteconnection',
+            'actor' => 'privacy:metadata:mastermind_dashboard:actor',
         ], 'privacy:metadata:mastermind_dashboard');
 
         return $collection;

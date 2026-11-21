@@ -98,6 +98,11 @@ class api_client {
         if ($enterprise > 0) {
             $headers[] = 'X-Enterprise-Plugin-Version: ' . $enterprise;
         }
+        // A pseudonym of the person making the request (none for guests, CLI and scheduled tasks).
+        $actor = local\actor::current();
+        if ($actor !== null) {
+            $headers[] = 'X-MA-Actor: ' . $actor;
+        }
         return $headers;
     }
 

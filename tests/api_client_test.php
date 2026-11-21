@@ -116,6 +116,30 @@ final class api_client_test extends \advanced_testcase {
         $this->assertContains('Authorization: Bearer ma_live_' . str_repeat('x', 24), $headers);
     }
 
+    public function test_headers_carry_the_actor_for_a_logged_in_user(): void {
+        $this->resetAfterTest();
+        set_config('api_key', 'ma_live_' . str_repeat('x', 24), 'block_mastermind_assistant');
+        $teacher = $this->getDataGenerator()->create_user();
+        $this->setUser($teacher);
+
+        $headers = (new api_client())->build_headers();
+
+        $this->assertContains('X-MA-Actor: ' . local\actor::pseudonym((int) $teacher->id), $headers);
+    }
+
+    public function test_headers_carry_no_actor_without_a_user(): void {
+        $this->resetAfterTest();
+        set_config('api_key', 'ma_live_' . str_repeat('x', 24), 'block_mastermind_assistant');
+        $this->setUser(0);
+
+        $headers = (new api_client())->build_headers();
+
+        $this->assertSame([], array_values(array_filter(
+            $headers,
+            static fn(string $h): bool => str_starts_with($h, 'X-MA-Actor:')
+        )));
+    }
+
     public function test_request_headers_declare_the_enterprise_plugin_version_when_installed(): void {
         $this->resetAfterTest();
         set_config('api_key', 'ma_live_' . str_repeat('x', 24), 'block_mastermind_assistant');

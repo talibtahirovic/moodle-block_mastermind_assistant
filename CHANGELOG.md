@@ -1,5 +1,28 @@
 # Changelog
 
+## Unreleased
+
+### Privacy
+- The privacy summary no longer says that identity a learner typed into an answer or
+  submission is removed in Moodle before anything is sent. It now says that learners'
+  free text is cleaned in Moodle but not completely: a name inside a sentence, another
+  person's name in a submission, and anything inside a PDF or Word file can still reach
+  the dashboard. English and German.
+- The evaluation declaration now names the average rating per question, which has always
+  been sent alongside the answers and answer counts.
+- Every request a logged-in user makes to the dashboard carries a pseudonym of that user
+  (the same one the enterprise companion sends with decisions), and the dashboard keeps it
+  with AI requests, so it can tell requests apart by person without knowing who it is. No
+  pseudonym is sent for guests, command-line scripts or scheduled tasks; during "log in as"
+  it is the real user's. Declared in the privacy metadata and the README.
+
+### Release notes
+- Raise the version (proposed v4.5.0): a new class and request header, and changed
+  language strings that sites see only after the upgrade.
+- Deploy a dashboard that stores the pseudonym first; older dashboards ignore the header.
+- The enterprise companion's next release (v1.5.1) records the real user during "log in as"
+  as well, so both plugins name the same person for the same click.
+
 ## v4.4.0 (2026112100) — 2026-11-21
 
 ### Security
